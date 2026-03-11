@@ -1,5 +1,13 @@
 const CACHE = 'workout-v1';
-const ASSETS = ['/', '/index.html', '/app.js'];
+const BASE = '/Lifting-App';
+const ASSETS = [
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/app.js',
+  BASE + '/manifest.json',
+  BASE + '/icon-192.png',
+  BASE + '/icon-512.png',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -16,9 +24,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for CDN scripts, cache first for local assets
   const url = new URL(e.request.url);
-  if (url.origin !== location.origin) return; // let CDN requests pass through
+  if (url.origin !== location.origin) return;
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
