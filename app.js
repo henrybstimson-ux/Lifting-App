@@ -2,6 +2,57 @@ const { useState, useEffect, useRef, useCallback } = React;
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 // hooks from React global
 
+// ── STORAGE SHIM (localStorage wrapper matching window.storage API) ───────────
+if (!window.storage) {
+  window.storage = {
+    get: async key => {
+      try {
+        const v = localStorage.getItem(key);
+        return v != null ? {
+          key,
+          value: v
+        } : null;
+      } catch (e) {
+        return null;
+      }
+    },
+    set: async (key, value) => {
+      try {
+        localStorage.setItem(key, String(value));
+        return {
+          key,
+          value
+        };
+      } catch (e) {
+        return null;
+      }
+    },
+    delete: async key => {
+      try {
+        localStorage.removeItem(key);
+        return {
+          key,
+          deleted: true
+        };
+      } catch (e) {
+        return null;
+      }
+    },
+    list: async prefix => {
+      try {
+        const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix));
+        return {
+          keys
+        };
+      } catch (e) {
+        return {
+          keys: []
+        };
+      }
+    }
+  };
+}
+
 // ── SWIPE HOOK ────────────────────────────────────────────────────────────────
 function useSwipe(onLeft, onRight, threshold = 50) {
   const startX = useRef(null);
