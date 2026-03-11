@@ -1,4 +1,3 @@
-// Destructure React hooks from global React
 const { useState, useEffect, useRef, useCallback } = React;
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 // hooks from React global
@@ -1533,14 +1532,14 @@ function RestSettingsPage({
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "0 0 100px",
+      padding: "0 0 calc(env(safe-area-inset-bottom) + 86px)",
       maxWidth: 680,
       margin: "0 auto"
     },
     className: "ai"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "20px 16px 16px",
+      padding: "calc(env(safe-area-inset-top) + 20px) 16px 16px",
       borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -3956,8 +3955,9 @@ function ProgressView({
 }
 
 // ── NAV DOT ───────────────────────────────────────────────────────────────────
-const NAV_BAR_H = 76;
-const NAV_DOT_CY = 31;
+const NAV_CONTENT_H = 64; // fixed content area, dots always live here
+const NAV_DOT_CY = 30; // vertical center of dots within content area
+
 function NavDot({
   day,
   isActive,
@@ -3989,8 +3989,8 @@ function NavDot({
   }, /*#__PURE__*/React.createElement("div", {
     className: tapClass,
     style: {
-      width: 20,
-      height: 20,
+      width: 24,
+      height: 24,
       borderRadius: "50%",
       flexShrink: 0,
       background: isActive ? day.accent : isDone ? day.accent + "28" : "rgba(255,255,255,0.05)",
@@ -4003,8 +4003,8 @@ function NavDot({
     }
   }, hasLogged && !isActive && /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 5,
-      height: 5,
+      width: 6,
+      height: 6,
       borderRadius: "50%",
       background: day.accent,
       opacity: isDone ? 0.55 : 0.85,
@@ -4012,8 +4012,8 @@ function NavDot({
     }
   }), isActive && /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 7,
-      height: 7,
+      width: 8,
+      height: 8,
       borderRadius: "50%",
       background: "#0c0a09"
     }
@@ -4113,8 +4113,7 @@ function BottomNav({
       margin: "0 auto",
       display: "flex",
       alignItems: "stretch",
-      height: NAV_BAR_H,
-      paddingBottom: "env(safe-area-inset-bottom)"
+      height: NAV_CONTENT_H
     }
   }, /*#__PURE__*/React.createElement(NavIconBtn, {
     tapClass: homeTap,
@@ -4148,7 +4147,7 @@ function BottomNav({
       left: 0,
       top: 0,
       width: "100%",
-      height: `${NAV_BAR_H}px`,
+      height: `${NAV_CONTENT_H}px`,
       overflow: "visible",
       pointerEvents: "none"
     }
@@ -4195,8 +4194,8 @@ function BottomNav({
       y1: NAV_DOT_CY,
       x2: `${x2pct}%`,
       y2: NAV_DOT_CY,
-      stroke: "rgba(255,255,255,0.07)",
-      strokeWidth: "1.5",
+      stroke: "rgba(255,255,255,0.08)",
+      strokeWidth: "2",
       strokeLinecap: "round"
     }), colored && /*#__PURE__*/React.createElement("line", {
       x1: `${x1pct}%`,
@@ -4204,7 +4203,7 @@ function BottomNav({
       x2: `${x2pct}%`,
       y2: NAV_DOT_CY,
       stroke: `url(#seg-${i})`,
-      strokeWidth: "2.5",
+      strokeWidth: "3",
       strokeLinecap: "round",
       filter: isLeading ? "url(#line-glow)" : undefined
     }));
@@ -4245,7 +4244,12 @@ function BottomNav({
     stroke: page === "settings" ? W.cyan : NAV_REST_COLOR,
     strokeWidth: "1.5",
     strokeLinecap: "round"
-  })))));
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "env(safe-area-inset-bottom)",
+      background: "rgba(9,7,6,0.97)"
+    }
+  }));
 }
 
 // ── HOME PAGE ─────────────────────────────────────────────────────────────────
@@ -4406,7 +4410,7 @@ function HomePage({
   };
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "0 0 100px",
+      padding: "0 0 calc(env(safe-area-inset-bottom) + 86px)",
       maxWidth: 680,
       margin: "0 auto",
       background: "linear-gradient(180deg,#131313 0%,#0a0a0a 300px,#080808 100%)"
@@ -4414,7 +4418,7 @@ function HomePage({
     className: "ai"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "20px 16px 16px",
+      padding: "calc(env(safe-area-inset-top) + 20px) 16px 16px",
       borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5735,29 +5739,27 @@ function DayPage({
       }
     }
   }
-  return /*#__PURE__*/React.createElement("div", _extends({}, swipe, {
+  return /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 680,
       margin: "0 auto",
-      padding: "0 0 110px",
-      touchAction: "pan-y"
+      padding: "0 0 calc(env(safe-area-inset-bottom) + 90px)"
     },
     className: "ai"
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       borderBottom: `1px solid ${W.border}`,
       overflow: "hidden",
-      position: "relative",
-      borderLeft: `3px solid ${day.accent}`
+      position: "relative"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      height: 2,
-      background: `linear-gradient(90deg,${day.accent},${day.accent}22)`
+      height: 3,
+      background: `linear-gradient(90deg,${day.accent},${day.accent}44,transparent)`
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 16px 18px",
+      padding: "calc(env(safe-area-inset-top) + 16px) 16px 18px",
       background: `linear-gradient(135deg,${day.accent}08 0%,transparent 60%)`
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -6202,6 +6204,15 @@ window.App = function App() {
     if (d.id === "fri") return thuFriVis.showFri;
     return true;
   }).map(d => d.id);
+  // Global page order for swipe navigation
+  const allPages = ["home", ...visibleDayIds, "settings"];
+  const globalSwipe = useSwipe(useCallback(() => {
+    const i = allPages.indexOf(page);
+    if (i < allPages.length - 1) setPage(allPages[i + 1]);
+  }, [page, allPages.join(",")]), useCallback(() => {
+    const i = allPages.indexOf(page);
+    if (i > 0) setPage(allPages[i - 1]);
+  }, [page, allPages.join(",")]));
   const currentDay = DAYS.find(d => d.id === page);
   const bodyweight = getLatestBW();
   useEffect(() => {
@@ -6235,18 +6246,19 @@ window.App = function App() {
       textTransform: "uppercase"
     }
   }, "Loading"));
-  return /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", _extends({}, globalSwipe, {
     style: {
       background: W.bg,
       minHeight: "100vh",
       color: W.text,
-      fontFamily: "'DM Sans',sans-serif"
+      fontFamily: "'DM Sans',sans-serif",
+      touchAction: "pan-y"
     }
-  }, /*#__PURE__*/React.createElement("style", null, `
+  }), /*#__PURE__*/React.createElement("style", null, `
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-        html{font-size:16px;}
-        body{overscroll-behavior-y:none;background:#0c0a09;}
+        html{font-size:16px;height:100%;}
+        body{overscroll-behavior-y:none;background:#0c0a09;height:100%;}
         input,button{font-family:'DM Sans',sans-serif;-webkit-appearance:none;appearance:none;}
         input{color-scheme:dark;}
         button{cursor:pointer;user-select:none;}
