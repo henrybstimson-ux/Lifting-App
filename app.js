@@ -1704,7 +1704,7 @@ function RestSettingsPage({
       borderRadius: 8,
       color: W.text,
       fontFamily: "'DM Mono',monospace",
-      fontSize: 13,
+      fontSize: 16,
       padding: "11px 12px",
       outline: "none",
       letterSpacing: "0.02em"
@@ -2092,7 +2092,7 @@ function InlineSetLogger({
     borderRadius: 8,
     color: disabled ? W.textDim : W.text,
     fontFamily: "'DM Mono',monospace",
-    fontSize: F.input,
+    fontSize: Math.max(F.input, 16),
     padding: "13px 8px",
     outline: "none",
     width: "100%",
@@ -2662,7 +2662,7 @@ function BodyweightCard({
       borderRadius: 8,
       color: W.text,
       fontFamily: "'DM Mono',monospace",
-      fontSize: 14,
+      fontSize: 16,
       padding: "8px",
       outline: "none",
       textAlign: "center"
