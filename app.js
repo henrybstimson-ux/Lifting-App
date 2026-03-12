@@ -142,56 +142,89 @@ const EX_GROUP = {
   "Force Plate CMJ": "CNS",
   "Hang Clean": "CNS",
   "Box Drop → Stick Landing": "CNS",
+  "Box Drop Stick": "CNS",
+  "MB Slam → Lateral Toss": "CNS",
   "MB Slam → MB Lateral Toss": "CNS",
+  "Snap Down → Split Jump": "CNS",
   "Snap Down → Split Squat Jump": "CNS",
-  "MB Slam x3 (easy)": "CNS",
-  "Snap Down x3 (sub-max)": "CNS",
+  "Pogos": "CNS",
+  "Vertical Jump": "CNS",
+  "CMJ": "CNS",
+  "Snap Down": "CNS",
   "BB Back Squat": "Legs",
   "Trap Bar Deadlift": "Legs",
   "Bulgarian Split Squat": "Legs",
   "BB Split Squat": "Legs",
-  "Elevated Band Hip Flexor/Glute": "Legs",
   "RDL": "Legs",
-  "Barbell Zercher Curls": "Legs",
-  "Lying Ham Curl": "Legs",
-  "Light Trap Bar DL Ramp": "Legs",
-  "Bodyweight Squat to Box": "Legs",
+  "Hip Thrust": "Legs",
+  "Nordic Curl": "Legs",
   "Nordic Hamstring Curl ISO": "Legs",
   "SL Glute Bridge": "Legs",
   "Glute Bridge Hold": "Legs",
   "Glute Bridge + ISO Hold": "Legs",
-  "Band Clamshells": "Legs",
+  "Band Lateral Walk": "Legs",
+  "Tempo Goblet Squat": "Legs",
+  "Couch Stretch": "Stability",
+  "Deep Squat Pry": "Stability",
+  "Ankle Rocks": "Stability",
+  "Quads Roll": "Stability",
+  "Adductors Roll": "Stability",
+  "Glutes Roll": "Stability",
+  "Adductors roll": "Stability",
+  "Glutes roll": "Stability",
+  "T-Spine Roll": "Stability",
+  "Foot Roll": "Stability",
+  "Dynamic Hip Openers": "Stability",
+  "Ankle Pogo Rocks": "Stability",
+  "T-Spine Rotations": "Stability",
+  "Copenhagen Short Lever": "Core",
+  "Banded Deadbug": "Core",
   "BB Bench Press": "Push",
+  "DB Incline Press": "Push",
   "DB Incline Bench Press": "Push",
   "DB Incline Bench": "Push",
+  "DB Lateral Raise": "Push",
   "DB Lateral Raises": "Push",
+  "Cable Y Raise": "Push",
   "Cable Y Raises": "Push",
+  "Straight Bar Pushdown": "Push",
   "Straight Bar Pulldown": "Push",
+  "OH DB Extension": "Push",
   "Overhead DB Tricep Extension": "Push",
   "SA DB Shoulder Press": "Push",
   "Empty Bar Bench Press": "Push",
   "50–60% Bench Press": "Push",
+  "Explosive Empty Bar Bench": "Push",
+  "Dead Hang Active": "Pull",
+  "Passive → Active Hang": "Pull",
+  "Passive Hang": "Pull",
+  "Serratus Wall Slides": "Stability",
+  "Cable External Rotation": "Stability",
+  "Weighted Pull-Ups": "Pull",
   "Pull-Ups": "Pull",
+  "Scap Pull-Ups": "Pull",
+  "Scapular Pull-Ups": "Pull",
+  "Straight Arm Pulldown": "Pull",
   "SA DB Row": "Pull",
   "Chest Supported Row": "Pull",
+  "Cable Rear Fly": "Stability",
+  "Rear Delt Cable Fly": "Stability",
+  "Incline Curl": "Pull",
   "Incline Dumbbell Curl": "Pull",
   "Hammer Curl": "Pull",
   "Lat Pulldown": "Pull",
   "BB Row": "Pull",
   "Dead Hangs (passive → active)": "Pull",
-  "Scapular Pull-Ups": "Pull",
   "Lat Stretch (Bar Hang)": "Pull",
+  "Thoracic Extension": "Stability",
   "Copenhagen Plank": "Core",
   "V-Ups": "Core",
   "Hanging Leg Raises": "Core",
   "Suitcase Carry": "Core",
   "Cuban Press": "Stability",
-  "Cuban Press (Sunday)": "Stability",
-  "Rear Delt Cable Fly": "Stability",
   "Rack Hip CARs": "Stability",
   "Band Pull-Aparts": "Stability",
   "Band Pull-Aparts (overhand)": "Stability",
-  "Band Pull-Aparts (Sunday)": "Stability",
   "Side-Lying External Rotation (DB)": "Stability",
   "Scapular Wall Slides": "Stability",
   "Light Cable External Rotation": "Stability",
@@ -204,19 +237,60 @@ const EX_GROUP = {
   "Thoracic Cat-Cow": "Stability",
   "Diaphragmatic Breathing": "Stability",
   "World's Greatest Stretch": "Stability",
-  "Shoulder CARs": "Stability"
+  "Shoulder CARs": "Stability",
+  // New Sunday exercises
+  "Foam Roll T-Spine": "Stability",
+  "Foam Roll Adductors": "Legs",
+  "Foam Roll Glutes": "Legs",
+  "Foam Roll Lats": "Pull",
+  "Foam Roll Quads": "Legs",
+  "90/90 Hip Rotations": "Stability",
+  "Deadbugs": "Core",
+  "Cable External Rotations": "Stability",
+  "Ankle Dorsiflexion Rocks": "Stability",
+  "Rear Foot Elevated Split Squat": "Legs",
+  "Single Leg RDL": "Legs",
+  "Tibialis Raises": "Stability",
+  "Half-Kneeling Landmine Press": "Push",
+  "Chest Supported DB Row": "Pull",
+  "Face Pull to External Rotation": "Stability",
+  "Pallof Press": "Core",
+  // Warm-down
+  "Crocodile Breathing": "Stability",
+  "Hip Flexor Stretch": "Stability",
+  "Pec Doorway Stretch": "Stability",
+  "Lat Stretch on Bench": "Stability",
+  "Hamstring Neural Glide": "Stability",
+  "Nasal Walk": "Stability",
+  "Hamstring Glide": "Stability",
+  "Supine Breathing": "Stability",
+  "Adductor Rock": "Stability",
+  "Nasal Breathing": "Stability",
+  "Pec Minor Release": "Stability",
+  "Trap Stretch": "Stability",
+  "Thoracic Breathing": "Stability",
+  "Child Pose Lat Stretch": "Stability",
+  "Passive Hang": "Pull"
 };
-const LIGHT_INTENT = new Set(["Cuban Press", "Cuban Press (Sunday)", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Band Pull-Aparts (Sunday)", "Light Cable External Rotation", "Side-Lying External Rotation (DB)", "Rack Hip CARs", "Wall Angels", "Scapular Wall Slides", "Scapular Pull-Ups", "Dead Hangs (passive → active)", "Hip 90/90 Stretch", "Ankle Circles + Dorsiflexion Wall Drill", "Thoracic Extension over Roller", "Pec Minor Doorway Stretch", "Thoracic Rotation (Kneeling)", "Thoracic Cat-Cow", "Diaphragmatic Breathing", "World's Greatest Stretch", "Shoulder CARs", "Cable Y Raises", "Band Clamshells", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "SL Glute Bridge", "Nordic Hamstring Curl ISO", "Copenhagen Plank", "V-Ups", "Hanging Leg Raises", "Bodyweight Squat to Box", "Box Drop → Stick Landing", "Snap Down x3 (sub-max)", "MB Slam x3 (easy)", "Force Plate CMJ", "Empty Bar Bench Press", "50–60% Bench Press", "Light Trap Bar DL Ramp", "Lat Stretch (Bar Hang)", "Thoracic Cat-Cow", "Hang Clean", "MB Slam → MB Lateral Toss", "Snap Down → Split Squat Jump", "Suitcase Carry", "Elevated Band Hip Flexor/Glute", "Rear Delt Cable Fly"]);
+const LIGHT_INTENT = new Set(["Cuban Press", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Cable External Rotation", "Cable External Rotations", "Light Cable External Rotation", "Side-Lying External Rotation (DB)", "Rack Hip CARs", "Wall Angels", "Scapular Wall Slides", "Scapular Pull-Ups", "Scap Pull-Ups", "Dead Hangs (passive → active)", "Dead Hang Active", "Passive → Active Hang", "Passive Hang", "Hip 90/90 Stretch", "Ankle Circles + Dorsiflexion Wall Drill", "Thoracic Extension over Roller", "Thoracic Extension", "Pec Minor Doorway Stretch", "Thoracic Rotation (Kneeling)", "Thoracic Cat-Cow", "Diaphragmatic Breathing", "World's Greatest Stretch", "Shoulder CARs", "Cable Y Raises", "Cable Y Raise", "Band Clamshells", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "SL Glute Bridge", "Nordic Hamstring Curl ISO", "Copenhagen Plank", "V-Ups", "Hanging Leg Raises", "Bodyweight Squat to Box", "Box Drop → Stick Landing", "Box Drop Stick", "Snap Down x3 (sub-max)", "Snap Down", "MB Slam x3 (easy)", "Force Plate CMJ", "CMJ", "Empty Bar Bench Press", "50–60% Bench Press", "Explosive Empty Bar Bench", "Lat Stretch (Bar Hang)", "Thoracic Cat-Cow", "Hang Clean", "MB Slam → MB Lateral Toss", "MB Slam → Lateral Toss", "Snap Down → Split Squat Jump", "Snap Down → Split Jump", "Suitcase Carry", "Rear Delt Cable Fly", "Cable Rear Fly", "Serratus Wall Slides", "Straight Arm Pulldown", "Pogos", "Vertical Jump", "Copenhagen Short Lever", "Banded Deadbug", "Band Lateral Walk", "Tempo Goblet Squat", "Couch Stretch", "Deep Squat Pry", "Ankle Rocks", "Quads Roll", "Adductors Roll", "Glutes Roll", "T-Spine Roll", "Foot Roll", "Dynamic Hip Openers", "Ankle Pogo Rocks", "T-Spine Rotations",
+// New Sunday
+"Foam Roll T-Spine", "Foam Roll Adductors", "Foam Roll Glutes", "Foam Roll Lats", "Foam Roll Quads", "90/90 Hip Rotations", "Deadbugs", "Ankle Dorsiflexion Rocks", "Tibialis Raises", "Face Pull to External Rotation", "Pallof Press", "Half-Kneeling Landmine Press", "Chest Supported DB Row",
+// Warm-down
+"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch", "Passive Hang"]);
 const PROGRESSIVE_OVERLOAD_EX = new Set([
 // Barbell compounds
-"BB Back Squat", "BB Bench Press", "BB Split Squat", "Trap Bar Deadlift", "RDL", "BB Row", "Barbell Zercher Curls",
+"BB Back Squat", "BB Bench Press", "BB Split Squat", "Trap Bar Deadlift", "RDL", "BB Row", "Nordic Curl", "Weighted Pull-Ups",
 // Dumbbell compounds
-"DB Incline Bench Press", "DB Incline Bench", "SA DB Row", "SA DB Shoulder Press", "Incline Dumbbell Curl",
-// Cable / machine isolation — respond well to progressive overload
-"Straight Bar Pulldown", "Lat Pulldown", "Chest Supported Row", "Overhead DB Tricep Extension", "DB Lateral Raises", "Hammer Curl",
+"DB Incline Press", "DB Incline Bench Press", "DB Incline Bench", "SA DB Row", "SA DB Shoulder Press", "Incline Curl", "Incline Dumbbell Curl",
+// Cable / machine isolation
+"Straight Bar Pushdown", "Lat Pulldown", "Chest Supported Row", "OH DB Extension", "Overhead DB Tricep Extension", "DB Lateral Raise", "DB Lateral Raises", "Hammer Curl", "Hip Thrust",
 // Weighted bodyweight
 "Pull-Ups", "Bulgarian Split Squat"]);
-const BODYWEIGHT_EX = new Set(["Pull-Ups", "Hanging Leg Raises", "V-Ups", "Copenhagen Plank", "Dead Hangs (passive → active)", "Scapular Pull-Ups", "Bodyweight Squat to Box", "Box Drop → Stick Landing", "Snap Down x3 (sub-max)", "Snap Down → Split Squat Jump", "Force Plate CMJ", "Nordic Hamstring Curl ISO", "SL Glute Bridge", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "World's Greatest Stretch", "Shoulder CARs", "Diaphragmatic Breathing", "Hip 90/90 Stretch", "Thoracic Cat-Cow", "Thoracic Rotation (Kneeling)", "Pec Minor Doorway Stretch", "Thoracic Extension over Roller", "Ankle Circles + Dorsiflexion Wall Drill", "Wall Angels", "Scapular Wall Slides", "Lat Stretch (Bar Hang)", "MB Slam x3 (easy)"]);
+const BODYWEIGHT_EX = new Set(["Pull-Ups", "Hanging Leg Raises", "V-Ups", "Copenhagen Plank", "Copenhagen Short Lever", "Dead Hangs (passive → active)", "Dead Hang Active", "Passive → Active Hang", "Passive Hang", "Scapular Pull-Ups", "Scap Pull-Ups", "Bodyweight Squat to Box", "Box Drop → Stick Landing", "Box Drop Stick", "Snap Down x3 (sub-max)", "Snap Down → Split Squat Jump", "Snap Down → Split Jump", "Snap Down", "Force Plate CMJ", "CMJ", "Vertical Jump", "Pogos", "Nordic Hamstring Curl ISO", "Nordic Curl", "SL Glute Bridge", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "World's Greatest Stretch", "Shoulder CARs", "Diaphragmatic Breathing", "Hip 90/90 Stretch", "Thoracic Cat-Cow", "Thoracic Rotation (Kneeling)", "Thoracic Extension", "Thoracic Extension over Roller", "Pec Minor Doorway Stretch", "Ankle Circles + Dorsiflexion Wall Drill", "Wall Angels", "Scapular Wall Slides", "Serratus Wall Slides", "Copenhagen Short Lever", "Banded Deadbug", "Band Lateral Walk", "Tempo Goblet Squat", "Couch Stretch", "Deep Squat Pry", "Ankle Rocks", "Ankle Pogo Rocks", "Dynamic Hip Openers", "T-Spine Rotations",
+// New Sunday
+"Foam Roll T-Spine", "Foam Roll Adductors", "Foam Roll Glutes", "Foam Roll Lats", "Foam Roll Quads", "90/90 Hip Rotations", "Deadbugs", "Ankle Dorsiflexion Rocks", "Tibialis Raises", "Pallof Press",
+// Warm-down
+"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch"]);
 // ── FONT SCALE ────────────────────────────────────────────────────────────────
 const FS = {
   sm: {
@@ -289,45 +363,64 @@ const BADGES = {
 // ── WORKOUT DATA ──────────────────────────────────────────────────────────────
 const LOWER_HYP_DAY = {
   title: "Lower Hypertrophy",
-  focus: "Glutes + Quads",
+  focus: "Growth Hormone + Metabolic Leg Day",
   warmup: {
-    duration: "10–12 min",
+    duration: "12 min",
     phases: [{
-      label: "Tissue Prep",
+      label: "Tissue",
       exercises: [{
-        name: "Foam Roll Quads + IT Band",
-        detail: "30 sec/side · reduce stiffness",
+        name: "Quads Roll",
+        detail: "45s",
         badge: "MOB"
       }, {
-        name: "Hip Flexor Couch Stretch",
-        detail: "45 sec/side · critical for split squat depth",
+        name: "Adductors Roll",
+        detail: "45s",
+        badge: "MOB"
+      }, {
+        name: "Glutes Roll",
+        detail: "45s",
         badge: "MOB"
       }]
     }, {
-      label: "Glute + Hamstring Activation",
+      label: "Mobility",
       exercises: [{
-        name: "Glute Bridge Hold",
-        detail: "2×10 + 3 sec hold/rep",
-        badge: "ACT"
+        name: "Couch Stretch",
+        detail: "45s/side",
+        badge: "MOB"
       }, {
-        name: "Nordic Hamstring Curl ISO",
-        detail: "2×5 slow negatives",
+        name: "Deep Squat Pry",
+        detail: "60s",
+        badge: "MOB"
+      }, {
+        name: "Ankle Rocks",
+        detail: "12",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Activation",
+      exercises: [{
+        name: "Band Lateral Walk",
+        detail: "2×12",
         badge: "ACT"
       }, {
         name: "SL Glute Bridge",
-        detail: "2×8/side",
+        detail: "2×8",
+        badge: "ACT"
+      }, {
+        name: "Tempo Goblet Squat",
+        detail: "2×6",
         badge: "ACT"
       }]
     }, {
-      label: "Movement Prep + CNS Tap",
+      label: "CNS",
       exercises: [{
-        name: "Snap Down x3 (sub-max)",
-        detail: "50% effort",
+        name: "Snap Down",
+        detail: "2×3",
         badge: "CNS"
       }, {
-        name: "Light Trap Bar DL Ramp",
-        detail: "1×8 @ 40%, 1×5 @ 60%",
-        badge: "PRIME"
+        name: "Vertical Jump",
+        detail: "2×2",
+        badge: "CNS"
       }]
     }]
   },
@@ -336,265 +429,319 @@ const LOWER_HYP_DAY = {
     title: "A — Power",
     sub: "Reactive Primer",
     exercises: [{
-      name: "Snap Down → Split Squat Jump",
+      name: "Snap Down → Split Jump",
       detail: "3×3",
       badge: "POWER"
     }]
   }, {
     icon: "🏋️",
-    title: "B — Main Lift",
-    sub: "Moderate Load",
-    exercises: [{
-      name: "Trap Bar Deadlift",
-      detail: "4×6",
-      badge: "HYP"
-    }]
-  }, {
-    icon: "🦵",
-    title: "C — Unilateral",
-    sub: "Quad + Glute",
-    exercises: [{
-      name: "BB Split Squat",
-      detail: "4×8 ea",
-      badge: "HYP"
-    }]
-  }, {
-    icon: "🍑",
-    title: "D — Glutes",
-    sub: "Isolation",
-    exercises: [{
-      name: "Elevated Band Hip Flexor/Glute",
-      detail: "3×12",
-      badge: "HYP"
-    }, {
-      name: "RDL",
-      detail: "5×6",
-      badge: "STR"
-    }]
-  }, {
-    icon: "🦿",
-    title: "E — Quads",
-    sub: "Added Block",
+    title: "B — Main Hypertrophy",
+    sub: "Primary Loading",
     exercises: [{
       name: "BB Back Squat",
-      detail: "4×8",
-      badge: "HYP"
-    }, {
-      name: "Bulgarian Split Squat",
       detail: "4×8",
       badge: "HYP"
     }]
   }, {
     icon: "🔗",
-    title: "F — Posterior Chain",
+    title: "C — Posterior",
     sub: "Accessory",
     exercises: [{
-      name: "Barbell Zercher Curls",
+      name: "Trap Bar Deadlift",
+      detail: "3×6",
+      badge: "STR"
+    }, {
+      name: "RDL",
+      detail: "3×8",
+      badge: "STR"
+    }]
+  }, {
+    icon: "🦵",
+    title: "D — Unilateral",
+    sub: "Quad + Glute",
+    exercises: [{
+      name: "BB Split Squat",
       detail: "3×8",
       badge: "HYP"
     }]
   }, {
+    icon: "🍑",
+    title: "E — Glutes",
+    sub: "Isolation",
+    exercises: [{
+      name: "Hip Thrust",
+      detail: "3×10",
+      badge: "HYP"
+    }]
+  }, {
     icon: "🧱",
-    title: "G — Core",
+    title: "F — Core",
     sub: "Finisher",
     exercises: [{
       name: "Copenhagen Plank",
-      detail: "3×20 sec",
+      detail: "3×20s",
       badge: "CORE"
     }]
-  }]
+  }],
+  warmdown: {
+    duration: "8 min",
+    phases: [{
+      label: "Recovery Flow",
+      exercises: [{
+        name: "Nasal Walk",
+        detail: "3 min",
+        badge: "MOB"
+      }, {
+        name: "Hip Flexor Stretch",
+        detail: "1 min/side",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Reset",
+      exercises: [{
+        name: "Adductor Rock",
+        detail: "1 min",
+        badge: "MOB"
+      }, {
+        name: "Supine Breathing",
+        detail: "2 min",
+        badge: "MOB"
+      }]
+    }]
+  }
 };
 const DAYS = [{
   id: "sun",
   label: "Sunday",
   accent: C.sun,
-  title: "Upper Pump + Stability",
-  focus: "Injury-Proofing Day",
+  title: "Full Body Bulletproofing",
+  focus: "Longevity + Athletic Integrity",
   warmup: {
-    duration: "6–8 min",
+    duration: "10–12 min",
     phases: [{
-      label: "Nervous System Reset",
+      label: "Foam Rolling",
       exercises: [{
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths",
+        name: "Foam Roll T-Spine",
+        detail: "1 min · slow passes, pause on tight spots",
         badge: "MOB"
       }, {
-        name: "World's Greatest Stretch",
-        detail: "4/side slow",
+        name: "Foam Roll Adductors",
+        detail: "1 min / side",
         badge: "MOB"
       }, {
-        name: "Shoulder CARs",
-        detail: "5/direction/side",
+        name: "Foam Roll Glutes",
+        detail: "1 min / side",
+        badge: "MOB"
+      }, {
+        name: "Foam Roll Lats",
+        detail: "1 min / side",
+        badge: "MOB"
+      }, {
+        name: "Foam Roll Quads",
+        detail: "1 min / side",
         badge: "MOB"
       }]
     }, {
-      label: "Shoulder + Rotator Cuff Prep",
+      label: "Mobility + Activation",
       exercises: [{
-        name: "Band Pull-Aparts (Sunday)",
-        detail: "2×15",
+        name: "90/90 Hip Rotations",
+        detail: "2×8 each side",
+        badge: "MOB"
+      }, {
+        name: "Deadbugs",
+        detail: "2×8 slow · keep lower back flat",
         badge: "ACT"
       }, {
-        name: "Light Cable External Rotation",
-        detail: "2×12/side",
+        name: "Cable External Rotations",
+        detail: "2×15 · light weight",
         badge: "ACT"
       }, {
-        name: "Wall Angels",
-        detail: "2×10",
+        name: "Ankle Dorsiflexion Rocks",
+        detail: "2×12",
+        badge: "MOB"
+      }, {
+        name: "Glute Bridge Hold",
+        detail: "2×30 sec",
         badge: "ACT"
       }]
     }]
   },
   blocks: [{
-    icon: "🛡️",
-    title: "A — Shoulder Health",
-    sub: "Joint Longevity",
+    icon: "🦵",
+    title: "A — Lower Body Integrity",
+    sub: "Lower Body Bulletproofing",
     exercises: [{
-      name: "Rack Hip CARs",
-      detail: "3×3 ea",
-      badge: "HEALTH"
+      name: "Rear Foot Elevated Split Squat",
+      detail: "3×8 each side · Tempo 3-1-1",
+      badge: "STR"
     }, {
-      name: "Rear Delt Cable Fly",
+      name: "Single Leg RDL",
+      detail: "3×8 each side · dumbbell",
+      badge: "STR"
+    }, {
+      name: "Tibialis Raises",
       detail: "3×15",
       badge: "HEALTH"
+    }]
+  }, {
+    icon: "🤝",
+    title: "B — Shoulder + Upper Stability",
+    sub: "Upper Body Bulletproofing",
+    exercises: [{
+      name: "Half-Kneeling Landmine Press",
+      detail: "3×10 each side",
+      badge: "STR"
     }, {
-      name: "Cuban Press",
-      detail: "3×12",
+      name: "Chest Supported DB Row",
+      detail: "3×10 · pause at top",
+      badge: "HYP"
+    }, {
+      name: "Face Pull to External Rotation",
+      detail: "3×15",
       badge: "HEALTH"
-    }]
-  }, {
-    icon: "💪",
-    title: "B — Moderate Press",
-    sub: "Pump, Not Power",
-    exercises: [{
-      name: "SA DB Shoulder Press",
-      detail: "3×10",
-      badge: "HYP"
-    }, {
-      name: "DB Incline Bench",
-      detail: "3×10",
-      badge: "HYP"
-    }]
-  }, {
-    icon: "🔙",
-    title: "C — Back Pump",
-    sub: "Volume / Feel",
-    exercises: [{
-      name: "Lat Pulldown",
-      detail: "3×12",
-      badge: "HYP"
-    }, {
-      name: "BB Row",
-      detail: "3×12",
-      badge: "HYP"
-    }]
-  }, {
-    icon: "🦾",
-    title: "D — Arms",
-    sub: "Pump Finisher",
-    exercises: [{
-      name: "Incline Dumbbell Curl",
-      detail: "3×12",
-      badge: "HYP"
-    }, {
-      name: "Straight Bar Pulldown",
-      detail: "3×12",
-      badge: "HYP"
     }]
   }, {
     icon: "🧱",
-    title: "E — Core",
-    sub: "Anti-Rotation + Flexion",
+    title: "C — Core + Athletic Stability",
+    sub: "Life Bulletproofing",
     exercises: [{
-      name: "V-Ups",
-      detail: "4×12",
+      name: "Copenhagen Plank",
+      detail: "3×20 sec each side",
       badge: "CORE"
     }, {
-      name: "Hanging Leg Raises",
-      detail: "3×12",
+      name: "Pallof Press",
+      detail: "3×12 slow",
       badge: "CORE"
-    }]
-  }, {
-    icon: "🧳",
-    title: "F — Carry",
-    sub: "Loaded Stability",
-    exercises: [{
+    }, {
       name: "Suitcase Carry",
-      detail: "4×20m",
+      detail: "2× up & down the turf",
       badge: "CORE"
     }]
-  }]
+  }],
+  warmdown: {
+    duration: "8–10 min",
+    phases: [{
+      label: "Breathing Reset",
+      exercises: [{
+        name: "Crocodile Breathing",
+        detail: "3 min · breathe into lower back, full exhale",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Stretch Flow",
+      exercises: [{
+        name: "Hip Flexor Stretch",
+        detail: "2×30 sec each side",
+        badge: "MOB"
+      }, {
+        name: "Pec Doorway Stretch",
+        detail: "2×30 sec each side",
+        badge: "MOB"
+      }, {
+        name: "Lat Stretch on Bench",
+        detail: "2×30 sec",
+        badge: "MOB"
+      }, {
+        name: "Hamstring Neural Glide",
+        detail: "2×10 each side",
+        badge: "MOB"
+      }]
+    }]
+  }
 }, {
   id: "mon",
   label: "Monday",
   accent: C.mon,
   title: "Lower Strength",
-  focus: "Heavy CNS Day",
+  focus: "Primary Testosterone + CNS Day",
   warmup: {
     duration: "12–15 min",
     phases: [{
+      label: "Tissue",
+      exercises: [{
+        name: "Adductors Roll",
+        detail: "45s",
+        badge: "MOB"
+      }, {
+        name: "Glutes Roll",
+        detail: "45s",
+        badge: "MOB"
+      }, {
+        name: "T-Spine Roll",
+        detail: "45s",
+        badge: "MOB"
+      }, {
+        name: "Foot Roll",
+        detail: "45s",
+        badge: "MOB"
+      }]
+    }, {
       label: "Mobility",
       exercises: [{
-        name: "Hip 90/90 Stretch",
-        detail: "45 sec/side",
+        name: "Dynamic Hip Openers",
+        detail: "8/side",
         badge: "MOB"
       }, {
-        name: "Ankle Circles + Dorsiflexion Wall Drill",
-        detail: "10 reps/side",
+        name: "Ankle Pogo Rocks",
+        detail: "15",
         badge: "MOB"
       }, {
-        name: "Thoracic Extension over Roller",
-        detail: "8–10 reps",
+        name: "T-Spine Rotations",
+        detail: "8/side",
         badge: "MOB"
       }]
     }, {
       label: "Activation",
       exercises: [{
-        name: "Glute Bridge + ISO Hold",
-        detail: "2×10 + 5 sec hold",
+        name: "SL Glute Bridge",
+        detail: "2×8",
         badge: "ACT"
       }, {
-        name: "Band Clamshells",
-        detail: "2×15/side",
+        name: "Copenhagen Short Lever",
+        detail: "2×15s",
         badge: "ACT"
       }, {
-        name: "Bodyweight Squat to Box",
-        detail: "2×8 controlled",
+        name: "Banded Deadbug",
+        detail: "2×6",
         badge: "ACT"
       }]
     }, {
-      label: "CNS Primer",
+      label: "CNS",
       exercises: [{
-        name: "Box Drop → Stick Landing",
-        detail: "3×3",
+        name: "Pogos",
+        detail: "2×20",
+        badge: "CNS"
+      }, {
+        name: "Box Drop Stick",
+        detail: "3×2",
+        badge: "CNS"
+      }, {
+        name: "CMJ",
+        detail: "2×2",
         badge: "CNS"
       }]
     }]
   },
   blocks: [{
     icon: "⚡",
-    title: "A — Power Primer",
+    title: "A — Power",
     sub: "Low Volume",
     exercises: [{
-      name: "Force Plate CMJ",
-      detail: "1×2",
-      badge: "POWER"
-    }, {
       name: "Hang Clean",
-      detail: "6×3",
+      detail: "5×3",
       badge: "POWER"
     }]
   }, {
     icon: "🏋️",
     title: "B — Strength",
     sub: "Primary Loading",
-    note: "Keep trap bar volume capped. Full CNS expression on squats first.",
     exercises: [{
       name: "BB Back Squat",
-      detail: "5×5",
+      detail: "5×4",
       badge: "STR"
     }, {
       name: "Trap Bar Deadlift",
-      detail: "3×5",
+      detail: "3×3",
       badge: "STR"
     }]
   }, {
@@ -602,9 +749,9 @@ const DAYS = [{
     title: "C — Posterior Chain",
     sub: "Accessory",
     exercises: [{
-      name: "Barbell Zercher Curls",
-      detail: "3×8",
-      badge: "HYP"
+      name: "Nordic Curl",
+      detail: "3×5",
+      badge: "STR"
     }]
   }, {
     icon: "🧱",
@@ -612,151 +759,174 @@ const DAYS = [{
     sub: "Finisher",
     exercises: [{
       name: "Copenhagen Plank",
-      detail: "3×20 sec",
+      detail: "3×25s",
       badge: "CORE"
     }]
-  }]
+  }],
+  warmdown: {
+    duration: "8 min",
+    phases: [{
+      label: "Recovery Flow",
+      exercises: [{
+        name: "Nasal Walk",
+        detail: "3 min",
+        badge: "MOB"
+      }, {
+        name: "Hip Flexor Stretch",
+        detail: "1 min/side",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Reset",
+      exercises: [{
+        name: "Hamstring Glide",
+        detail: "10/side",
+        badge: "MOB"
+      }, {
+        name: "Supine Breathing",
+        detail: "2 min",
+        badge: "MOB"
+      }]
+    }]
+  }
 }, {
   id: "tue",
   label: "Tuesday",
   accent: C.tue,
   title: "Upper Push",
-  focus: "Chest / Shoulders",
+  focus: "Androgen + Hypertrophy Signal",
   warmup: {
-    duration: "8–10 min",
+    duration: "12 min",
     phases: [{
-      label: "Mobility",
+      label: "Shoulder Prep",
       exercises: [{
-        name: "Pec Minor Doorway Stretch",
-        detail: "30 sec/side",
-        badge: "MOB"
-      }, {
-        name: "Thoracic Rotation (Kneeling)",
-        detail: "8/side",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Shoulder Health",
-      exercises: [{
-        name: "Band Pull-Aparts",
-        detail: "2×20",
+        name: "Dead Hang Active",
+        detail: "2×20s",
         badge: "ACT"
       }, {
-        name: "Side-Lying External Rotation (DB)",
-        detail: "2×12 @ light",
-        badge: "ACT"
-      }, {
-        name: "Scapular Wall Slides",
+        name: "Serratus Wall Slides",
         detail: "2×10",
+        badge: "ACT"
+      }, {
+        name: "Cable External Rotation",
+        detail: "2×15",
         badge: "ACT"
       }]
     }, {
       label: "Press Ramp",
       exercises: [{
-        name: "Empty Bar Bench Press",
-        detail: "1×15",
-        badge: "PRIME"
-      }, {
-        name: "50–60% Bench Press",
-        detail: "1×6",
+        name: "Explosive Empty Bar Bench",
+        detail: "2×5",
         badge: "PRIME"
       }]
     }]
   },
   blocks: [{
-    icon: "🛡️",
-    title: "A — Activation",
-    sub: "Shoulder Health",
-    exercises: [{
-      name: "Cuban Press",
-      detail: "3×10",
-      badge: "HEALTH"
-    }]
-  }, {
     icon: "🏋️",
-    title: "B — Main Press",
+    title: "A — Strength",
     sub: "Primary Strength",
     exercises: [{
       name: "BB Bench Press",
-      detail: "4×6",
+      detail: "5×5",
       badge: "STR"
     }]
   }, {
     icon: "💪",
-    title: "C — Secondary Press",
-    sub: "Volume",
+    title: "B — Volume",
+    sub: "Secondary Press",
     exercises: [{
-      name: "DB Incline Bench Press",
+      name: "DB Incline Press",
       detail: "4×8–10",
       badge: "HYP"
     }]
   }, {
     icon: "🔺",
-    title: "D — Shoulder Hypertrophy",
+    title: "C — Shoulder Hypertrophy",
     sub: "Added Block",
     exercises: [{
-      name: "DB Lateral Raises",
-      detail: "4×12–15",
+      name: "DB Lateral Raise",
+      detail: "4×15",
       badge: "HYP"
     }, {
-      name: "Cable Y Raises",
+      name: "Cable Y Raise",
       detail: "3×12",
       badge: "HYP"
+    }]
+  }, {
+    icon: "🛡️",
+    title: "D — Shoulder Integrity",
+    sub: "Health",
+    exercises: [{
+      name: "Cuban Press",
+      detail: "3×12",
+      badge: "HEALTH"
     }]
   }, {
     icon: "🦾",
     title: "E — Triceps",
     sub: "Added Block",
     exercises: [{
-      name: "Straight Bar Pulldown",
+      name: "Straight Bar Pushdown",
       detail: "4×12",
       badge: "HYP"
     }, {
-      name: "Overhead DB Tricep Extension",
+      name: "OH DB Extension",
       detail: "3×10",
       badge: "HYP"
     }]
-  }]
+  }],
+  warmdown: {
+    duration: "7 min",
+    phases: [{
+      label: "Upper Release",
+      exercises: [{
+        name: "Pec Minor Release",
+        detail: "1 min",
+        badge: "MOB"
+      }, {
+        name: "Trap Stretch",
+        detail: "30s/side",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Reset",
+      exercises: [{
+        name: "Thoracic Breathing",
+        detail: "2 min",
+        badge: "MOB"
+      }, {
+        name: "Nasal Walk",
+        detail: "3 min",
+        badge: "MOB"
+      }]
+    }]
+  }
 }, {
   id: "wed",
   label: "Wednesday",
   accent: C.wed,
   title: "Upper Pull",
-  focus: "Back Thickness + Width",
+  focus: "Neural Pull + Structural Balance",
   warmup: {
-    duration: "8–10 min",
+    duration: "10 min",
     phases: [{
-      label: "Mobility",
+      label: "Pull Prep",
       exercises: [{
-        name: "Lat Stretch (Bar Hang)",
-        detail: "30 sec/side",
-        badge: "MOB"
-      }, {
-        name: "Thoracic Cat-Cow",
-        detail: "10 reps",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Scap + Rear Delt Activation",
-      exercises: [{
-        name: "Dead Hangs (passive → active)",
-        detail: "2×20 sec",
+        name: "Passive → Active Hang",
+        detail: "2×20s",
         badge: "ACT"
       }, {
-        name: "Scapular Pull-Ups",
+        name: "Scap Pull-Ups",
         detail: "2×8",
         badge: "ACT"
       }, {
-        name: "Band Pull-Aparts (overhand)",
-        detail: "2×15",
+        name: "Straight Arm Pulldown",
+        detail: "2×12",
         badge: "ACT"
-      }]
-    }, {
-      label: "Power Ramp",
-      exercises: [{
-        name: "MB Slam x3 (easy)",
-        detail: "50% effort",
-        badge: "CNS"
+      }, {
+        name: "Thoracic Extension",
+        detail: "1 min",
+        badge: "MOB"
       }]
     }]
   },
@@ -765,38 +935,38 @@ const DAYS = [{
     title: "A — Power",
     sub: "Minimal",
     exercises: [{
-      name: "MB Slam → MB Lateral Toss",
+      name: "MB Slam → Lateral Toss",
       detail: "3×3",
       badge: "POWER"
     }]
   }, {
     icon: "🔝",
-    title: "B — Vertical Pull",
+    title: "B — Strength",
     sub: "Width Driver",
     exercises: [{
-      name: "Pull-Ups",
-      detail: "6×6",
+      name: "Weighted Pull-Ups",
+      detail: "5×5",
       badge: "STR"
     }]
   }, {
     icon: "↔️",
-    title: "C — Horizontal Pull",
-    sub: "Thickness",
+    title: "C — Thickness",
+    sub: "Horizontal Pull",
     exercises: [{
       name: "SA DB Row",
-      detail: "4×8",
+      detail: "3×8",
       badge: "HYP"
     }, {
       name: "Chest Supported Row",
-      detail: "4×10",
+      detail: "3×10",
       badge: "HYP"
     }]
   }, {
     icon: "🎯",
-    title: "D — Rear Delt / Scap",
+    title: "D — Rear Delt",
     sub: "Injury Proofing",
     exercises: [{
-      name: "Rear Delt Cable Fly",
+      name: "Cable Rear Fly",
       detail: "3×12",
       badge: "HEALTH"
     }]
@@ -805,15 +975,37 @@ const DAYS = [{
     title: "E — Biceps",
     sub: "Added Block",
     exercises: [{
-      name: "Incline Dumbbell Curl",
+      name: "Incline Curl",
       detail: "3×10",
       badge: "HYP"
     }, {
       name: "Hammer Curl",
-      detail: "3×12",
+      detail: "2×12",
       badge: "HYP"
     }]
-  }]
+  }],
+  warmdown: {
+    duration: "6 min",
+    phases: [{
+      label: "Decompression",
+      exercises: [{
+        name: "Passive Hang",
+        detail: "2×30s",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Reset",
+      exercises: [{
+        name: "Child Pose Lat Stretch",
+        detail: "1 min",
+        badge: "MOB"
+      }, {
+        name: "Nasal Breathing",
+        detail: "3 min",
+        badge: "MOB"
+      }]
+    }]
+  }
 }, {
   id: "thu",
   label: "Thursday",
@@ -979,18 +1171,40 @@ async function loadAllFromStorage() {
     console.error('wt: corrupt sessionsStore', e);
   }
 }
-async function saveEntries() {
+let saveEntriesTimer = null;
+let saveFailCount = 0;
+async function _doSaveEntries() {
   try {
-    if (Object.keys(memStore).length === 0) return; // nothing logged yet — not an error
-    const r = await window.storage.set(STORE_KEY, JSON.stringify(memStore));
+    if (Object.keys(memStore).length === 0) return;
+    const val = JSON.stringify(memStore);
+    let r = await window.storage.set(STORE_KEY, val);
     if (!r) {
-      console.error("wt: saveEntries returned null");
-      reportSaveStatus(false);
-    } else reportSaveStatus(true);
+      await new Promise(res => setTimeout(res, 600));
+      r = await window.storage.set(STORE_KEY, val);
+    }
+    if (!r) {
+      saveFailCount++;
+      if (saveFailCount >= 3) {
+        console.error("wt: saveEntries failed 3x");
+        reportSaveStatus(false);
+      }
+    } else {
+      saveFailCount = 0;
+      reportSaveStatus(true);
+    }
   } catch (e) {
+    saveFailCount++;
     console.error("wt: saveEntries failed", e);
-    reportSaveStatus(false);
+    if (saveFailCount >= 3) reportSaveStatus(false);
   }
+}
+function saveEntries() {
+  // Debounce — collapse rapid consecutive saves into one write
+  if (saveEntriesTimer) clearTimeout(saveEntriesTimer);
+  saveEntriesTimer = setTimeout(() => {
+    saveEntriesTimer = null;
+    _doSaveEntries();
+  }, 400);
 }
 async function saveBW() {
   try {
@@ -1164,7 +1378,7 @@ function isPR(entries, idx) {
   if (!entries.length || !entries[idx]) return false;
   return entries[idx].weight >= entries.reduce((b, e) => Math.max(b, e.weight), 0) && (idx === 0 || entries[idx].weight > entries.slice(0, idx).reduce((b, e) => Math.max(b, e.weight), 0));
 }
-const BARBELL_EX = new Set(["BB Back Squat", "BB Bench Press", "Trap Bar Deadlift", "RDL", "BB Row", "BB Split Squat", "Barbell Zercher Curls"]);
+const BARBELL_EX = new Set(["BB Back Squat", "BB Bench Press", "Trap Bar Deadlift", "RDL", "BB Row", "BB Split Squat", "Nordic Curl", "Hang Clean", "Weighted Pull-Ups"]);
 function getOverloadSug(entries, exName = "") {
   if (exName && !PROGRESSIVE_OVERLOAD_EX.has(exName)) return null;
   if (!entries.length) return null;
@@ -3633,6 +3847,111 @@ function EndWorkoutModal({
   }, "End It \u2713"))));
 }
 
+// ── START WORKOUT MODAL ───────────────────────────────────────────────────────
+function StartWorkoutModal({
+  day,
+  estTime,
+  onConfirm,
+  onCancel
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.94)",
+      zIndex: 2000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 90px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "au",
+    style: {
+      background: W.surfaceHi,
+      border: `1px solid ${W.borderHi}`,
+      borderRadius: "20px",
+      width: "100%",
+      maxWidth: 480,
+      padding: "28px 24px 32px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 32,
+      height: 3,
+      borderRadius: 2,
+      background: W.borderHi,
+      margin: "0 auto 24px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.25em",
+      color: day.accent,
+      marginBottom: 8,
+      textAlign: "center",
+      fontWeight: 600,
+      textTransform: "uppercase"
+    }
+  }, "Start Workout?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: W.text,
+      marginBottom: 4,
+      textAlign: "center"
+    }
+  }, day.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      marginBottom: 24,
+      textAlign: "center"
+    }
+  }, "Estimated time: ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.text,
+      fontWeight: 700
+    }
+  }, estTime)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onCancel,
+    style: {
+      flex: 1,
+      background: "transparent",
+      border: `1px solid ${W.borderHi}`,
+      borderRadius: 10,
+      color: W.textMid,
+      fontFamily: "'DM Sans',sans-serif",
+      fontSize: 14,
+      fontWeight: 600,
+      padding: "15px 0",
+      cursor: "pointer"
+    }
+  }, "Not Yet"), /*#__PURE__*/React.createElement("button", {
+    onClick: onConfirm,
+    style: {
+      flex: 1,
+      background: day.accent,
+      border: "none",
+      borderRadius: 10,
+      color: W.bg,
+      fontFamily: "'DM Sans',sans-serif",
+      fontSize: 14,
+      fontWeight: 700,
+      padding: "15px 0",
+      letterSpacing: "0.02em",
+      cursor: "pointer"
+    }
+  }, "Let's Go \u203A"))));
+}
+
 // ── DONUT CHART ───────────────────────────────────────────────────────────────
 // Distinct colors for each muscle group segment
 const DONUT_COLORS = {
@@ -3673,6 +3992,7 @@ function DonutChart({
       sweep
     };
   });
+  const activeSegs = segments.filter(seg => seg.sweep >= 0.015);
   function arc(r, a1, a2) {
     const x1 = cx + r * Math.cos(a1),
       y1 = cy + r * Math.sin(a1),
@@ -3696,18 +4016,13 @@ function DonutChart({
       i = arc(innerR, startA, endA);
     return `M${o.x1},${o.y1} A${outerR},${outerR},0,${o.large},1,${o.x2},${o.y2} L${i.x2},${i.y2} A${innerR},${innerR},0,${i.large},0,${i.x1},${i.y1} Z`;
   }
-  // Build label positions with collision avoidance
-  const MIN_SWEEP = 0.25; // hide label if slice too small
-  const labelSegs = segments.filter(seg => seg.sweep >= MIN_SWEEP);
-  // Sort by angle, then spread if too close
-  labelSegs.sort((a, b) => a.startA + a.sweep / 2 - (b.startA + b.sweep / 2));
-  const labelAngles = labelSegs.map(seg => ({
+  // Label ALL active segments — spread angles to avoid overlap
+  const labelAngles = activeSegs.map(seg => ({
     seg,
     angle: seg.startA + seg.sweep / 2
   }));
-  // Nudge overlapping labels apart
-  const MIN_ANGLE_GAP = 0.45;
-  for (let pass = 0; pass < 3; pass++) {
+  const MIN_ANGLE_GAP = 0.42;
+  for (let pass = 0; pass < 5; pass++) {
     for (let i = 1; i < labelAngles.length; i++) {
       const diff = labelAngles[i].angle - labelAngles[i - 1].angle;
       if (diff < MIN_ANGLE_GAP) {
@@ -3748,14 +4063,14 @@ function DonutChart({
     }));
     const midA = labelInfo.angle;
     const lineR1 = outerR + 4,
-      lineR2 = outerR + 16;
+      lineR2 = outerR + 18;
     const lx1 = cx + lineR1 * Math.cos(seg.startA + seg.sweep / 2),
       ly1 = cy + lineR1 * Math.sin(seg.startA + seg.sweep / 2);
     const lx2 = cx + lineR2 * Math.cos(midA),
       ly2 = cy + lineR2 * Math.sin(midA);
     const anchor = Math.cos(midA) > 0.1 ? "start" : Math.cos(midA) < -0.1 ? "end" : "middle";
-    const tx = cx + (lineR2 + 4) * Math.cos(midA),
-      ty = cy + (lineR2 + 4) * Math.sin(midA);
+    const tx = cx + (lineR2 + 5) * Math.cos(midA),
+      ty = cy + (lineR2 + 5) * Math.sin(midA);
     return /*#__PURE__*/React.createElement("g", {
       key: seg.g
     }, /*#__PURE__*/React.createElement("path", {
@@ -3771,7 +4086,7 @@ function DonutChart({
       y2: ly2,
       stroke: color,
       strokeWidth: 1,
-      strokeOpacity: 0.6
+      strokeOpacity: 0.7
     }), /*#__PURE__*/React.createElement("text", {
       x: tx,
       y: ty - 5,
@@ -3785,7 +4100,7 @@ function DonutChart({
       }
     }, seg.g), /*#__PURE__*/React.createElement("text", {
       x: tx,
-      y: ty + 7,
+      y: ty + 6,
       textAnchor: anchor,
       dominantBaseline: "middle",
       style: {
@@ -3802,7 +4117,6 @@ function DonutChart({
     fill: W.bg
   }));
 }
-
 // ── PROGRESS VIEW ─────────────────────────────────────────────────────────────
 function ProgressView({
   onClose,
@@ -4569,7 +4883,7 @@ function HomePage({
   });
   trends.sort((a, b) => b.pct - a.pct);
   const topGainers = trends.slice(0, 3);
-  const PROGRESS_EXEMPT = new Set(["Hang Clean", "Force Plate CMJ", "MB Slam → MB Lateral Toss", "Snap Down → Split Squat Jump", "Box Drop → Stick Landing", "Rear Delt Cable Fly", "Cuban Press", "Cuban Press (Sunday)", "Cable Y Raises", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Band Pull-Aparts (Sunday)", "Suitcase Carry", "Copenhagen Plank", "Elevated Band Hip Flexor/Glute"]);
+  const PROGRESS_EXEMPT = new Set(["Hang Clean", "MB Slam → Lateral Toss", "MB Slam → MB Lateral Toss", "Snap Down → Split Jump", "Snap Down → Split Squat Jump", "Box Drop → Stick Landing", "Box Drop Stick", "Rear Delt Cable Fly", "Cable Rear Fly", "Cuban Press", "Cable Y Raise", "Cable Y Raises", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Suitcase Carry", "Copenhagen Plank"]);
   const fourWeeksAgo = new Date();
   fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
   const fourWeeksAgoStr = fourWeeksAgo.toISOString().slice(0, 10);
@@ -5419,18 +5733,24 @@ const EX_DESC = {
   "BB Split Squat": "Rear foot elevated or on floor. Front shin near-vertical, lower rear knee toward ground. Builds unilateral leg strength and hip mobility simultaneously.",
   "Bulgarian Split Squat": "Rear foot elevated on bench. Lower hips straight down, front knee tracks over toe. Brutal quad/glute builder with high balance demand.",
   "RDL": "Hinge at hips with soft knee bend, bar stays close to legs. Feel hamstring stretch at bottom, drive hips forward to lockout. Posterior chain king.",
-  "Barbell Zercher Curls": "Bar held in elbow crooks, curl up. Unique loading angle hits brachialis and grip. Keep elbows tucked.",
+  "Nordic Curl": "Anchor feet, lower body toward floor under control. Eccentric hamstring strength — one of the best injury prevention exercises for athletes.",
+  "Hip Thrust": "Shoulders on bench, bar across hips. Drive hips to full extension, squeeze glutes at top. Primary glute mass builder.",
   "BB Bench Press": "Arch back slightly, retract scapula, bar path from lower chest. Leg drive into floor. Primary horizontal push for chest/triceps/anterior delt.",
+  "DB Incline Press": "30–45° incline. Dumbbells allow greater ROM than barbell. Targets upper chest and anterior delts with natural wrist rotation.",
   "DB Incline Bench Press": "30–45° incline. Dumbbells allow greater ROM than barbell. Targets upper chest and anterior delts with natural wrist rotation.",
-  "DB Incline Bench": "Same as DB Incline Bench Press. Moderate incline targets upper chest with full range of motion.",
+  "DB Lateral Raise": "Slight forward lean, raise to shoulder height with pinky slightly higher. Isolates medial delt. Keep weight light and strict.",
   "DB Lateral Raises": "Slight forward lean, raise to shoulder height with pinky slightly higher. Isolates medial delt. Keep weight light and strict.",
+  "Cable Y Raise": "Cable at low pulley, raise arms in Y shape above head. Targets lower trap and serratus — critical for shoulder health and scapular upward rotation.",
   "Cable Y Raises": "Cable at low pulley, raise arms in Y shape above head. Targets lower trap and serratus — critical for shoulder health and scapular upward rotation.",
-  "Straight Bar Pulldown": "Overhand grip slightly wider than shoulders. Pull bar to upper chest, elbows drive down and back. Lat isolation with continuous tension.",
+  "Straight Bar Pushdown": "Overhand grip, elbows pinned at sides, push bar to full extension. Consistent cable tension isolates all three tricep heads.",
+  "OH DB Extension": "Keep elbows pointed forward, lower dumbbell behind head. Full stretch at bottom builds long head of tricep.",
   "Overhead DB Tricep Extension": "Keep elbows pointed forward, lower dumbbell behind head. Full stretch at bottom builds long head of tricep.",
   "SA DB Shoulder Press": "Single arm press builds unilateral stability and reduces shoulder imbalances. Core braces hard to prevent lateral lean.",
   "Pull-Ups": "Dead hang start. Drive elbows to hips, chin over bar. Best bodyweight lat builder. Add weight when reps exceed 10 consistently.",
+  "Weighted Pull-Ups": "Dead hang start with added load. Drive elbows to hips, chin over bar. Premium lat and bicep strength builder.",
   "SA DB Row": "Brace on bench, row dumbbell to hip keeping elbow close. Full stretch at bottom. Best unilateral back thickness builder.",
   "Chest Supported Row": "Lie prone on incline bench, row handles to chest. Removes lower back from the equation — pure upper back stimulus.",
+  "Incline Curl": "On incline bench, full stretch at bottom. Stretches long head of bicep under load for superior development.",
   "Incline Dumbbell Curl": "On incline bench, full stretch at bottom. Stretches long head of bicep under load for superior development.",
   "Hammer Curl": "Neutral grip curl. Targets brachialis (under bicep) and brachioradialis. Adds arm thickness and grip strength.",
   "Lat Pulldown": "Wide or shoulder-width grip. Pull bar to upper chest, lean back slightly. Builds lat width. Good precursor or alternative to pull-ups.",
@@ -5477,7 +5797,73 @@ const EX_DESC = {
   "Nordic Hamstring Curl ISO": "Kneeling, anchor feet, isometrically resist forward fall. Eccentric hamstring strength — among the best injury prevention exercises.",
   "SL Glute Bridge": "Single leg bridge. Challenges glute unilaterally and exposes left-right asymmetries.",
   "Empty Bar Bench Press": "Bar only, high reps. Greases the groove for bench mechanics. Warms shoulder and elbow joints before loading.",
-  "50–60% Bench Press": "Working warmup set. Bridges from empty bar to working weight. Sets lat engagement and bar path."
+  "50–60% Bench Press": "Working warmup set. Bridges from empty bar to working weight. Sets lat engagement and bar path.",
+  // Sunday exercises
+  "Foam Roll T-Spine": "Slow passes along the thoracic spine, pausing on stiff segments. Restores extension mobility lost from sitting. Breathe into each spot.",
+  "Foam Roll Adductors": "Roll along inner thigh from groin to knee. Releases tight adductors that restrict hip mobility and knee tracking.",
+  "Foam Roll Glutes": "Target glute med, glute max, and piriformis. Cross ankle over knee to hit deep hip rotators. Critical before lower body work.",
+  "Foam Roll Lats": "Arm overhead, roll along lat from armpit to mid-back. Tight lats pull the shoulder into internal rotation — release before pressing or pulling.",
+  "Foam Roll Quads": "Roll front of thigh from hip to knee. Pause on tight spots. Reduces anterior knee stress and improves squat depth.",
+  "90/90 Hip Rotations": "Seated on floor, both knees at 90°. Rotate hips side to side, working each hip through internal and external rotation. Builds active hip mobility in all planes.",
+  "Deadbugs": "Lying on back, arms to ceiling, knees at 90°. Extend opposite arm and leg toward floor while keeping lower back pressed down. Trains deep core stability.",
+  "Cable External Rotations": "Cable at elbow height, elbow at 90° pinned to side. Rotate forearm outward against resistance. Directly strengthens the rotator cuff. Keep weight light.",
+  "Ankle Dorsiflexion Rocks": "Kneeling, drive knee over toes without heel lifting. Improves ankle mobility critical for squat depth and athletic landing mechanics.",
+  "Rear Foot Elevated Split Squat": "Rear foot on bench, front foot forward. Lower hips straight down, front shin near-vertical. Builds unilateral quad and glute strength. Tempo 3-1-1 = 3s down, 1s pause, 1s up.",
+  "Single Leg RDL": "Stand on one leg, hinge at hip, dumbbell in opposite hand. Feel hamstring loading, return by driving hip forward. Builds posterior chain and challenges balance.",
+  "Tibialis Raises": "Lean back against wall, heels on floor, raise toes toward shins. Strengthens tibialis anterior — prevents shin splints and protects the knee.",
+  "Half-Kneeling Landmine Press": "One knee down, press the landmine bar overhead from shoulder. Challenges shoulder stability, anti-rotation core, and hip flexor length simultaneously.",
+  "Chest Supported DB Row": "Prone on incline bench, row dumbbells to chest with pause at top. Removes lower back — pure upper back and rear delt work.",
+  "Face Pull to External Rotation": "Cable at face height, pull to nose then externally rotate to goalpost. Combines rear delt, lower trap, and rotator cuff. Essential shoulder health.",
+  "Pallof Press": "Cable or band at chest height, press straight out and hold. Anti-rotation core challenge — resists lateral pull. Keep hips square throughout.",
+  // Warm-down exercises
+  "Crocodile Breathing": "Lie prone, breathe into lower back and sides. Resets the diaphragm and parasympathetic nervous system. Full exhale, then inhale deep into the belly.",
+  "Hip Flexor Stretch": "Half-kneeling, drive hip forward until stretch in front of rear hip. Critical after lower body work — tight hip flexors inhibit glutes and cause anterior pelvic tilt.",
+  "Pec Doorway Stretch": "Arm at 90° in doorframe, step through. Releases anterior shoulder tightness built from pressing. Essential after any pushing work.",
+  "Lat Stretch on Bench": "Kneel beside bench, arms extended on bench, sit hips back. Let lats lengthen under gravity. Decompresses thoracic spine after pulling.",
+  "Hamstring Neural Glide": "Lying on back, extend leg and flex/point ankle repeatedly while holding behind the knee. Mobilizes the sciatic nerve and hamstring tissue simultaneously.",
+  "Nasal Walk": "Slow walk breathing only through nose. Activates parasympathetic nervous system, drops heart rate, and locks in recovery state post-workout.",
+  "Hamstring Glide": "Seated or lying, extend and flex leg while maintaining posterior pelvic tilt. Neural mobilization for hamstrings and sciatic nerve.",
+  "Supine Breathing": "Lie on back, knees bent. Breathe 360° into ribcage — lateral, posterior, and anterior. Full parasympathetic downregulation.",
+  "Adductor Rock": "Kneel in wide stance, rock side to side into each hip. Releases inner groin and hip capsule after heavy leg work.",
+  "Nasal Breathing": "Slow, controlled nasal breathing for full parasympathetic recovery. Reduces cortisol and heart rate post-training.",
+  "Pec Minor Release": "Thumbs or ball into pec minor (below collarbone near shoulder). Hold and breathe. Relieves anterior shoulder tightness from pressing.",
+  "Trap Stretch": "Ear to shoulder, hand gently pulling head away. Full upper trap and levator scapulae release after heavy pulling or shrugging.",
+  "Thoracic Breathing": "Hands on ribcage, breathe wide into thoracic spine. Reverses thoracic flexion from rowing. Resets posture.",
+  "Child Pose Lat Stretch": "Arms extended overhead in child's pose, walk hands to one side. Deep lat and teres major stretch after pulling work.",
+  "Passive Hang": "Relax completely from a bar. Decompresses shoulder joint and spine. Full shoulder traction — essential for long-term shoulder health.",
+  // New Mon warmup
+  "Adductors Roll": "Foam roll inner thigh from groin to knee. Slow passes, pause on knots. Reduces adductor tension before squats and hinges.",
+  "Glutes Roll": "Foam roll glutes and piriformis. Cross one leg over, roll into the hip. Releases hip external rotators before lower body work.",
+  "T-Spine Roll": "Foam roll thoracic spine, arms crossed. Pause at each vertebral segment. Restores extension mobility for squats and overhead work.",
+  "Foot Roll": "Roll arch of foot on ball or roller. Releases plantar fascia and improves ankle mechanics for squatting.",
+  "Dynamic Hip Openers": "Standing or on ground, cycle through hip flexion, abduction, extension. Lubricates hip joint through full ROM before loading.",
+  "Ankle Pogo Rocks": "Rock forward and back over ankle in dorsiflexion. Warms up ankle mobility needed for deep squatting.",
+  "T-Spine Rotations": "Kneeling or seated, rotate thoracic spine with hands behind head. Increases rotational mobility before compound lifts.",
+  "Copenhagen Short Lever": "Side plank with bent top knee on bench, bottom leg free. Adductor isometric hold. Shorter lever than full Copenhagen — great entry point.",
+  "Banded Deadbug": "Band anchored overhead, hold with both hands while performing deadbug leg extensions. Increases anti-extension demand on the core.",
+  "Pogos": "Rapid small hops on balls of feet, minimal ground contact time. Activates Achilles-calf spring mechanism and CNS for power training.",
+  "Box Drop Stick": "Step off box and stick the landing in athletic position. Trains force absorption and ankle-knee-hip alignment under reactive load.",
+  "CMJ": "Counter-movement jump — dip and explode vertically. Measures lower body power output. Max effort, full reset between reps.",
+  // New Tue warmup
+  "Dead Hang Active": "Start in dead hang, then engage lats to depress and retract scapula without bending elbows. Teaches scapular control for pulling.",
+  "Serratus Wall Slides": "Forearms on wall, slide arms overhead while protracting scapula. Activates serratus anterior — critical for shoulder blade upward rotation.",
+  "Cable External Rotation": "Cable at elbow height, rotate arm externally keeping elbow fixed at side. Strengthens infraspinatus and teres minor for rotator cuff health.",
+  "Explosive Empty Bar Bench": "Light bar, press with max intent on the concentric. Activates rate of force development before heavy pressing.",
+  // New Wed warmup
+  "Passive → Active Hang": "Begin fully relaxed hanging from bar, then engage lats and depress scapula. Trains the transition from passive shoulder position to active stability.",
+  "Scap Pull-Ups": "Dead hang, retract and depress scapula to lift body slightly without bending elbows. Foundation of pull-up strength and shoulder health.",
+  "Straight Arm Pulldown": "Cable or band, arms straight, pull from overhead to hips. Activates lats through full length before rows and pull-ups.",
+  "Thoracic Extension": "Over roller or edge of bench, extend thoracic spine into extension. Counteracts flexion from pulling exercises and daily posture.",
+  // New Thu/Fri warmup
+  "Quads Roll": "Foam roll quadriceps from hip to knee. Prone position, slow passes. Reduces quad tension and improves knee tracking before squats.",
+  "Couch Stretch": "Rear foot on wall behind you in kneeling position. Aggressive hip flexor and quad stretch. Critical for athletes with anterior hip tightness.",
+  "Deep Squat Pry": "Hold weight for counterbalance, sink into deep squat and pry knees out with elbows. Opens hip capsule before loaded squatting.",
+  "Ankle Rocks": "Kneel with foot flat, rock knee forward over toe repeatedly. Improves ankle dorsiflexion range needed for full depth squatting.",
+  "Band Lateral Walk": "Band around ankles or knees, step sideways maintaining tension. Activates glute medius — key hip stabilizer for squats and split squats.",
+  "Tempo Goblet Squat": "Slow 3-second descent with goblet hold. Teaches squat mechanics, builds positional strength, and activates full lower body before heavy work.",
+  "Snap Down": "From quarter squat, rapidly pull feet into athletic stance. Trains reactive hip loading pattern that transfers to jump and sprint mechanics.",
+  "Vertical Jump": "Max effort vertical jump. True CNS activation and lower body power expression. Full reset between reps.",
+  "Snap Down → Split Jump": "Snap down to loaded position then explode into alternating split jump. High CNS demand reactive power exercise."
 };
 
 // ── EXERCISE ROW ──────────────────────────────────────────────────────────────
@@ -5780,7 +6166,7 @@ function Block({
     style: {
       fontSize: isWarmup ? 12 : 13,
       fontWeight: 600,
-      color: isWarmup ? warmupDone ? W.cyan : W.textDim : W.text,
+      color: isWarmup ? warmupDone ? W.cyan : W.text : W.text,
       letterSpacing: "0.01em",
       display: "flex",
       alignItems: "center",
@@ -5815,7 +6201,7 @@ function Block({
   }, "\u2713 DONE")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      color: warmupDone ? W.cyan : W.textDim,
+      color: warmupDone ? W.cyan : W.textMid,
       fontFamily: "'DM Mono',monospace",
       textTransform: "uppercase",
       letterSpacing: "0.12em",
@@ -6004,190 +6390,21 @@ function getHistoricalAvgMin(dayId) {
   return recent.reduce((a, b) => a + b, 0) / recent.length;
 }
 // ── COOLDOWN DATA ─────────────────────────────────────────────────────────────
-const DAY_COOLDOWNS = {
-  sun: {
-    duration: "8–10 min",
-    phases: [{
-      label: "Shoulder Decompression",
-      exercises: [{
-        name: "Dead Hangs (passive → active)",
-        detail: "2×30 sec · decompress shoulder joint",
-        badge: "MOB"
-      }, {
-        name: "Pec Minor Doorway Stretch",
-        detail: "45 sec/side · release anterior shoulder",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Spine & Core Reset",
-      exercises: [{
-        name: "Thoracic Cat-Cow",
-        detail: "10 slow reps · breathe into each position",
-        badge: "MOB"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths · parasympathetic reset",
-        badge: "MOB"
-      }]
-    }]
-  },
-  mon: {
-    duration: "10–12 min",
-    phases: [{
-      label: "Hip & Spine Decompression",
-      exercises: [{
-        name: "Hip 90/90 Stretch",
-        detail: "60 sec/side · release hip flexors and rotators",
-        badge: "MOB"
-      }, {
-        name: "Thoracic Extension over Roller",
-        detail: "10 reps · counter the spinal loading",
-        badge: "MOB"
-      }, {
-        name: "Lat Stretch (Bar Hang)",
-        detail: "2×30 sec · decompress lumbar from heavy pulls",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Glute & Hamstring Flush",
-      exercises: [{
-        name: "SL Glute Bridge",
-        detail: "1×10/side · light pump to flush glutes",
-        badge: "ACT"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths · CNS downregulation",
-        badge: "MOB"
-      }]
-    }]
-  },
-  tue: {
-    duration: "8–10 min",
-    phases: [{
-      label: "Shoulder & Chest Release",
-      exercises: [{
-        name: "Pec Minor Doorway Stretch",
-        detail: "60 sec/side · essential after heavy pressing",
-        badge: "MOB"
-      }, {
-        name: "Dead Hangs (passive → active)",
-        detail: "2×30 sec · traction for shoulder joint",
-        badge: "MOB"
-      }, {
-        name: "Wall Angels",
-        detail: "2×10 slow · restore scapular position",
-        badge: "ACT"
-      }]
-    }, {
-      label: "Thoracic Reset",
-      exercises: [{
-        name: "Thoracic Extension over Roller",
-        detail: "10 reps · undo press-induced thoracic flexion",
-        badge: "MOB"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths",
-        badge: "MOB"
-      }]
-    }]
-  },
-  wed: {
-    duration: "8–10 min",
-    phases: [{
-      label: "Lat & Back Release",
-      exercises: [{
-        name: "Lat Stretch (Bar Hang)",
-        detail: "2×45 sec · release lats after heavy pulling",
-        badge: "MOB"
-      }, {
-        name: "Thoracic Rotation (Kneeling)",
-        detail: "8/side · restore rotation post-row fatigue",
-        badge: "MOB"
-      }, {
-        name: "Thoracic Cat-Cow",
-        detail: "10 reps",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Shoulder Health",
-      exercises: [{
-        name: "Dead Hangs (passive → active)",
-        detail: "2×30 sec",
-        badge: "MOB"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths",
-        badge: "MOB"
-      }]
-    }]
-  },
-  thu: {
-    duration: "10–12 min",
-    phases: [{
-      label: "Hip & Quad Release",
-      exercises: [{
-        name: "Hip 90/90 Stretch",
-        detail: "60 sec/side",
-        badge: "MOB"
-      }, {
-        name: "Hip Flexor Couch Stretch",
-        detail: "60 sec/side · essential after volume leg work",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Posterior Chain Flush",
-      exercises: [{
-        name: "Thoracic Extension over Roller",
-        detail: "10 reps",
-        badge: "MOB"
-      }, {
-        name: "Lat Stretch (Bar Hang)",
-        detail: "30 sec · decompress from deadlift hinge pattern",
-        badge: "MOB"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths · lower cortisol",
-        badge: "MOB"
-      }]
-    }]
-  },
-  fri: {
-    duration: "10–12 min",
-    phases: [{
-      label: "Hip & Quad Release",
-      exercises: [{
-        name: "Hip 90/90 Stretch",
-        detail: "60 sec/side",
-        badge: "MOB"
-      }, {
-        name: "Hip Flexor Couch Stretch",
-        detail: "60 sec/side · essential after volume leg work",
-        badge: "MOB"
-      }]
-    }, {
-      label: "Posterior Chain Flush",
-      exercises: [{
-        name: "Thoracic Extension over Roller",
-        detail: "10 reps",
-        badge: "MOB"
-      }, {
-        name: "Lat Stretch (Bar Hang)",
-        detail: "30 sec · decompress from deadlift hinge pattern",
-        badge: "MOB"
-      }, {
-        name: "Diaphragmatic Breathing",
-        detail: "10 deep breaths · lower cortisol",
-        badge: "MOB"
-      }]
-    }]
-  }
-};
+// All days now have warmdown sections — DAY_COOLDOWNS kept as empty fallback
+const DAY_COOLDOWNS = {};
 function computeEstimatedTime(day) {
+  // Warmup duration — handles "12–15 min" and "12 min"
   const warmupMatch = day.warmup?.duration?.match(/(\d+)[–\-](\d+)/);
-  const warmupMin = warmupMatch ? (parseInt(warmupMatch[1]) + parseInt(warmupMatch[2])) / 2 : 10;
+  const warmupSingle = day.warmup?.duration?.match(/^(\d+)\s*min/);
+  const warmupMin = warmupMatch ? (parseInt(warmupMatch[1]) + parseInt(warmupMatch[2])) / 2 : warmupSingle ? parseInt(warmupSingle[1]) : 10;
+  // Warmdown duration — replaces legacy DAY_COOLDOWNS for days that have warmdown
+  const warmdownMatch = day.warmdown?.duration?.match(/(\d+)[–\-](\d+)/);
+  const warmdownSingle = day.warmdown?.duration?.match(/^(\d+)\s*min/);
+  const warmdownMin = warmdownMatch ? (parseInt(warmdownMatch[1]) + parseInt(warmdownMatch[2])) / 2 : warmdownSingle ? parseInt(warmdownSingle[1]) : 0;
+  // Legacy cooldown fallback only for days without a warmdown
   const cooldownData = DAY_COOLDOWNS[day.id];
   const cooldownMatch = cooldownData?.duration?.match(/(\d+)[–\-](\d+)/);
-  const cooldownMin = cooldownMatch ? (parseInt(cooldownMatch[1]) + parseInt(cooldownMatch[2])) / 2 : 10;
+  const cooldownMin = !day.warmdown && cooldownMatch ? (parseInt(cooldownMatch[1]) + parseInt(cooldownMatch[2])) / 2 : 0;
   let workMin = 0;
   (day.blocks || []).forEach(block => {
     (block.exercises || []).forEach(ex => {
@@ -6200,11 +6417,11 @@ function computeEstimatedTime(day) {
     });
   });
   const transitionMin = (day.blocks || []).length * 1.5;
-  const calcTotal = warmupMin + workMin + transitionMin + cooldownMin;
+  const calcTotal = warmupMin + workMin + transitionMin + warmdownMin + cooldownMin;
   const histAvg = getHistoricalAvgMin(day.id);
   let finalMin = calcTotal;
   if (histAvg != null) {
-    // Fixed weighting: 70% analysis, 30% past workout history
+    // 70% calculated, 30% historical average
     finalMin = calcTotal * 0.7 + histAvg * 0.3;
   }
   const rounded = Math.round(finalMin / 5) * 5;
@@ -6230,6 +6447,7 @@ function DayPage({
   const [started, setStarted] = useState(_cached?.started || false),
     [ended, setEnded] = useState(_cached?.ended || false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [showStartConfirm, setShowStartConfirm] = useState(false);
   const [elapsed, setElapsed] = useState(_cached?.elapsed || 0),
     [finalElapsed, setFinalElapsed] = useState(_cached?.finalElapsed || 0),
     [startTime, setStartTime] = useState(_cached?.startTime || null);
@@ -6238,6 +6456,7 @@ function DayPage({
   const [autoEndShown, setAutoEndShown] = useState(false);
   const [version, setVersion] = useState(0);
   const [warmupDone, setWarmupDone] = useState(false);
+  const [warmdownDone, setWarmdownDone] = useState(false);
   const [cooldownDone, setCooldownDone] = useState(false);
   const cooldownData = DAY_COOLDOWNS[day.id];
   const cooldown = cooldownData ? {
@@ -6422,6 +6641,13 @@ function DayPage({
     sub: day.warmup?.duration || "",
     phases: day.warmup?.phases || []
   };
+  const warmdownData = day.warmdown;
+  const warmdown = warmdownData ? {
+    icon: "🧘",
+    title: "Warm Down",
+    sub: warmdownData.duration || "",
+    phases: warmdownData.phases || []
+  } : null;
   const saved = () => setVersion(v => v + 1);
   function onExerciseDone(exName) {
     // Find next incomplete exercise in flat ordered list
@@ -6542,7 +6768,10 @@ function DayPage({
       color: W.borderHi
     }
   }, next.label, " \u2192")), !started && /*#__PURE__*/React.createElement(TapButton, {
-    onClick: handleStart,
+    onClick: () => {
+      haptic(20);
+      setShowStartConfirm(true);
+    },
     style: {
       width: "100%",
       background: W.cyan,
@@ -6705,7 +6934,26 @@ function DayPage({
     version: version,
     onExerciseDone: onExerciseDone,
     exRefs: exRefs
-  }))), cooldown && ended && /*#__PURE__*/React.createElement("div", {
+  }))), warmdown && /*#__PURE__*/React.createElement("div", {
+    style: {
+      opacity: started && warmdownDone ? 0.35 : 1,
+      transition: "opacity 0.4s"
+    }
+  }, /*#__PURE__*/React.createElement(Block, {
+    block: warmdown,
+    accent: day.accent,
+    onHistory: onHistory,
+    isWarmup: true,
+    isActive: false,
+    onStartRest: startRest,
+    onSaved: saved,
+    bodyweight: bodyweight,
+    fontScale: fontScale,
+    dayId: day.id,
+    version: version,
+    warmupDone: warmdownDone,
+    onWarmupDone: () => setWarmdownDone(d => !d)
+  })), cooldown && ended && /*#__PURE__*/React.createElement("div", {
     style: {
       opacity: cooldownDone ? 0.35 : 1,
       transition: "opacity 0.4s"
@@ -6812,6 +7060,14 @@ function DayPage({
     total: restTotal,
     onDismiss: dismissRest,
     exName: restExName
+  }), showStartConfirm && /*#__PURE__*/React.createElement(StartWorkoutModal, {
+    day: day,
+    estTime: estTime,
+    onConfirm: () => {
+      setShowStartConfirm(false);
+      handleStart();
+    },
+    onCancel: () => setShowStartConfirm(false)
   }), showEndConfirm && /*#__PURE__*/React.createElement(EndWorkoutModal, {
     day: day,
     elapsed: elapsed,
