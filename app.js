@@ -457,7 +457,7 @@ const DAYS = [{
       detail: "3×15",
       badge: "HEALTH"
     }, {
-      name: "Cuban Press (Sunday)",
+      name: "Cuban Press",
       detail: "3×12",
       badge: "HEALTH"
     }]
@@ -1013,12 +1013,24 @@ async function saveSessions() {
     console.error("wt: saveSessions failed", e);
   }
 }
+
+// Canonical name map — aliases merge into primary exercise
+const EX_ALIAS = {
+  "Cuban Press (Sunday)": "Cuban Press",
+  "Band Pull-Aparts (Sunday)": "Band Pull-Aparts"
+};
+function canonicalEx(name) {
+  return EX_ALIAS[name] || name;
+}
 function getEntries(ex) {
-  if (!memStore[ex]) return [];
-  return memStore[ex].filter(e => e && typeof e === "object" && e.date && e.weight != null);
+  const key = canonicalEx(ex);
+  const a = memStore[key] || [];
+  const alias = Object.keys(EX_ALIAS).find(k => EX_ALIAS[k] === key);
+  const b = alias && memStore[alias] ? memStore[alias] : [];
+  return [...a, ...b].filter(e => e && typeof e === "object" && e.date && e.weight != null).sort((x, y) => x.date.localeCompare(y.date));
 }
 function setEntries(ex, arr) {
-  memStore[ex] = [...arr];
+  memStore[canonicalEx(ex)] = [...arr];
   saveEntries();
 }
 function delEntriesByDate(date, dayId = null) {
@@ -1115,8 +1127,31 @@ function playBeep(freq = 880, dur = 0.18, vol = 0.4, type = "sine") {
     setTimeout(() => ctx.close(), 500);
   } catch (e) {}
 }
-function restEndAlert() {
+
+// Request notification permission on first interaction
+async function requestNotifPermission() {
+  if ("Notification" in window && Notification.permission === "default") {
+    try {
+      await Notification.requestPermission();
+    } catch (e) {}
+  }
+}
+function fireRestNotification(exName) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      new Notification("Rest Over — Let's Go! 💪", {
+        body: exName ? `Time for your next set of ${exName}` : "Time for your next set",
+        icon: "/Lifting-App/icon-192.png",
+        badge: "/Lifting-App/icon-192.png",
+        silent: false,
+        tag: "rest-timer"
+      });
+    } catch (e) {}
+  }
+}
+function restEndAlert(exName = "") {
   haptic([60, 40, 60, 40, 120]);
+  fireRestNotification(exName);
   setTimeout(() => playBeep(660, 0.12), 0);
   setTimeout(() => playBeep(780, 0.12), 140);
   setTimeout(() => playBeep(920, 0.22), 280);
@@ -2011,7 +2046,10 @@ function InlineSetLogger({
           haptic([10, 20, 10]);
           return s;
         } // sanity: reject >200 reps
-        haptic(30);
+        const willAllDone = sets.every((s2, idx2) => idx2 === i ? true : s2.done);
+        if (willAllDone && onExerciseDone) {
+          haptic([40, 30, 60, 30, 100]);
+        } else haptic(30);
         const all = getEntries(ex.name);
         all.push({
           date: todayStr(),
@@ -2025,8 +2063,6 @@ function InlineSetLogger({
         all.sort((a, b) => a.date.localeCompare(b.date));
         setEntries(ex.name, all);
         onSaved();
-        // Check if this was the last set — if so, fire onExerciseDone
-        const willAllDone = sets.every((s2, idx2) => idx2 === i ? true : s2.done);
         if (willAllDone && onExerciseDone) onExerciseDone(ex.name);
         const freshAll = getEntries(ex.name);
         const newIdx = freshAll.length - 1;
@@ -2061,8 +2097,25 @@ function InlineSetLogger({
       weight: prefillW > 0 ? String(prefillW) : "",
       reps: String(prefillR(s.length)),
       done: false,
-      id: s.length
+      id: Date.now() + s.length
     }]);
+  }
+  function removeSet(i) {
+    if (sets[i].done) {
+      // un-log from storage first
+      const todayS = todayStr();
+      const w = parseFloat(sets[i].weight);
+      const safeW = isNaN(w) ? 0 : w;
+      const r = parseInt(sets[i].reps) || defaultReps;
+      const loggedW = isBW ? bodyweight ? bodyweight + safeW : safeW : safeW;
+      const all = getEntries(ex.name);
+      const matchIdx = all.map((_, idx) => idx).reverse().find(idx => all[idx].date === todayS && (all[idx].dayId === dayId || !all[idx].dayId) && all[idx].reps === r && all[idx].weight === loggedW);
+      if (matchIdx !== undefined) all.splice(matchIdx, 1);
+      setEntries(ex.name, all);
+      onSaved();
+    }
+    setSets(s => s.filter((_, idx) => idx !== i));
+    haptic(20);
   }
   function updateSet(i, field, val) {
     setSets(s => s.map((x, idx) => idx === i ? {
@@ -2148,7 +2201,7 @@ function InlineSetLogger({
   }, "(", sug.inc, ")"))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "28px 1fr 1fr 44px",
+      gridTemplateColumns: "28px 1fr 1fr 44px 28px",
       gap: 6,
       marginBottom: 8,
       padding: "0 2px"
@@ -2180,7 +2233,7 @@ function InlineSetLogger({
       textAlign: "center",
       letterSpacing: "0.1em"
     }
-  }, "Reps"), /*#__PURE__*/React.createElement("span", null)), sets.map((s, i) => {
+  }, "Reps"), /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", null)), sets.map((s, i) => {
     const prev = prevSets[i] || null;
     const prevW = prev ? isBW ? Math.max(0, prev.weight - (bodyweight || 0)) : prev.weight : null;
     const prevR = prev ? prev.reps : null;
@@ -2219,7 +2272,7 @@ function InlineSetLogger({
     }, "PR \u2605")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
-        gridTemplateColumns: "28px 1fr 1fr 44px",
+        gridTemplateColumns: "28px 1fr 1fr 44px 28px",
         gap: 6,
         alignItems: "center",
         opacity: s.done ? 0.30 : 1,
@@ -2270,7 +2323,23 @@ function InlineSetLogger({
     })), /*#__PURE__*/React.createElement(SetToggleButton, {
       done: s.done,
       onToggle: () => toggleSet(i)
-    })));
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => removeSet(i),
+      style: {
+        height: 28,
+        width: 28,
+        borderRadius: 6,
+        border: "1px solid rgba(255,71,87,0.2)",
+        background: "rgba(255,71,87,0.06)",
+        color: W.red,
+        fontSize: 11,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        padding: 0
+      }
+    }, "\u2715")));
   }), doneCount > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8,
@@ -2366,6 +2435,9 @@ function HistoryModal({
   onSaved
 }) {
   const [version, setVersion] = useState(0);
+  const [editIdx, setEditIdx] = useState(null);
+  const [editW, setEditW] = useState("");
+  const [editR, setEditR] = useState("");
   const entries = getEntries(exName);
   const sug = entries.length ? getOverloadSug(entries, exName) : null;
   function del(idx) {
@@ -2374,6 +2446,27 @@ function HistoryModal({
     setEntries(exName, all);
     setVersion(v => v + 1);
     onSaved();
+  }
+  function startEdit(idx, e) {
+    setEditIdx(idx);
+    setEditW(String(e.weight));
+    setEditR(String(e.reps));
+  }
+  function saveEdit(idx) {
+    const all = getEntries(exName);
+    const w = parseFloat(editW),
+      r = parseInt(editR);
+    if (!isNaN(w) && !isNaN(r) && r > 0) {
+      all[idx] = {
+        ...all[idx],
+        weight: w,
+        reps: r
+      };
+      setEntries(exName, all);
+      onSaved();
+    }
+    setEditIdx(null);
+    setVersion(v => v + 1);
   }
   return /*#__PURE__*/React.createElement("div", {
     onClick: e => e.target === e.currentTarget && onClose(),
@@ -2507,15 +2600,93 @@ function HistoryModal({
   }, "No entries yet") : [...entries].reverse().map((e, i) => {
     const ri = entries.length - 1 - i,
       pr = !e.bodyweight && isPR(entries, ri);
+    const isEditing = editIdx === ri;
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
         padding: "11px 0",
         borderBottom: `1px solid ${W.border}`,
         animation: `setRowIn 0.18s ease ${i * 0.03}s both`
+      }
+    }, isEditing ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        fontFamily: "'DM Mono',monospace",
+        color: W.textDim,
+        width: 44,
+        flexShrink: 0
+      }
+    }, fmtDate(e.date)), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      value: editW,
+      onChange: ev => setEditW(ev.target.value),
+      style: {
+        width: 68,
+        background: W.surfaceHi,
+        border: `1px solid ${W.cyan}`,
+        borderRadius: 6,
+        color: W.text,
+        fontFamily: "'DM Mono',monospace",
+        fontSize: 16,
+        padding: "6px 8px",
+        outline: "none",
+        textAlign: "center"
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: W.textDim,
+        fontSize: 11
+      }
+    }, "\xD7"), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      value: editR,
+      onChange: ev => setEditR(ev.target.value),
+      style: {
+        width: 52,
+        background: W.surfaceHi,
+        border: `1px solid ${W.cyan}`,
+        borderRadius: 6,
+        color: W.text,
+        fontFamily: "'DM Mono',monospace",
+        fontSize: 16,
+        padding: "6px 8px",
+        outline: "none",
+        textAlign: "center"
+      }
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => saveEdit(ri),
+      style: {
+        background: W.cyan,
+        border: "none",
+        borderRadius: 6,
+        color: W.bg,
+        fontSize: 11,
+        padding: "6px 12px",
+        fontWeight: 700,
+        flexShrink: 0
+      }
+    }, "Save"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setEditIdx(null),
+      style: {
+        background: "transparent",
+        border: `1px solid ${W.border}`,
+        borderRadius: 6,
+        color: W.textDim,
+        fontSize: 11,
+        padding: "6px 10px",
+        flexShrink: 0
+      }
+    }, "\u2715")) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -2552,6 +2723,21 @@ function HistoryModal({
         fontFamily: "'DM Mono',monospace"
       }
     }, "~", calc1RM(e.weight, e.reps)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => startEdit(ri, e),
+      style: {
+        background: "rgba(0,201,177,0.08)",
+        border: `1px solid rgba(0,201,177,0.15)`,
+        borderRadius: 6,
+        color: W.cyan,
+        fontSize: 11,
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0
+      }
+    }, "\u270E"), /*#__PURE__*/React.createElement("button", {
       onClick: () => del(ri),
       style: {
         background: "rgba(255,71,87,0.08)",
@@ -2566,7 +2752,7 @@ function HistoryModal({
         justifyContent: "center",
         flexShrink: 0
       }
-    }, "\u2715"));
+    }, "\u2715")));
   }))));
 }
 
@@ -3510,6 +3696,27 @@ function DonutChart({
       i = arc(innerR, startA, endA);
     return `M${o.x1},${o.y1} A${outerR},${outerR},0,${o.large},1,${o.x2},${o.y2} L${i.x2},${i.y2} A${innerR},${innerR},0,${i.large},0,${i.x1},${i.y1} Z`;
   }
+  // Build label positions with collision avoidance
+  const MIN_SWEEP = 0.25; // hide label if slice too small
+  const labelSegs = segments.filter(seg => seg.sweep >= MIN_SWEEP);
+  // Sort by angle, then spread if too close
+  labelSegs.sort((a, b) => a.startA + a.sweep / 2 - (b.startA + b.sweep / 2));
+  const labelAngles = labelSegs.map(seg => ({
+    seg,
+    angle: seg.startA + seg.sweep / 2
+  }));
+  // Nudge overlapping labels apart
+  const MIN_ANGLE_GAP = 0.45;
+  for (let pass = 0; pass < 3; pass++) {
+    for (let i = 1; i < labelAngles.length; i++) {
+      const diff = labelAngles[i].angle - labelAngles[i - 1].angle;
+      if (diff < MIN_ANGLE_GAP) {
+        const nudge = (MIN_ANGLE_GAP - diff) / 2;
+        labelAngles[i - 1].angle -= nudge;
+        labelAngles[i].angle += nudge;
+      }
+    }
+  }
   return /*#__PURE__*/React.createElement("svg", {
     width: size,
     height: size,
@@ -3527,16 +3734,26 @@ function DonutChart({
     strokeWidth: outerR - innerR
   }), segments.map(seg => {
     if (seg.sweep < 0.015) return null;
-    const color = DONUT_COLORS[seg.g] || GROUP_COLORS[seg.g],
-      midA = seg.startA + seg.sweep / 2,
-      pct = Math.round(seg.frac * 100);
+    const color = DONUT_COLORS[seg.g] || GROUP_COLORS[seg.g];
+    const pct = Math.round(seg.frac * 100);
+    const labelInfo = labelAngles.find(l => l.seg === seg);
+    if (!labelInfo) return /*#__PURE__*/React.createElement("g", {
+      key: seg.g
+    }, /*#__PURE__*/React.createElement("path", {
+      d: slicePath(seg),
+      fill: color,
+      fillOpacity: 0.9,
+      stroke: W.bg,
+      strokeWidth: 2
+    }));
+    const midA = labelInfo.angle;
     const lineR1 = outerR + 4,
-      lineR2 = outerR + 14 + pct * 0.4;
-    const lx1 = cx + lineR1 * Math.cos(midA),
-      ly1 = cy + lineR1 * Math.sin(midA),
-      lx2 = cx + lineR2 * Math.cos(midA),
+      lineR2 = outerR + 16;
+    const lx1 = cx + lineR1 * Math.cos(seg.startA + seg.sweep / 2),
+      ly1 = cy + lineR1 * Math.sin(seg.startA + seg.sweep / 2);
+    const lx2 = cx + lineR2 * Math.cos(midA),
       ly2 = cy + lineR2 * Math.sin(midA);
-    const anchor = Math.cos(midA) > 0.15 ? "start" : Math.cos(midA) < -0.15 ? "end" : "middle";
+    const anchor = Math.cos(midA) > 0.1 ? "start" : Math.cos(midA) < -0.1 ? "end" : "middle";
     const tx = cx + (lineR2 + 4) * Math.cos(midA),
       ty = cy + (lineR2 + 4) * Math.sin(midA);
     return /*#__PURE__*/React.createElement("g", {
@@ -3997,7 +4214,7 @@ function ProgressView({
 
 // ── NAV DOT ───────────────────────────────────────────────────────────────────
 const NAV_CONTENT_H = 64; // fixed content area, dots always live here
-const NAV_DOT_CY = 30; // vertical center of dots within content area
+const NAV_DOT_CY = 26; // vertical center of dots: (64 - (24+5+8))/2 + 12 = 25.5 ≈ 26
 
 function NavDot({
   day,
@@ -4235,16 +4452,17 @@ function BottomNav({
       y1: NAV_DOT_CY,
       x2: `${x2pct}%`,
       y2: NAV_DOT_CY,
-      stroke: "rgba(255,255,255,0.08)",
-      strokeWidth: "2",
-      strokeLinecap: "round"
+      stroke: "rgba(255,255,255,0.12)",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeDasharray: "3 3"
     }), colored && /*#__PURE__*/React.createElement("line", {
       x1: `${x1pct}%`,
       y1: NAV_DOT_CY,
       x2: `${x2pct}%`,
       y2: NAV_DOT_CY,
       stroke: `url(#seg-${i})`,
-      strokeWidth: "3",
+      strokeWidth: "1.5",
       strokeLinecap: "round",
       filter: isLeading ? "url(#line-glow)" : undefined
     }));
@@ -5194,6 +5412,74 @@ function HomePage({
   })));
 }
 
+// ── EXERCISE DESCRIPTIONS ─────────────────────────────────────────────────────
+const EX_DESC = {
+  "BB Back Squat": "Barbell on upper traps, feet shoulder-width. Brace core, sit back and down keeping chest up. Drive through heels to lockout. King of lower body strength.",
+  "Trap Bar Deadlift": "Stand inside hex bar, hinge at hips, grip handles. Keep back flat, push floor away. Less spinal stress than straight bar — great for strength and power.",
+  "BB Split Squat": "Rear foot elevated or on floor. Front shin near-vertical, lower rear knee toward ground. Builds unilateral leg strength and hip mobility simultaneously.",
+  "Bulgarian Split Squat": "Rear foot elevated on bench. Lower hips straight down, front knee tracks over toe. Brutal quad/glute builder with high balance demand.",
+  "RDL": "Hinge at hips with soft knee bend, bar stays close to legs. Feel hamstring stretch at bottom, drive hips forward to lockout. Posterior chain king.",
+  "Barbell Zercher Curls": "Bar held in elbow crooks, curl up. Unique loading angle hits brachialis and grip. Keep elbows tucked.",
+  "BB Bench Press": "Arch back slightly, retract scapula, bar path from lower chest. Leg drive into floor. Primary horizontal push for chest/triceps/anterior delt.",
+  "DB Incline Bench Press": "30–45° incline. Dumbbells allow greater ROM than barbell. Targets upper chest and anterior delts with natural wrist rotation.",
+  "DB Incline Bench": "Same as DB Incline Bench Press. Moderate incline targets upper chest with full range of motion.",
+  "DB Lateral Raises": "Slight forward lean, raise to shoulder height with pinky slightly higher. Isolates medial delt. Keep weight light and strict.",
+  "Cable Y Raises": "Cable at low pulley, raise arms in Y shape above head. Targets lower trap and serratus — critical for shoulder health and scapular upward rotation.",
+  "Straight Bar Pulldown": "Overhand grip slightly wider than shoulders. Pull bar to upper chest, elbows drive down and back. Lat isolation with continuous tension.",
+  "Overhead DB Tricep Extension": "Keep elbows pointed forward, lower dumbbell behind head. Full stretch at bottom builds long head of tricep.",
+  "SA DB Shoulder Press": "Single arm press builds unilateral stability and reduces shoulder imbalances. Core braces hard to prevent lateral lean.",
+  "Pull-Ups": "Dead hang start. Drive elbows to hips, chin over bar. Best bodyweight lat builder. Add weight when reps exceed 10 consistently.",
+  "SA DB Row": "Brace on bench, row dumbbell to hip keeping elbow close. Full stretch at bottom. Best unilateral back thickness builder.",
+  "Chest Supported Row": "Lie prone on incline bench, row handles to chest. Removes lower back from the equation — pure upper back stimulus.",
+  "Incline Dumbbell Curl": "On incline bench, full stretch at bottom. Stretches long head of bicep under load for superior development.",
+  "Hammer Curl": "Neutral grip curl. Targets brachialis (under bicep) and brachioradialis. Adds arm thickness and grip strength.",
+  "Lat Pulldown": "Wide or shoulder-width grip. Pull bar to upper chest, lean back slightly. Builds lat width. Good precursor or alternative to pull-ups.",
+  "BB Row": "Hinged at hips, overhand grip. Row bar to lower chest/navel. Builds mid-back thickness. Maintain flat back throughout.",
+  "Copenhagen Plank": "Side plank with top foot on bench. Demand on adductors and obliques. Critical for hip/groin injury prevention.",
+  "V-Ups": "Simultaneously raise legs and torso, touch toes at top. Full rectus abdominis contraction. Control the descent.",
+  "Hanging Leg Raises": "Dead hang, raise legs to 90° or higher. Hip flexors and lower abs. Avoid swinging — use controlled movement.",
+  "Suitcase Carry": "Heavy dumbbell/KB in one hand, walk tall. Anti-lateral-flexion core challenge. Also builds grip and traps.",
+  "Cuban Press": "External rotation + overhead press combo. Heats up the rotator cuff and promotes shoulder external rotation. Use light weight.",
+  "Cuban Press (Sunday)": "External rotation + overhead press combo. Heats up the rotator cuff and promotes shoulder external rotation. Use light weight.",
+  "Rear Delt Cable Fly": "Cable at head height, fly across body. Isolates posterior delt and horizontal abductors. Essential for shoulder balance.",
+  "Rack Hip CARs": "Controlled articular rotations of the hip at a rack. Full active hip mobility in all planes. Daily movement hygiene.",
+  "Band Pull-Aparts": "Straight arms, pull band to chest width apart. Activates lower trap, rhomboids, and posterior delts. Counters internal rotation from pressing.",
+  "Band Pull-Aparts (overhand)": "Same as band pull-aparts with palms down. Targets more posterior delt.",
+  "Band Pull-Aparts (Sunday)": "Same as band pull-aparts. Shoulder health staple before Sunday pressing.",
+  "Side-Lying External Rotation (DB)": "Lying on side, elbow at 90°, rotate DB upward. Directly strengthens infraspinatus/teres minor. Protect your rotator cuff.",
+  "Scapular Wall Slides": "Back flat to wall, slide arms overhead maintaining contact. Trains serratus anterior and scapular upward rotation.",
+  "Light Cable External Rotation": "Cable at elbow height, rotate arm outward. Rotator cuff endurance work. Keep sets high, weight low.",
+  "Wall Angels": "Like snow angels against a wall. Full contact required. Diagnoses and improves thoracic mobility and scapular control.",
+  "Elevated Band Hip Flexor/Glute": "Band above knees, drive hips forward or backward to target glutes and hip flexors. High rep activation work.",
+  "Force Plate CMJ": "Counter-movement jump on force plate. Measures CNS readiness/power output. Jump for maximum height — diagnostic tool.",
+  "Hang Clean": "Pull bar from hang position at hip crease, triple-extend (ankles/knees/hips), catch in front rack. Full-body power development.",
+  "MB Slam → MB Lateral Toss": "Overhead slam into lateral rotation throw. Combines anti-rotation core work with explosive extension. CNS primer.",
+  "Snap Down → Split Squat Jump": "Drop into athletic stance then immediately jump into split squat landing. Trains reactive strength and landing mechanics.",
+  "MB Slam x3 (easy)": "Overhead to ground slam at moderate effort. Warms up full extension pattern and activates lat/core without taxing CNS.",
+  "Snap Down x3 (sub-max)": "Drop to athletic stance — reactive deceleration drill. Primes nervous system without maximal effort.",
+  "Box Drop → Stick Landing": "Step off box, land and hold. Eccentric load + balance. Trains ground reaction force absorption.",
+  "Hip 90/90 Stretch": "Sit with both hips at 90°. Work front hip into external rotation and back hip into internal rotation. Fundamental hip mobility.",
+  "Ankle Circles + Dorsiflexion Wall Drill": "Loosen ankle joint and improve dorsiflexion ROM. Critical for squat depth and knee tracking.",
+  "Thoracic Extension over Roller": "Extend over foam roller segment by segment. Restores thoracic extension lost from sitting. Do slowly.",
+  "Pec Minor Doorway Stretch": "Arm at 90° in doorframe, step through to stretch pec minor. Relieves anterior shoulder tightness from pressing.",
+  "Thoracic Rotation (Kneeling)": "Kneeling on floor, rotate thoracic spine with hand behind head. Builds rotational mobility without lumbar compensation.",
+  "Thoracic Cat-Cow": "On hands/knees, flex and extend entire spine with breath. Warms up spine and connects breathing to movement.",
+  "Diaphragmatic Breathing": "Breathe into belly and lower ribs. Activates parasympathetic system and sets proper IAP (intra-abdominal pressure) for lifting.",
+  "World's Greatest Stretch": "Lunge + reach + rotation. Hits hip flexor, hamstring, T-spine, and shoulder simultaneously. Most bang-for-buck mobility drill.",
+  "Shoulder CARs": "Controlled articular rotation of shoulder. Takes joint through full active range. Lubricates joint and identifies restrictions.",
+  "Lat Stretch (Bar Hang)": "Hang from bar with light grip, let lats lengthen. Decompresses spine and stretches tight lats from pulling.",
+  "Dead Hangs (passive → active)": "Start with passive hang (relax), progress to active (pack shoulder, engage lats). Builds shoulder integrity.",
+  "Scapular Pull-Ups": "Hanging, depress and retract scapula without bending elbow. Activates lower trap before pull work.",
+  "Glute Bridge Hold": "Supine, drive hips up and hold. Activates glutes without loading spine. Great pre-squat primer.",
+  "Glute Bridge + ISO Hold": "Bodyweight bridge with isometric holds. Builds mind-muscle connection to glutes before heavy loading.",
+  "Band Clamshells": "Side-lying, resist band opening top knee. Gluteus medius activation — prevents knee valgus in squats.",
+  "Bodyweight Squat to Box": "Sit to box and stand. Teaches squat pattern, depth, and control without load.",
+  "Nordic Hamstring Curl ISO": "Kneeling, anchor feet, isometrically resist forward fall. Eccentric hamstring strength — among the best injury prevention exercises.",
+  "SL Glute Bridge": "Single leg bridge. Challenges glute unilaterally and exposes left-right asymmetries.",
+  "Empty Bar Bench Press": "Bar only, high reps. Greases the groove for bench mechanics. Warms shoulder and elbow joints before loading.",
+  "50–60% Bench Press": "Working warmup set. Bridges from empty bar to working weight. Sets lat engagement and bar path."
+};
+
 // ── EXERCISE ROW ──────────────────────────────────────────────────────────────
 function ExRow({
   ex,
@@ -5214,6 +5500,8 @@ function ExRow({
   const entries = getEntries(ex.name);
   const isBW = BODYWEIGHT_EX.has(ex.name);
   const [showInline, setShowInline] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
+  const desc = EX_DESC[ex.name];
   useEffect(() => {
     if (isActive && isWorking) setShowInline(true);
   }, [isActive]);
@@ -5250,19 +5538,50 @@ function ExRow({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
       fontSize: F?.body || 13,
       fontWeight: 600,
       color: W.text,
       lineHeight: 1.3
     }
-  }, ex.name), /*#__PURE__*/React.createElement("div", {
+  }, ex.name), desc && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDesc(d => !d),
+    style: {
+      background: "transparent",
+      border: "none",
+      color: showDesc ? W.cyan : W.textDim,
+      fontSize: 12,
+      padding: "2px 4px",
+      flexShrink: 0,
+      lineHeight: 1,
+      borderRadius: 4
+    }
+  }, "\u24D8")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: F?.label || 10,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
       marginTop: 2
     }
-  }, ex.detail), (() => {
+  }, ex.detail), showDesc && desc && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: W.textMid,
+      fontFamily: "'DM Mono',monospace",
+      marginTop: 6,
+      lineHeight: 1.6,
+      padding: "8px 10px",
+      background: W.surface,
+      borderRadius: 6,
+      border: `1px solid ${W.border}`,
+      animation: "fadeIn 0.15s ease both"
+    }
+  }, desc), (() => {
     const ents = getEntries(ex.name);
     if (!ents.length) return isWorking ? /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5373,6 +5692,41 @@ function Block({
 }) {
   const [open, setOpen] = useState(() => isWarmup ? true : getBlockOpen(dayId, block.title));
   const [tapClass, triggerTap] = useTap();
+  const [warmupTimerSecs, setWarmupTimerSecs] = useState(null); // null=not started
+  const [warmupTimerTotal, setWarmupTimerTotal] = useState(0);
+  const warmupTimerRef = useRef(null);
+  const warmupEndRef = useRef(null);
+  function startWarmupTimer() {
+    if (warmupTimerRef.current) clearInterval(warmupTimerRef.current);
+    const match = block.sub?.match(/(\d+)[–\-](\d+)/);
+    const mins = match ? (parseInt(match[1]) + parseInt(match[2])) / 2 : 10;
+    const totalSecs = Math.round(mins * 60);
+    const endAt = Date.now() + totalSecs * 1000;
+    warmupEndRef.current = endAt;
+    setWarmupTimerTotal(totalSecs);
+    setWarmupTimerSecs(totalSecs);
+    warmupTimerRef.current = setInterval(() => {
+      const rem = Math.max(0, Math.round((warmupEndRef.current - Date.now()) / 1000));
+      setWarmupTimerSecs(rem);
+      if (rem <= 0) {
+        clearInterval(warmupTimerRef.current);
+        haptic([40, 30, 80]);
+      }
+    }, 500);
+  }
+  function stopWarmupTimer() {
+    if (warmupTimerRef.current) clearInterval(warmupTimerRef.current);
+    setWarmupTimerSecs(null);
+  }
+  useEffect(() => () => {
+    if (warmupTimerRef.current) clearInterval(warmupTimerRef.current);
+  }, []);
+  function fmtWarmup(s) {
+    const m = Math.floor(s / 60),
+      sec = s % 60;
+    return `${m}:${String(sec).padStart(2, "0")}`;
+  }
+  const warmupPct = warmupTimerTotal > 0 && warmupTimerSecs != null ? warmupTimerSecs / warmupTimerTotal : 1;
   const todayS = todayStr();
   const blockComplete = !isWarmup && isActive && (block.exercises || []).length > 0 && (block.exercises || []).every(ex => {
     const parsed = parseDetail(ex.detail);
@@ -5491,7 +5845,77 @@ function Block({
       flexShrink: 0,
       letterSpacing: "0.05em"
     }
-  }, warmupDone ? "✓ Done" : "Mark Done"), /*#__PURE__*/React.createElement("span", {
+  }, warmupDone ? "✓ Done" : "Mark Done"), isWarmup && (warmupTimerSecs != null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: 28,
+    height: 28,
+    style: {
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: 14,
+    cy: 14,
+    r: 11,
+    fill: "none",
+    stroke: "rgba(255,255,255,0.08)",
+    strokeWidth: 2.5
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: 14,
+    cy: 14,
+    r: 11,
+    fill: "none",
+    stroke: warmupTimerSecs === 0 ? W.cyan : accent,
+    strokeWidth: 2.5,
+    strokeDasharray: `${69.1 * warmupPct} 69.1`,
+    strokeLinecap: "round",
+    transform: "rotate(-90 14 14)",
+    style: {
+      transition: "stroke-dasharray 0.5s linear"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontFamily: "'DM Mono',monospace",
+      color: warmupTimerSecs === 0 ? W.cyan : W.text,
+      fontWeight: 700,
+      minWidth: 36
+    }
+  }, fmtWarmup(warmupTimerSecs)), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      stopWarmupTimer();
+    },
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      padding: "4px 8px",
+      borderRadius: 6,
+      border: `1px solid ${W.border}`,
+      background: "transparent",
+      color: W.textDim
+    }
+  }, "\u2715")) : /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      startWarmupTimer();
+    },
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      padding: "4px 10px",
+      borderRadius: 6,
+      border: `1px solid ${W.border}`,
+      background: "transparent",
+      color: W.textDim,
+      flexShrink: 0,
+      letterSpacing: "0.05em"
+    }
+  }, "\u23F1 Start")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 8,
       color: W.textDim,
@@ -5579,9 +6003,191 @@ function getHistoricalAvgMin(dayId) {
   const recent = durations.slice(0, 5);
   return recent.reduce((a, b) => a + b, 0) / recent.length;
 }
+// ── COOLDOWN DATA ─────────────────────────────────────────────────────────────
+const DAY_COOLDOWNS = {
+  sun: {
+    duration: "8–10 min",
+    phases: [{
+      label: "Shoulder Decompression",
+      exercises: [{
+        name: "Dead Hangs (passive → active)",
+        detail: "2×30 sec · decompress shoulder joint",
+        badge: "MOB"
+      }, {
+        name: "Pec Minor Doorway Stretch",
+        detail: "45 sec/side · release anterior shoulder",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Spine & Core Reset",
+      exercises: [{
+        name: "Thoracic Cat-Cow",
+        detail: "10 slow reps · breathe into each position",
+        badge: "MOB"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths · parasympathetic reset",
+        badge: "MOB"
+      }]
+    }]
+  },
+  mon: {
+    duration: "10–12 min",
+    phases: [{
+      label: "Hip & Spine Decompression",
+      exercises: [{
+        name: "Hip 90/90 Stretch",
+        detail: "60 sec/side · release hip flexors and rotators",
+        badge: "MOB"
+      }, {
+        name: "Thoracic Extension over Roller",
+        detail: "10 reps · counter the spinal loading",
+        badge: "MOB"
+      }, {
+        name: "Lat Stretch (Bar Hang)",
+        detail: "2×30 sec · decompress lumbar from heavy pulls",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Glute & Hamstring Flush",
+      exercises: [{
+        name: "SL Glute Bridge",
+        detail: "1×10/side · light pump to flush glutes",
+        badge: "ACT"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths · CNS downregulation",
+        badge: "MOB"
+      }]
+    }]
+  },
+  tue: {
+    duration: "8–10 min",
+    phases: [{
+      label: "Shoulder & Chest Release",
+      exercises: [{
+        name: "Pec Minor Doorway Stretch",
+        detail: "60 sec/side · essential after heavy pressing",
+        badge: "MOB"
+      }, {
+        name: "Dead Hangs (passive → active)",
+        detail: "2×30 sec · traction for shoulder joint",
+        badge: "MOB"
+      }, {
+        name: "Wall Angels",
+        detail: "2×10 slow · restore scapular position",
+        badge: "ACT"
+      }]
+    }, {
+      label: "Thoracic Reset",
+      exercises: [{
+        name: "Thoracic Extension over Roller",
+        detail: "10 reps · undo press-induced thoracic flexion",
+        badge: "MOB"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths",
+        badge: "MOB"
+      }]
+    }]
+  },
+  wed: {
+    duration: "8–10 min",
+    phases: [{
+      label: "Lat & Back Release",
+      exercises: [{
+        name: "Lat Stretch (Bar Hang)",
+        detail: "2×45 sec · release lats after heavy pulling",
+        badge: "MOB"
+      }, {
+        name: "Thoracic Rotation (Kneeling)",
+        detail: "8/side · restore rotation post-row fatigue",
+        badge: "MOB"
+      }, {
+        name: "Thoracic Cat-Cow",
+        detail: "10 reps",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Shoulder Health",
+      exercises: [{
+        name: "Dead Hangs (passive → active)",
+        detail: "2×30 sec",
+        badge: "MOB"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths",
+        badge: "MOB"
+      }]
+    }]
+  },
+  thu: {
+    duration: "10–12 min",
+    phases: [{
+      label: "Hip & Quad Release",
+      exercises: [{
+        name: "Hip 90/90 Stretch",
+        detail: "60 sec/side",
+        badge: "MOB"
+      }, {
+        name: "Hip Flexor Couch Stretch",
+        detail: "60 sec/side · essential after volume leg work",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Posterior Chain Flush",
+      exercises: [{
+        name: "Thoracic Extension over Roller",
+        detail: "10 reps",
+        badge: "MOB"
+      }, {
+        name: "Lat Stretch (Bar Hang)",
+        detail: "30 sec · decompress from deadlift hinge pattern",
+        badge: "MOB"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths · lower cortisol",
+        badge: "MOB"
+      }]
+    }]
+  },
+  fri: {
+    duration: "10–12 min",
+    phases: [{
+      label: "Hip & Quad Release",
+      exercises: [{
+        name: "Hip 90/90 Stretch",
+        detail: "60 sec/side",
+        badge: "MOB"
+      }, {
+        name: "Hip Flexor Couch Stretch",
+        detail: "60 sec/side · essential after volume leg work",
+        badge: "MOB"
+      }]
+    }, {
+      label: "Posterior Chain Flush",
+      exercises: [{
+        name: "Thoracic Extension over Roller",
+        detail: "10 reps",
+        badge: "MOB"
+      }, {
+        name: "Lat Stretch (Bar Hang)",
+        detail: "30 sec · decompress from deadlift hinge pattern",
+        badge: "MOB"
+      }, {
+        name: "Diaphragmatic Breathing",
+        detail: "10 deep breaths · lower cortisol",
+        badge: "MOB"
+      }]
+    }]
+  }
+};
 function computeEstimatedTime(day) {
   const warmupMatch = day.warmup?.duration?.match(/(\d+)[–\-](\d+)/);
   const warmupMin = warmupMatch ? (parseInt(warmupMatch[1]) + parseInt(warmupMatch[2])) / 2 : 10;
+  const cooldownData = DAY_COOLDOWNS[day.id];
+  const cooldownMatch = cooldownData?.duration?.match(/(\d+)[–\-](\d+)/);
+  const cooldownMin = cooldownMatch ? (parseInt(cooldownMatch[1]) + parseInt(cooldownMatch[2])) / 2 : 10;
   let workMin = 0;
   (day.blocks || []).forEach(block => {
     (block.exercises || []).forEach(ex => {
@@ -5594,18 +6200,16 @@ function computeEstimatedTime(day) {
     });
   });
   const transitionMin = (day.blocks || []).length * 1.5;
-  const calcTotal = warmupMin + workMin + transitionMin;
+  const calcTotal = warmupMin + workMin + transitionMin + cooldownMin;
   const histAvg = getHistoricalAvgMin(day.id);
   let finalMin = calcTotal;
   if (histAvg != null) {
-    const count = sessionsStore.filter(s => s.dayId === day.id || day.id === "thu" && s.dayId === "fri" || day.id === "fri" && s.dayId === "thu").length;
-    const histWeight = Math.min(count, 5) / 5;
-    finalMin = calcTotal * (1 - histWeight) + histAvg * histWeight;
+    // Fixed weighting: 70% analysis, 30% past workout history
+    finalMin = calcTotal * 0.7 + histAvg * 0.3;
   }
   const rounded = Math.round(finalMin / 5) * 5;
   return `~${rounded} min`;
 }
-
 // ── DAY PAGE ──────────────────────────────────────────────────────────────────
 function DayPage({
   day,
@@ -5631,9 +6235,17 @@ function DayPage({
     [startTime, setStartTime] = useState(_cached?.startTime || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [autoEndShown, setAutoEndShown] = useState(false);
   const [version, setVersion] = useState(0);
   const [warmupDone, setWarmupDone] = useState(false);
-  const [autoEndShown, setAutoEndShown] = useState(false);
+  const [cooldownDone, setCooldownDone] = useState(false);
+  const cooldownData = DAY_COOLDOWNS[day.id];
+  const cooldown = cooldownData ? {
+    icon: "🧘",
+    title: "Cool Down",
+    sub: cooldownData.duration,
+    phases: cooldownData.phases
+  } : null;
   const [restActive, setRestActive] = useState(false);
   const [restSecs, setRestSecs] = useState(90);
   const [restTotal, setRestTotal] = useState(90);
@@ -5648,9 +6260,29 @@ function DayPage({
   }, [next]), useCallback(() => {
     if (prev) setPage(prev.id);
   }, [prev]));
+
+  // Auto-clear ended state at 1am Sunday each week
   useEffect(() => {
-    setEstTime(computeEstimatedTime(day));
-  }, [restVersion, day.id]);
+    if (!ended) return;
+    function checkSundayReset() {
+      const now = new Date();
+      if (now.getDay() === 0 && now.getHours() >= 1) {
+        setStarted(false);
+        setEnded(false);
+        setElapsed(0);
+        setFinalElapsed(0);
+        setStartTime(null);
+        setShowSummary(false);
+        delete workoutStateCache[day.id];
+        try {
+          window.storage.delete('wt_wstate_' + day.id);
+        } catch (e) {}
+      }
+    }
+    checkSundayReset();
+    const id = setInterval(checkSundayReset, 60000);
+    return () => clearInterval(id);
+  }, [ended, day.id]);
   useEffect(() => {
     saveWorkoutState(day.id, {
       started,
@@ -5665,31 +6297,63 @@ function DayPage({
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
     return () => clearInterval(id);
   }, [started, ended, startTime]);
+  const restEndRef = useRef(null); // timestamp when rest ends
+
   function startRest(exName, duration) {
     if (restRef.current) clearInterval(restRef.current);
+    requestNotifPermission();
+    const endAt = Date.now() + duration * 1000;
+    restEndRef.current = endAt;
     setRestSecs(duration);
     setRestTotal(duration);
     setRestActive(true);
     setRestExName(exName);
-    restRef.current = setInterval(() => {
-      setRestSecs(s => {
-        if (s <= 1) {
-          clearInterval(restRef.current);
-          setRestActive(false);
-          restEndAlert();
-          return 0;
-        }
-        return s - 1;
+    // Tell service worker to fire a notification after duration (works when app is backgrounded)
+    if (navigator.serviceWorker?.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "SCHEDULE_REST",
+        exName,
+        delayMs: duration * 1000
       });
-    }, 1000);
+    }
+    restRef.current = setInterval(() => {
+      const remaining = Math.max(0, Math.round((restEndRef.current - Date.now()) / 1000));
+      setRestSecs(remaining);
+      if (remaining <= 0) {
+        clearInterval(restRef.current);
+        setRestActive(false);
+        restEndAlert(exName);
+      }
+    }, 500);
   }
   function dismissRest() {
     if (restRef.current) clearInterval(restRef.current);
     setRestActive(false);
+    if (navigator.serviceWorker?.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "CANCEL_REST"
+      });
+    }
   }
   useEffect(() => () => {
     if (restRef.current) clearInterval(restRef.current);
   }, []);
+
+  // Resume rest timer after app comes back from background
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === "visible" && restActive && restEndRef.current) {
+        const remaining = Math.max(0, Math.round((restEndRef.current - Date.now()) / 1000));
+        if (remaining <= 0) {
+          if (restRef.current) clearInterval(restRef.current);
+          setRestActive(false);
+          restEndAlert();
+        } else setRestSecs(remaining);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [restActive]);
   function fmtElapsed(s) {
     const m = Math.floor(s / 60),
       sec = s % 60;
@@ -6041,7 +6705,43 @@ function DayPage({
     version: version,
     onExerciseDone: onExerciseDone,
     exRefs: exRefs
-  })))), /*#__PURE__*/React.createElement("div", {
+  }))), cooldown && ended && /*#__PURE__*/React.createElement("div", {
+    style: {
+      opacity: cooldownDone ? 0.35 : 1,
+      transition: "opacity 0.4s"
+    }
+  }, /*#__PURE__*/React.createElement(Block, {
+    block: cooldown,
+    accent: W.cyan,
+    onHistory: onHistory,
+    isWarmup: true,
+    isActive: false,
+    onStartRest: startRest,
+    onSaved: saved,
+    bodyweight: bodyweight,
+    fontScale: fontScale,
+    dayId: day.id,
+    version: version,
+    warmupDone: cooldownDone,
+    onWarmupDone: () => setCooldownDone(d => !d)
+  })), cooldown && !ended && started && /*#__PURE__*/React.createElement("div", {
+    style: {
+      opacity: 0.4
+    }
+  }, /*#__PURE__*/React.createElement(Block, {
+    block: cooldown,
+    accent: W.cyan,
+    onHistory: onHistory,
+    isWarmup: true,
+    isActive: false,
+    onStartRest: startRest,
+    onSaved: saved,
+    bodyweight: bodyweight,
+    fontScale: fontScale,
+    dayId: day.id,
+    version: version,
+    warmupDone: false
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
