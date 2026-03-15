@@ -1,6 +1,12 @@
-const { useState, useEffect, useRef, useCallback } = React;
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-// hooks from React global
+/* @jsxRuntime classic */
+var {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} = React;
 
 // ── STORAGE SHIM (localStorage wrapper matching window.storage API) ───────────
 if (!window.storage) {
@@ -135,9 +141,10 @@ const GROUP_COLORS = {
   Push: "#ff7043",
   Pull: "#4fc3f7",
   Core: "#ab97e8",
-  Stability: "#80cbc4"
+  Stability: "#80cbc4",
+  Mobility: "#80cbc4"
 };
-const GROUPS = ["CNS", "Legs", "Push", "Pull", "Core", "Stability"];
+const GROUPS = ["CNS", "Legs", "Push", "Pull", "Core", "Stability", "Mobility"];
 const EX_GROUP = {
   "Force Plate CMJ": "CNS",
   "Hang Clean": "CNS",
@@ -167,16 +174,16 @@ const EX_GROUP = {
   "Couch Stretch": "Stability",
   "Deep Squat Pry": "Stability",
   "Ankle Rocks": "Stability",
-  "Quads Roll": "Stability",
-  "Adductors Roll": "Stability",
-  "Glutes Roll": "Stability",
-  "Adductors roll": "Stability",
-  "Glutes roll": "Stability",
-  "T-Spine Roll": "Stability",
-  "Foot Roll": "Stability",
-  "Dynamic Hip Openers": "Stability",
-  "Ankle Pogo Rocks": "Stability",
-  "T-Spine Rotations": "Stability",
+  "Quads Roll": "Mobility",
+  "Adductors Roll": "Mobility",
+  "Glutes Roll": "Mobility",
+  "Adductors roll": "Mobility",
+  "Glutes roll": "Mobility",
+  "T-Spine Roll": "Mobility",
+  "Foot Roll": "Mobility",
+  "Dynamic Hip Openers": "Mobility",
+  "Ankle Pogo Rocks": "Mobility",
+  "T-Spine Rotations": "Mobility",
   "Copenhagen Short Lever": "Core",
   "Banded Deadbug": "Core",
   "BB Bench Press": "Push",
@@ -270,13 +277,72 @@ const EX_GROUP = {
   "Trap Stretch": "Stability",
   "Thoracic Breathing": "Stability",
   "Child Pose Lat Stretch": "Stability",
-  "Passive Hang": "Pull"
+  "Passive Hang": "Pull",
+  "90-90 Breathing": "Stability",
+  "Lat Bench Stretch": "Stability",
+  "Calf Stretch": "Stability",
+  "Incline Treadmill Walk": "Stability",
+  "Adductor Stretch": "Stability",
+  "Slow Walk": "Stability",
+  "Band Shoulder Traction": "Stability",
+  "Pec Minor Stretch": "Stability",
+  "Thoracic Extension Breathing": "Stability",
+  "Deep Nasal Breathing": "Stability",
+  "Nasal Incline Walk": "Stability",
+  "Deep Squat Hold Breathing": "Stability",
+  "Supine Legs-Up Breathing": "Stability",
+  // Mobility group — warmup tissue/mobility work and all warmdown recovery exercises
+  "Foam Roll T-Spine": "Mobility",
+  "Foam Roll Adductors": "Mobility",
+  "Foam Roll Glutes": "Mobility",
+  "Foam Roll Lats": "Mobility",
+  "Foam Roll Quads": "Mobility",
+  "Quads Roll": "Mobility",
+  "Adductors Roll": "Mobility",
+  "Glutes Roll": "Mobility",
+  "T-Spine Roll": "Mobility",
+  "Foot Roll": "Mobility",
+  "90/90 Hip Rotations": "Mobility",
+  "Ankle Dorsiflexion Rocks": "Mobility",
+  "Ankle Rocks": "Mobility",
+  "Ankle Pogo Rocks": "Mobility",
+  "Dynamic Hip Openers": "Mobility",
+  "T-Spine Rotations": "Mobility",
+  "Thoracic Extension": "Mobility",
+  "Thoracic Extension Breathing": "Mobility",
+  "Couch Stretch": "Mobility",
+  "Deep Squat Pry": "Mobility",
+  "Deep Squat Hold Breathing": "Mobility",
+  "Hip Flexor Stretch": "Mobility",
+  "Adductor Rock": "Mobility",
+  "Adductor Stretch": "Mobility",
+  "Calf Stretch": "Mobility",
+  "Child Pose Lat Stretch": "Mobility",
+  "Lat Bench Stretch": "Mobility",
+  "Supine Breathing": "Mobility",
+  "Supine Legs-Up Breathing": "Mobility",
+  "90-90 Breathing": "Mobility",
+  "Deep Nasal Breathing": "Mobility",
+  "Nasal Walk": "Mobility",
+  "Slow Walk": "Mobility",
+  "Nasal Incline Walk": "Mobility",
+  "Incline Treadmill Walk": "Mobility",
+  "Band Shoulder Traction": "Mobility",
+  "Pec Minor Stretch": "Mobility",
+  "Scap Pull-Ups": "Mobility",
+  "Straight Arm Pulldown": "Mobility",
+  "Passive Hang": "Mobility",
+  "Deadbugs": "Mobility",
+  "Cable External Rotations": "Mobility",
+  "Glute Bridge Hold": "Mobility",
+  "Glute Bridge + ISO Hold": "Mobility",
+  "SL Glute Bridge": "Mobility"
 };
 const LIGHT_INTENT = new Set(["Cuban Press", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Cable External Rotation", "Cable External Rotations", "Light Cable External Rotation", "Side-Lying External Rotation (DB)", "Rack Hip CARs", "Wall Angels", "Scapular Wall Slides", "Scapular Pull-Ups", "Scap Pull-Ups", "Dead Hangs (passive → active)", "Dead Hang Active", "Passive → Active Hang", "Passive Hang", "Hip 90/90 Stretch", "Ankle Circles + Dorsiflexion Wall Drill", "Thoracic Extension over Roller", "Thoracic Extension", "Pec Minor Doorway Stretch", "Thoracic Rotation (Kneeling)", "Thoracic Cat-Cow", "Diaphragmatic Breathing", "World's Greatest Stretch", "Shoulder CARs", "Cable Y Raises", "Cable Y Raise", "Band Clamshells", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "SL Glute Bridge", "Nordic Hamstring Curl ISO", "Copenhagen Plank", "V-Ups", "Hanging Leg Raises", "Bodyweight Squat to Box", "Box Drop → Stick Landing", "Box Drop Stick", "Snap Down x3 (sub-max)", "Snap Down", "MB Slam x3 (easy)", "Force Plate CMJ", "CMJ", "Empty Bar Bench Press", "50–60% Bench Press", "Explosive Empty Bar Bench", "Lat Stretch (Bar Hang)", "Thoracic Cat-Cow", "Hang Clean", "MB Slam → MB Lateral Toss", "MB Slam → Lateral Toss", "Snap Down → Split Squat Jump", "Snap Down → Split Jump", "Suitcase Carry", "Rear Delt Cable Fly", "Cable Rear Fly", "Serratus Wall Slides", "Straight Arm Pulldown", "Pogos", "Vertical Jump", "Copenhagen Short Lever", "Banded Deadbug", "Band Lateral Walk", "Tempo Goblet Squat", "Couch Stretch", "Deep Squat Pry", "Ankle Rocks", "Quads Roll", "Adductors Roll", "Glutes Roll", "T-Spine Roll", "Foot Roll", "Dynamic Hip Openers", "Ankle Pogo Rocks", "T-Spine Rotations",
 // New Sunday
 "Foam Roll T-Spine", "Foam Roll Adductors", "Foam Roll Glutes", "Foam Roll Lats", "Foam Roll Quads", "90/90 Hip Rotations", "Deadbugs", "Ankle Dorsiflexion Rocks", "Tibialis Raises", "Face Pull to External Rotation", "Pallof Press", "Half-Kneeling Landmine Press", "Chest Supported DB Row",
 // Warm-down
-"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch", "Passive Hang"]);
+"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch", "Passive Hang", "90-90 Breathing", "Lat Bench Stretch", "Calf Stretch", "Incline Treadmill Walk", "Adductor Stretch", "Slow Walk", "Band Shoulder Traction", "Pec Minor Stretch", "Thoracic Extension Breathing", "Deep Nasal Breathing", "Nasal Incline Walk", "Deep Squat Hold Breathing", "Supine Legs-Up Breathing"]);
 const PROGRESSIVE_OVERLOAD_EX = new Set([
 // Barbell compounds
 "BB Back Squat", "BB Bench Press", "BB Split Squat", "Trap Bar Deadlift", "RDL", "BB Row", "Nordic Curl", "Weighted Pull-Ups",
@@ -290,7 +356,7 @@ const BODYWEIGHT_EX = new Set(["Pull-Ups", "Hanging Leg Raises", "V-Ups", "Copen
 // New Sunday
 "Foam Roll T-Spine", "Foam Roll Adductors", "Foam Roll Glutes", "Foam Roll Lats", "Foam Roll Quads", "90/90 Hip Rotations", "Deadbugs", "Ankle Dorsiflexion Rocks", "Tibialis Raises", "Pallof Press",
 // Warm-down
-"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch"]);
+"Crocodile Breathing", "Hip Flexor Stretch", "Pec Doorway Stretch", "Lat Stretch on Bench", "Hamstring Neural Glide", "Nasal Walk", "Hamstring Glide", "Supine Breathing", "Adductor Rock", "Nasal Breathing", "Pec Minor Release", "Trap Stretch", "Thoracic Breathing", "Child Pose Lat Stretch", "90-90 Breathing", "Lat Bench Stretch", "Calf Stretch", "Adductor Stretch", "Slow Walk", "Band Shoulder Traction", "Pec Minor Stretch", "Thoracic Extension Breathing", "Deep Nasal Breathing", "Passive Hang", "Deep Squat Hold Breathing", "Supine Legs-Up Breathing"]);
 // ── FONT SCALE ────────────────────────────────────────────────────────────────
 const FS = {
   sm: {
@@ -425,7 +491,7 @@ const LOWER_HYP_DAY = {
     }]
   },
   blocks: [{
-    icon: "💥",
+    icon: "A",
     title: "A — Power",
     sub: "Reactive Primer",
     exercises: [{
@@ -434,7 +500,7 @@ const LOWER_HYP_DAY = {
       badge: "POWER"
     }]
   }, {
-    icon: "🏋️",
+    icon: "B",
     title: "B — Main Hypertrophy",
     sub: "Primary Loading",
     exercises: [{
@@ -443,7 +509,7 @@ const LOWER_HYP_DAY = {
       badge: "HYP"
     }]
   }, {
-    icon: "🔗",
+    icon: "C",
     title: "C — Posterior",
     sub: "Accessory",
     exercises: [{
@@ -456,7 +522,7 @@ const LOWER_HYP_DAY = {
       badge: "STR"
     }]
   }, {
-    icon: "🦵",
+    icon: "D",
     title: "D — Unilateral",
     sub: "Quad + Glute",
     exercises: [{
@@ -465,7 +531,7 @@ const LOWER_HYP_DAY = {
       badge: "HYP"
     }]
   }, {
-    icon: "🍑",
+    icon: "E",
     title: "E — Glutes",
     sub: "Isolation",
     exercises: [{
@@ -474,7 +540,7 @@ const LOWER_HYP_DAY = {
       badge: "HYP"
     }]
   }, {
-    icon: "🧱",
+    icon: "F",
     title: "F — Core",
     sub: "Finisher",
     exercises: [{
@@ -484,27 +550,31 @@ const LOWER_HYP_DAY = {
     }]
   }],
   warmdown: {
-    duration: "8 min",
+    duration: "9 min",
     phases: [{
-      label: "Recovery Flow",
+      label: "Decompression Walk",
       exercises: [{
-        name: "Nasal Walk",
-        detail: "3 min",
-        badge: "MOB"
-      }, {
-        name: "Hip Flexor Stretch",
-        detail: "1 min/side",
+        name: "Nasal Incline Walk",
+        detail: "4 min · low speed, nose only, drop heart rate",
         badge: "MOB"
       }]
     }, {
-      label: "Reset",
+      label: "Hip & Leg Reset",
       exercises: [{
-        name: "Adductor Rock",
-        detail: "1 min",
+        name: "Deep Squat Hold Breathing",
+        detail: "1 min · full depth hold, breathe into hips",
         badge: "MOB"
       }, {
-        name: "Supine Breathing",
-        detail: "2 min",
+        name: "Hip Flexor Stretch",
+        detail: "1 min/side · deep lunge hold, hands elevated",
+        badge: "MOB"
+      }, {
+        name: "Adductor Stretch",
+        detail: "1 min · wide stance, sink down slowly",
+        badge: "MOB"
+      }, {
+        name: "Supine Legs-Up Breathing",
+        detail: "2 min · legs on wall, belly breathing, full reset",
         badge: "MOB"
       }]
     }]
@@ -567,7 +637,7 @@ const DAYS = [{
     }]
   },
   blocks: [{
-    icon: "🦵",
+    icon: "A",
     title: "A — Lower Body Integrity",
     sub: "Lower Body Bulletproofing",
     exercises: [{
@@ -584,13 +654,17 @@ const DAYS = [{
       badge: "HEALTH"
     }]
   }, {
-    icon: "🤝",
+    icon: "B",
     title: "B — Shoulder + Upper Stability",
     sub: "Upper Body Bulletproofing",
     exercises: [{
       name: "Half-Kneeling Landmine Press",
       detail: "3×10 each side",
       badge: "STR"
+    }, {
+      name: "DB Incline Press",
+      detail: "3×6 · slow tempo 4-1-2, quality reps only",
+      badge: "HYP"
     }, {
       name: "Chest Supported DB Row",
       detail: "3×10 · pause at top",
@@ -601,7 +675,7 @@ const DAYS = [{
       badge: "HEALTH"
     }]
   }, {
-    icon: "🧱",
+    icon: "C",
     title: "C — Core + Athletic Stability",
     sub: "Life Bulletproofing",
     exercises: [{
@@ -619,31 +693,31 @@ const DAYS = [{
     }]
   }],
   warmdown: {
-    duration: "8–10 min",
+    duration: "10 min",
     phases: [{
-      label: "Breathing Reset",
+      label: "Recovery Walk",
       exercises: [{
-        name: "Crocodile Breathing",
-        detail: "3 min · breathe into lower back, full exhale",
+        name: "Nasal Walk",
+        detail: "4 min · easy pace, nose only",
         badge: "MOB"
       }]
     }, {
-      label: "Stretch Flow",
+      label: "Floor Reset",
       exercises: [{
+        name: "90-90 Breathing",
+        detail: "3 min · on floor, full exhale each breath",
+        badge: "MOB"
+      }, {
         name: "Hip Flexor Stretch",
-        detail: "2×30 sec each side",
+        detail: "1 min/side · long hold, let it melt",
         badge: "MOB"
       }, {
-        name: "Pec Doorway Stretch",
-        detail: "2×30 sec each side",
+        name: "Lat Bench Stretch",
+        detail: "1 min · arms on bench, sink chest down",
         badge: "MOB"
       }, {
-        name: "Lat Stretch on Bench",
-        detail: "2×30 sec",
-        badge: "MOB"
-      }, {
-        name: "Hamstring Neural Glide",
-        detail: "2×10 each side",
+        name: "Calf Stretch",
+        detail: "1 min · wall lean, both sides",
         badge: "MOB"
       }]
     }]
@@ -723,7 +797,7 @@ const DAYS = [{
     }]
   },
   blocks: [{
-    icon: "⚡",
+    icon: "A",
     title: "A — Power",
     sub: "Low Volume",
     exercises: [{
@@ -732,7 +806,7 @@ const DAYS = [{
       badge: "POWER"
     }]
   }, {
-    icon: "🏋️",
+    icon: "B",
     title: "B — Strength",
     sub: "Primary Loading",
     exercises: [{
@@ -745,7 +819,7 @@ const DAYS = [{
       badge: "STR"
     }]
   }, {
-    icon: "🔗",
+    icon: "C",
     title: "C — Posterior Chain",
     sub: "Accessory",
     exercises: [{
@@ -754,7 +828,7 @@ const DAYS = [{
       badge: "STR"
     }]
   }, {
-    icon: "🧱",
+    icon: "D",
     title: "D — Core",
     sub: "Finisher",
     exercises: [{
@@ -764,27 +838,31 @@ const DAYS = [{
     }]
   }],
   warmdown: {
-    duration: "8 min",
+    duration: "9 min",
     phases: [{
-      label: "Recovery Flow",
+      label: "Decompression Walk",
       exercises: [{
-        name: "Nasal Walk",
-        detail: "3 min",
-        badge: "MOB"
-      }, {
-        name: "Hip Flexor Stretch",
-        detail: "1 min/side",
+        name: "Incline Treadmill Walk",
+        detail: "3–4 min · nasal breathing only, low speed",
         badge: "MOB"
       }]
     }, {
-      label: "Reset",
+      label: "Spine & Hip Reset",
       exercises: [{
-        name: "Hamstring Glide",
-        detail: "10/side",
+        name: "Passive Hang",
+        detail: "1 min · decompress spine post heavy load",
+        badge: "MOB"
+      }, {
+        name: "Hip Flexor Stretch",
+        detail: "1 min/side · essential after heavy squat & deadlift",
+        badge: "MOB"
+      }, {
+        name: "Adductor Rock",
+        detail: "1 min · slow rocks, full range",
         badge: "MOB"
       }, {
         name: "Supine Breathing",
-        detail: "2 min",
+        detail: "2 min · diaphragm reset, CNS downregulation",
         badge: "MOB"
       }]
     }]
@@ -822,7 +900,7 @@ const DAYS = [{
     }]
   },
   blocks: [{
-    icon: "🏋️",
+    icon: "A",
     title: "A — Strength",
     sub: "Primary Strength",
     exercises: [{
@@ -831,7 +909,7 @@ const DAYS = [{
       badge: "STR"
     }]
   }, {
-    icon: "💪",
+    icon: "B",
     title: "B — Volume",
     sub: "Secondary Press",
     exercises: [{
@@ -840,7 +918,7 @@ const DAYS = [{
       badge: "HYP"
     }]
   }, {
-    icon: "🔺",
+    icon: "C",
     title: "C — Shoulder Hypertrophy",
     sub: "Added Block",
     exercises: [{
@@ -853,7 +931,7 @@ const DAYS = [{
       badge: "HYP"
     }]
   }, {
-    icon: "🛡️",
+    icon: "D",
     title: "D — Shoulder Integrity",
     sub: "Health",
     exercises: [{
@@ -862,7 +940,7 @@ const DAYS = [{
       badge: "HEALTH"
     }]
   }, {
-    icon: "🦾",
+    icon: "E",
     title: "E — Triceps",
     sub: "Added Block",
     exercises: [{
@@ -878,25 +956,25 @@ const DAYS = [{
   warmdown: {
     duration: "7 min",
     phases: [{
-      label: "Upper Release",
+      label: "Parasympathetic Walk",
       exercises: [{
-        name: "Pec Minor Release",
-        detail: "1 min",
-        badge: "MOB"
-      }, {
-        name: "Trap Stretch",
-        detail: "30s/side",
+        name: "Slow Walk",
+        detail: "3 min · easy pace, let heart rate fall naturally",
         badge: "MOB"
       }]
     }, {
-      label: "Reset",
+      label: "Upper Release",
       exercises: [{
-        name: "Thoracic Breathing",
-        detail: "2 min",
+        name: "Band Shoulder Traction",
+        detail: "1 min · decompress shoulder capsule post press",
         badge: "MOB"
       }, {
-        name: "Nasal Walk",
-        detail: "3 min",
+        name: "Pec Minor Stretch",
+        detail: "1 min/side · doorway or floor, breathe into it",
+        badge: "MOB"
+      }, {
+        name: "Thoracic Extension Breathing",
+        detail: "2 min · over roller, inhale to expand",
         badge: "MOB"
       }]
     }]
@@ -931,7 +1009,7 @@ const DAYS = [{
     }]
   },
   blocks: [{
-    icon: "💥",
+    icon: "A",
     title: "A — Power",
     sub: "Minimal",
     exercises: [{
@@ -940,7 +1018,7 @@ const DAYS = [{
       badge: "POWER"
     }]
   }, {
-    icon: "🔝",
+    icon: "B",
     title: "B — Strength",
     sub: "Width Driver",
     exercises: [{
@@ -949,7 +1027,7 @@ const DAYS = [{
       badge: "STR"
     }]
   }, {
-    icon: "↔️",
+    icon: "C",
     title: "C — Thickness",
     sub: "Horizontal Pull",
     exercises: [{
@@ -962,8 +1040,17 @@ const DAYS = [{
       badge: "HYP"
     }]
   }, {
-    icon: "🎯",
-    title: "D — Rear Delt",
+    icon: "D",
+    title: "D — Press Superset",
+    sub: "Horizontal Push Balance",
+    exercises: [{
+      name: "BB Bench Press",
+      detail: "3×5",
+      badge: "STR"
+    }]
+  }, {
+    icon: "E",
+    title: "E — Rear Delt",
     sub: "Injury Proofing",
     exercises: [{
       name: "Cable Rear Fly",
@@ -971,8 +1058,8 @@ const DAYS = [{
       badge: "HEALTH"
     }]
   }, {
-    icon: "💪",
-    title: "E — Biceps",
+    icon: "F",
+    title: "F — Biceps",
     sub: "Added Block",
     exercises: [{
       name: "Incline Curl",
@@ -990,18 +1077,18 @@ const DAYS = [{
       label: "Decompression",
       exercises: [{
         name: "Passive Hang",
-        detail: "2×30s",
+        detail: "2×30s · dead weight, full lat release",
         badge: "MOB"
       }]
     }, {
       label: "Reset",
       exercises: [{
         name: "Child Pose Lat Stretch",
-        detail: "1 min",
+        detail: "1 min · arms extended, breathe into lats",
         badge: "MOB"
       }, {
-        name: "Nasal Breathing",
-        detail: "3 min",
+        name: "Deep Nasal Breathing",
+        detail: "3 min · seated or supine, full exhale",
         badge: "MOB"
       }]
     }]
@@ -1096,10 +1183,35 @@ const REST_KEY = "wt_rest_v1";
 const SESSIONS_KEY = "wt_sessions_v1";
 const FONT_KEY = "wt_font_scale_v1";
 const BW_RESET_KEY = "wt_bw_reset_v3";
+const READINESS_KEY = "wt_readiness_v1";
+const RESONANCE_KEY = "wt_resonance_v1";
+const OPPONENT_KEY = "wt_opponent_v1";
+const SCAR_KEY = "wt_scar_v1";
+const FOSSIL_KEY = "wt_fossil_v1";
+const ORACLE_KEY = "wt_oracle_v1";
+const LAST_REP_KEY = "wt_lastrep_v1";
+const UNDERTOW_KEY = "wt_undertow_v1";
 const memStore = {};
 let bwStore = [];
 let restStore = {};
 let sessionsStore = [];
+let readinessStore = [];
+let resonanceStore = {};
+let opponentStore = {
+  name: "",
+  momentum: 0
+};
+let scarStore = {};
+let fossilStore = {};
+let lastRepStore = [];
+let undertowStore = {
+  debt: 0,
+  lastUpdated: null
+};
+let oracleStore = {
+  lastShown: null,
+  prediction: null
+};
 let fontScaleStore = "md";
 async function loadFontScale() {
   try {
@@ -1170,6 +1282,62 @@ async function loadAllFromStorage() {
   } catch (e) {
     console.error('wt: corrupt sessionsStore', e);
   }
+  try {
+    const r = await window.storage.get(READINESS_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (Array.isArray(p)) readinessStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(RESONANCE_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') resonanceStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(OPPONENT_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') opponentStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(SCAR_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') scarStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(FOSSIL_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') fossilStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(LAST_REP_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (Array.isArray(p)) lastRepStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(UNDERTOW_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') undertowStore = p;
+    }
+  } catch (e) {}
+  try {
+    const r = await window.storage.get(ORACLE_KEY);
+    if (r?.value) {
+      const p = JSON.parse(r.value);
+      if (p && typeof p === 'object') oracleStore = p;
+    }
+  } catch (e) {}
 }
 let saveEntriesTimer = null;
 let saveFailCount = 0;
@@ -1309,7 +1477,441 @@ function flushAllStores() {
   if (bwStore.length > 0) saves.push(window.storage.set(BW_KEY, JSON.stringify(bwStore)).catch(() => {}));
   if (Object.keys(restStore).length > 0) saves.push(window.storage.set(REST_KEY, JSON.stringify(restStore)).catch(() => {}));
   if (sessionsStore.length > 0) saves.push(window.storage.set(SESSIONS_KEY, JSON.stringify(sessionsStore)).catch(() => {}));
+  if (readinessStore.length > 0) saves.push(window.storage.set(READINESS_KEY, JSON.stringify(readinessStore)).catch(() => {}));
+  if (Object.keys(resonanceStore).length > 0) saves.push(window.storage.set(RESONANCE_KEY, JSON.stringify(resonanceStore)).catch(() => {}));
+  if (lastRepStore.length > 0) saves.push(window.storage.set(LAST_REP_KEY, JSON.stringify(lastRepStore)).catch(() => {}));
+  saves.push(window.storage.set(SCAR_KEY, JSON.stringify(scarStore)).catch(() => {}));
+  saves.push(window.storage.set(FOSSIL_KEY, JSON.stringify(fossilStore)).catch(() => {}));
+  saves.push(window.storage.set(UNDERTOW_KEY, JSON.stringify(undertowStore)).catch(() => {}));
+  saves.push(window.storage.set(ORACLE_KEY, JSON.stringify(oracleStore)).catch(() => {}));
   return Promise.all(saves);
+}
+
+// ── NEW FEATURE SAVE HELPERS ──────────────────────────────────────────────────
+async function saveReadiness() {
+  try {
+    await window.storage.set(READINESS_KEY, JSON.stringify(readinessStore));
+  } catch (e) {}
+}
+async function saveResonance() {
+  try {
+    await window.storage.set(RESONANCE_KEY, JSON.stringify(resonanceStore));
+  } catch (e) {}
+}
+async function saveOpponent() {
+  try {
+    await window.storage.set(OPPONENT_KEY, JSON.stringify(opponentStore));
+  } catch (e) {}
+}
+async function saveScar() {
+  try {
+    await window.storage.set(SCAR_KEY, JSON.stringify(scarStore));
+  } catch (e) {}
+}
+async function saveFossil() {
+  try {
+    await window.storage.set(FOSSIL_KEY, JSON.stringify(fossilStore));
+  } catch (e) {}
+}
+async function saveLastRep() {
+  try {
+    await window.storage.set(LAST_REP_KEY, JSON.stringify(lastRepStore));
+  } catch (e) {}
+}
+async function saveUndertow() {
+  try {
+    await window.storage.set(UNDERTOW_KEY, JSON.stringify(undertowStore));
+  } catch (e) {}
+}
+async function saveOracle() {
+  try {
+    await window.storage.set(ORACLE_KEY, JSON.stringify(oracleStore));
+  } catch (e) {}
+}
+
+// ── FEATURE DATA HELPERS ──────────────────────────────────────────────────────
+// Readiness
+function logReadiness(sleep, stress, soreness) {
+  const score = Math.round((sleep + (6 - stress) + (6 - soreness)) / 15 * 100);
+  const today = todayStr();
+  readinessStore = readinessStore.filter(r => r.date !== today);
+  readinessStore.push({
+    date: today,
+    sleep,
+    stress,
+    soreness,
+    score
+  });
+  readinessStore.sort((a, b) => a.date.localeCompare(b.date));
+  saveReadiness();
+  return score;
+}
+function getTodayReadiness() {
+  return readinessStore.find(r => r.date === todayStr()) || null;
+}
+function getAvgReadiness(days = 14) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cs = cutoff.toISOString().split("T")[0];
+  const recent = readinessStore.filter(r => r.date >= cs);
+  if (!recent.length) return null;
+  return Math.round(recent.reduce((s, r) => s + r.score, 0) / recent.length);
+}
+
+// Scar tissue — track struggles and breakthroughs per exercise
+function recordStruggle(exName) {
+  if (!scarStore[exName]) scarStore[exName] = {
+    struggles: 0,
+    breakthroughs: 0,
+    lastStruggle: null
+  };
+  scarStore[exName].struggles++;
+  scarStore[exName].lastStruggle = todayStr();
+  saveScar();
+}
+function recordBreakthrough(exName) {
+  if (!scarStore[exName]) scarStore[exName] = {
+    struggles: 0,
+    breakthroughs: 0,
+    lastStruggle: null
+  };
+  scarStore[exName].breakthroughs++;
+  saveScar();
+}
+function getScarIntensity(exName) {
+  const s = scarStore[exName];
+  if (!s) return 0;
+  const raw = Math.max(0, s.struggles - s.breakthroughs * 2);
+  return Math.min(1, raw / 8); // 0-1 scale
+}
+
+// Fossil record — preserve first-ever entry per exercise
+function checkAndSaveFossil(exName, entry) {
+  if (!fossilStore[exName]) {
+    fossilStore[exName] = {
+      date: entry.date,
+      weight: entry.weight,
+      reps: entry.reps
+    };
+    saveFossil();
+  }
+}
+
+// Undertow — fatigue debt
+function updateUndertow() {
+  const now = new Date();
+  const today = todayStr();
+  if (undertowStore.lastUpdated === today) return;
+  // Count sessions in last 7 days
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const wa = weekAgo.toISOString().split("T")[0];
+  const recentSessions = sessionsStore.filter(s => s.date >= wa).length;
+  // Recent readiness avg
+  const avgR = getAvgReadiness(7) || 70;
+  // Debt increases with sessions, decreases with readiness
+  const sessionLoad = recentSessions * 12;
+  const recoveryFactor = avgR / 100 * 40;
+  undertowStore.debt = Math.max(0, Math.min(100, sessionLoad - recoveryFactor));
+  undertowStore.lastUpdated = today;
+  saveUndertow();
+}
+
+// Momentum score (0-100)
+function computeMomentum() {
+  const now = new Date();
+  const thirtyAgo = new Date();
+  thirtyAgo.setDate(thirtyAgo.getDate() - 30);
+  const ta = thirtyAgo.toISOString().split("T")[0];
+  const recentSessions = sessionsStore.filter(s => s.date >= ta);
+  const sessionScore = Math.min(40, recentSessions.length * 5);
+  // PR bonus
+  const allEx = getAllWorkingExercises();
+  let prCount = 0;
+  allEx.forEach(ex => {
+    const ents = getEntries(ex.name);
+    ents.forEach((e, i) => {
+      if (isPR(ents, i) && e.date >= ta) prCount++;
+    });
+  });
+  const prScore = Math.min(30, prCount * 3);
+  // Consistency: no gaps >7 days
+  const dates = recentSessions.map(s => s.date).sort();
+  let gapPenalty = 0;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = (new Date(dates[i]) - new Date(dates[i - 1])) / (1000 * 60 * 60 * 24);
+    if (diff > 7) gapPenalty += 10;
+  }
+  // Readiness bonus
+  const readinessScore = Math.min(20, (getAvgReadiness(30) || 50) / 5);
+  // BW stability bonus
+  const bwScore = bwStore.length >= 4 ? 10 : 0;
+  return Math.max(0, Math.min(100, Math.round(sessionScore + prScore + readinessScore + bwScore - gapPenalty)));
+}
+
+// Circadian — add hour to entry metadata (no-op if already there)
+function getCurrentHour() {
+  return new Date().getHours();
+}
+function getCircadianPeak() {
+  // Find the 2-3 hour window where logged weights are statistically highest
+  const hourBuckets = {};
+  const allEx = getAllWorkingExercises().filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name));
+  allEx.forEach(ex => {
+    getEntries(ex.name).forEach(e => {
+      if (e.hour == null) return;
+      if (!hourBuckets[e.hour]) hourBuckets[e.hour] = {
+        total: 0,
+        count: 0
+      };
+      hourBuckets[e.hour].total += e.weight;
+      hourBuckets[e.hour].count++;
+    });
+  });
+  const hours = Object.keys(hourBuckets).filter(h => hourBuckets[h].count >= 3);
+  if (hours.length < 3) return null;
+  const avgs = hours.map(h => ({
+    h: parseInt(h),
+    avg: hourBuckets[h].total / hourBuckets[h].count
+  }));
+  avgs.sort((a, b) => b.avg - a.avg);
+  return avgs[0]?.h ?? null;
+}
+function isInPeakWindow() {
+  const peak = getCircadianPeak();
+  if (peak == null) return false;
+  const h = getCurrentHour();
+  return Math.abs(h - peak) <= 1 || peak === 0 && h === 23 || peak === 23 && h === 0;
+}
+
+// Seasonal theme
+function getSeasonalTheme() {
+  const m = new Date().getMonth();
+  if (m <= 1 || m === 11) return {
+    name: "winter",
+    accent: "#e8f0ff",
+    mod: -0.15,
+    speed: 0.7
+  }; // Dec-Feb: quiet, monastic
+  if (m <= 4) return {
+    name: "spring",
+    accent: "#a8e6a3",
+    mod: 0.05,
+    speed: 1.0
+  }; // Mar-May: fresh
+  if (m <= 7) return {
+    name: "summer",
+    accent: "#ff7043",
+    mod: 0.15,
+    speed: 1.3
+  }; // Jun-Aug: aggressive
+  return {
+    name: "autumn",
+    accent: "#e8c547",
+    mod: 0.0,
+    speed: 0.9
+  }; // Sep-Nov: philosophical
+}
+
+// Oracle — Sunday night prediction
+function generateOraclePrediction() {
+  const allEx = getAllWorkingExercises();
+  const predictions = [];
+  // Check for stalled lifts
+  allEx.filter(ex => PROGRESSIVE_OVERLOAD_EX.has(ex.name)).forEach(ex => {
+    const ents = getEntries(ex.name);
+    if (ents.length < 4) return;
+    const last3 = ents.slice(-3);
+    const allSame = last3.every(e => e.weight === last3[0].weight);
+    if (allSame) {
+      const sessionCount = new Set(ents.map(e => e.date)).size;
+      // Estimate sessions to breakthrough based on historical average plateau length
+      predictions.push(`Your ${ex.name} has been at ${last3[0].weight}lbs for ${last3.length} sessions. Based on your patterns, it will move in 1-2 sessions — increase volume this week, not load.`);
+    }
+  });
+  // Check bodyweight trend vs performance
+  if (bwStore.length >= 4) {
+    const recent = bwStore.slice(-4);
+    const bwDelta = recent[recent.length - 1].weight - recent[0].weight;
+    if (bwDelta < -2) {
+      predictions.push(`You've dropped ${Math.abs(bwDelta.toFixed(1))}lbs recently. Watch your strength — significant weight loss can mask CNS fatigue. Consider eating at maintenance this week.`);
+    }
+    if (bwDelta > 3) {
+      predictions.push(`You've gained ${bwDelta.toFixed(1)}lbs recently. If intentional, expect strength gains to follow within 2-3 sessions. If not, check your recovery quality.`);
+    }
+  }
+  // Session frequency check
+  const last14 = new Date();
+  last14.setDate(last14.getDate() - 14);
+  const l14 = last14.toISOString().split("T")[0];
+  const recentCount = sessionsStore.filter(s => s.date >= l14).length;
+  if (recentCount >= 8) {
+    predictions.push(`You've trained ${recentCount} times in 14 days. That's high frequency. A deload this week (60% load) will likely produce a performance spike next week.`);
+  }
+  if (recentCount <= 2 && sessionsStore.length > 4) {
+    predictions.push(`Only ${recentCount} sessions in the past two weeks. Your nervous system is rested — this week has high PR potential if you show up.`);
+  }
+  if (!predictions.length) {
+    const momentum = computeMomentum();
+    if (momentum > 70) predictions.push(`Momentum score ${momentum}/100. You're in a growth window. Push intensity on your primary lifts this week.`);else predictions.push(`Momentum score ${momentum}/100. Focus on consistency over intensity this week. Show up, do the work, don't overthink the numbers.`);
+  }
+  return predictions[Math.floor(Math.random() * predictions.length)];
+}
+function getOracle() {
+  const now = new Date();
+  const isSundayNight = now.getDay() === 0 && now.getHours() >= 18;
+  const isMondayMorning = now.getDay() === 1 && now.getHours() < 6;
+  if (!isSundayNight && !isMondayMorning) return null;
+  const today = todayStr();
+  if (oracleStore.lastShown === today) return oracleStore.prediction;
+  // Generate new prediction Sunday night
+  if (isSundayNight) {
+    const pred = generateOraclePrediction();
+    oracleStore = {
+      lastShown: today,
+      prediction: pred
+    };
+    saveOracle();
+    return pred;
+  }
+  return oracleStore.prediction; // Monday morning shows Sunday's prediction
+}
+
+// Whisper — one unique post-session insight
+function generateWhisper(dayId) {
+  const allEx = getAllWorkingExercises();
+  const insights = [];
+  // Total sets ever
+  let totalSets = 0;
+  Object.values(memStore).forEach(arr => {
+    totalSets += arr.length;
+  });
+  if (totalSets > 0) insights.push(`You've now logged ${totalSets.toLocaleString()} total sets in this app.`);
+  // Streak check
+  const dates = [...new Set(sessionsStore.map(s => s.date))].sort().reverse();
+  let streak = 0;
+  const td = new Date();
+  for (let i = 0; i < dates.length; i++) {
+    const d = new Date(dates[i]);
+    const diff = Math.round((td - d) / (1000 * 60 * 60 * 24)) - i;
+    if (diff <= 1) streak++;else break;
+  }
+  if (streak > 2) insights.push(`This is session ${streak} in a row. Don't break the chain.`);
+  // Check for clean day
+  const day = DAYS.find(d => d.id === dayId);
+  if (day) {
+    const todayS = todayStr();
+    const logged = day.blocks.flatMap(b => b.exercises || []).filter(ex => getEntries(ex.name).some(e => e.date === todayS)).length;
+    const total = day.blocks.flatMap(b => b.exercises || []).length;
+    if (logged === total) insights.push(`Perfect ${day.label}. Every exercise logged. That's rare.`);
+  }
+  // Long-standing PR
+  const allPRDates = [];
+  allEx.forEach(ex => {
+    const ents = getEntries(ex.name);
+    ents.forEach((e, i) => {
+      if (isPR(ents, i)) allPRDates.push(e.date);
+    });
+  });
+  if (allPRDates.length > 0) {
+    const oldestPR = allPRDates.sort()[0];
+    const daysSince = Math.round((new Date() - new Date(oldestPR)) / (1000 * 60 * 60 * 24));
+    if (daysSince > 60) insights.push(`Your oldest PR is from ${fmtDate(oldestPR)} — ${daysSince} days ago. That's your floor. Every day you train above it.`);
+  }
+  // Session duration trend
+  const recent5 = sessionsStore.slice(0, 5).map(s => parseDurationToMin(s.duration)).filter(Boolean);
+  if (recent5.length >= 3) {
+    const avg = recent5.reduce((a, b) => a + b, 0) / recent5.length;
+    insights.push(`Your last ${recent5.length} sessions averaged ${Math.round(avg)} minutes.`);
+  }
+  if (!insights.length) insights.push(`Session complete. The work compounds whether you feel it or not.`);
+  return insights[Math.floor(Math.random() * insights.length)];
+}
+
+// Blood Memory — exercise pairing correlations
+function getBloodMemoryInsight(exName) {
+  // Find exercises that co-occur with this one in sessions and correlate with performance
+  const ents = getEntries(exName);
+  if (ents.length < 6) return null;
+  const allDates = new Set(ents.map(e => e.date));
+  const allEx = getAllWorkingExercises();
+  const correlations = {};
+  // For each other exercise, split this exercise's sessions into "days with" vs "days without"
+  allEx.forEach(other => {
+    if (other.name === exName) return;
+    const otherDates = new Set(getEntries(other.name).map(e => e.date));
+    const withW = [],
+      withoutW = [];
+    ents.forEach(e => {
+      if (otherDates.has(e.date)) withW.push(e.weight);else withoutW.push(e.weight);
+    });
+    if (withW.length >= 3 && withoutW.length >= 2) {
+      correlations[other.name] = {
+        withW,
+        withoutW
+      };
+    }
+  });
+  // Find strongest positive correlation (performing better on days with paired exercise)
+  let best = null,
+    bestDelta = -Infinity;
+  Object.keys(correlations).forEach(otherName => {
+    const {
+      withW,
+      withoutW
+    } = correlations[otherName];
+    const avgWith = withW.reduce((a, b) => a + b, 0) / withW.length;
+    const avgWithout = withoutW.reduce((a, b) => a + b, 0) / withoutW.length;
+    if (avgWithout === 0) return;
+    const delta = (avgWith - avgWithout) / avgWithout * 100;
+    if (delta > bestDelta) {
+      bestDelta = delta;
+      best = otherName;
+    }
+  });
+  if (!best || bestDelta < 5) return null;
+  return {
+    pairedWith: best,
+    delta: Math.round(bestDelta)
+  };
+}
+
+// Archaeology — surface historical moments
+function getArchaeologyCard() {
+  const today = todayStr();
+  const allEx = getAllWorkingExercises();
+  const events = [];
+  // One year ago
+  const yearAgo = new Date();
+  yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+  const yaStr = yearAgo.toISOString().split("T")[0];
+  allEx.forEach(ex => {
+    const ents = getEntries(ex.name).filter(e => e.date === yaStr);
+    if (ents.length > 0) events.push(`One year ago today you logged ${ex.name} at ${ents[0].weight}lbs.`);
+  });
+  // Milestone sets
+  let totalSets = 0;
+  Object.values(memStore).forEach(arr => {
+    totalSets += arr.length;
+  });
+  const milestones = [100, 250, 500, 1000, 2500, 5000];
+  milestones.forEach(m => {
+    if (totalSets === m || totalSets === m + 1) events.push(`You just crossed ${m} total logged sets. That's a real number.`);
+  });
+  // Long streak being built
+  const dates = [...new Set(sessionsStore.map(s => s.date))].sort().reverse();
+  let streak = 0;
+  const td = new Date();
+  for (let i = 0; i < dates.length; i++) {
+    const d = new Date(dates[i]);
+    const diff = Math.round((td - d) / (1000 * 60 * 60 * 24)) - i;
+    if (diff <= 1) streak++;else break;
+  }
+  if (streak === 7) events.push(`Seven days in a row. You haven't missed a session in a week.`);
+  if (streak === 14) events.push(`Two weeks straight. Whatever you're doing — keep doing it.`);
+  if (streak === 30) events.push(`Thirty consecutive days. This is no longer a habit. It's identity.`);
+  if (!events.length) return null;
+  return events[Math.floor(Math.random() * events.length)];
 }
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
@@ -1372,11 +1974,15 @@ function restEndAlert(exName = "") {
 }
 function calc1RM(w, r) {
   if (!w || !r || r <= 0) return 0;
+  if (r === 1) return Math.round(w);
   return Math.round(w * (1 + r / 30));
 }
 function isPR(entries, idx) {
   if (!entries.length || !entries[idx]) return false;
-  return entries[idx].weight >= entries.reduce((b, e) => Math.max(b, e.weight), 0) && (idx === 0 || entries[idx].weight > entries.slice(0, idx).reduce((b, e) => Math.max(b, e.weight), 0));
+  const e = entries[idx];
+  if (e.bodyweight) return false;
+  const maxBefore = idx === 0 ? -1 : entries.slice(0, idx).reduce((b, x) => Math.max(b, x.weight), -1);
+  return e.weight > maxBefore && e.weight > 0;
 }
 const BARBELL_EX = new Set(["BB Back Squat", "BB Bench Press", "Trap Bar Deadlift", "RDL", "BB Row", "BB Split Squat", "Nordic Curl", "Hang Clean", "Weighted Pull-Ups"]);
 function getOverloadSug(entries, exName = "") {
@@ -1580,11 +2186,13 @@ function RestTimerBubble({
       animation: "slideUp 0.28s cubic-bezier(0.16,1,0.3,1) both",
       transition: "border-color 0.3s,box-shadow 0.3s"
     }
-  }, /*#__PURE__*/React.createElement("svg", {
+  }, !urgent && !done && /*#__PURE__*/React.createElement(RestingFaceOverlay, null), /*#__PURE__*/React.createElement("svg", {
     width: 76,
     height: 76,
     style: {
-      flexShrink: 0
+      flexShrink: 0,
+      position: "relative",
+      zIndex: 1
     }
   }, /*#__PURE__*/React.createElement("circle", {
     cx: cx,
@@ -2265,17 +2873,20 @@ function InlineSetLogger({
           haptic([40, 30, 60, 30, 100]);
         } else haptic(30);
         const all = getEntries(ex.name);
-        all.push({
+        const newEntry = {
           date: todayStr(),
           dayId: dayId,
           weight: isBW ? bodyweight ? bodyweight + safeW : safeW : safeW,
           sets: 1,
           reps: r,
           note: "",
-          bodyweight: isBW
-        });
+          bodyweight: isBW,
+          hour: getCurrentHour()
+        };
+        all.push(newEntry);
         all.sort((a, b) => a.date.localeCompare(b.date));
         setEntries(ex.name, all);
+        checkAndSaveFossil(ex.name, newEntry);
         onSaved();
         if (willAllDone && onExerciseDone) onExerciseDone(ex.name);
         const freshAll = getEntries(ex.name);
@@ -2455,6 +3066,7 @@ function InlineSetLogger({
       key: s.id,
       style: {
         marginBottom: 11,
+        position: "relative",
         animation: `setRowIn 0.2s cubic-bezier(0.16,1,0.3,1) ${i * 0.04}s both`
       }
     }, prFlashIdx === i && /*#__PURE__*/React.createElement("div", {
@@ -2971,6 +3583,235 @@ function HistoryModal({
 }
 
 // ── BODYWEIGHT TRACKER CARD ───────────────────────────────────────────────────
+// ── BODYWEIGHT GRAPH ──────────────────────────────────────────────────────────
+function BodyweightGraph() {
+  const canvasRef = useRef(null),
+    chartRef = useRef(null);
+  const [range, setRange] = useState(90);
+  const allEntries = [...bwStore].sort((a, b) => a.date.localeCompare(b.date));
+  const cutoff = range > 0 ? (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - range);
+    return d.toISOString().split("T")[0];
+  })() : null;
+  const entries = cutoff ? allEntries.filter(e => e.date >= cutoff) : allEntries;
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
+    }
+    const Chart = window.Chart;
+    if (!Chart) return;
+    if (entries.length < 2) {
+      return;
+    }
+    const labels = entries.map(e => fmtDate(e.date));
+    const weights = entries.map(e => e.weight);
+    const minW = Math.min(...weights),
+      maxW = Math.max(...weights);
+    const pad = Math.max(2, Math.round((maxW - minW) * 0.3) || 2);
+
+    // 7-day rolling average
+    const rolling = weights.map((_, i) => {
+      const slice = weights.slice(Math.max(0, i - 3), i + 4);
+      return Math.round(slice.reduce((s, v) => s + v, 0) / slice.length * 10) / 10;
+    });
+    chartRef.current = new Chart(canvasRef.current.getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Weight",
+          data: weights,
+          borderColor: "rgba(0,201,177,0.5)",
+          backgroundColor: "rgba(0,201,177,0.06)",
+          borderWidth: 1.5,
+          pointRadius: 3,
+          pointBackgroundColor: W.cyan,
+          pointBorderColor: W.bg,
+          pointBorderWidth: 1.5,
+          tension: 0.3,
+          fill: true,
+          yAxisID: "y"
+        }, {
+          label: "7-day avg",
+          data: rolling,
+          borderColor: W.cyan,
+          backgroundColor: "transparent",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: false,
+          yAxisID: "y"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: "index",
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: W.textMid,
+              font: {
+                size: 10,
+                family: "DM Mono"
+              },
+              boxWidth: 12,
+              padding: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: W.surfaceHi,
+            borderColor: W.borderHi,
+            borderWidth: 1,
+            titleColor: W.text,
+            bodyColor: W.textMid,
+            padding: 10,
+            callbacks: {
+              label: item => `  ${item.dataset.label}: ${item.raw} lbs`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: W.textDim,
+              font: {
+                size: 10
+              },
+              maxTicksLimit: 8,
+              maxRotation: 20
+            },
+            grid: {
+              color: W.border
+            },
+            border: {
+              color: W.border
+            }
+          },
+          y: {
+            min: minW - pad,
+            max: maxW + pad,
+            position: "left",
+            ticks: {
+              color: W.textDim,
+              font: {
+                size: 10
+              },
+              callback: v => v + " lbs"
+            },
+            grid: {
+              color: W.border
+            },
+            border: {
+              color: W.border
+            }
+          }
+        }
+      }
+    });
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+    };
+  }, [range, bwStore.length]);
+  if (allEntries.length < 2) return null;
+  const first = entries[0]?.weight,
+    last = entries[entries.length - 1]?.weight;
+  const delta = first && last ? +(last - first).toFixed(1) : null;
+  const deltaColor = delta === null ? W.textDim : delta < 0 ? W.cyan : delta > 0 ? W.red : W.textDim;
+  const btnStyle = {
+    background: "transparent",
+    border: `1px solid ${W.border}`,
+    borderRadius: 5,
+    color: W.textDim,
+    fontFamily: "'DM Mono',monospace",
+    fontSize: 11,
+    padding: "4px 10px",
+    cursor: "pointer"
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderBottom: `1px solid ${W.border}`,
+      padding: "16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, "Body Weight"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim
+    }
+  }, entries.length, " entries"), delta !== null && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: deltaColor,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, delta > 0 ? "+" : "", delta, " lbs"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4
+    }
+  }, [[30, "30D"], [90, "90D"], [0, "ALL"]].map(([r, label]) => /*#__PURE__*/React.createElement("button", {
+    key: r,
+    style: {
+      ...btnStyle,
+      border: `1px solid ${range === r ? W.cyan : W.border}`,
+      color: range === r ? W.cyan : W.textDim,
+      background: range === r ? W.cyanDim : "transparent"
+    },
+    onClick: () => setRange(r)
+  }, label)))), entries.length < 2 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 140,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim
+    }
+  }, "Log 2+ entries to see chart") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      height: 160
+    }
+  }, /*#__PURE__*/React.createElement("canvas", {
+    ref: canvasRef
+  })));
+}
 function BodyweightCard({
   onUpdate
 }) {
@@ -3089,10 +3930,23 @@ function BodyweightCard({
 function synthesizeSessionsFromEntries() {
   // Reconstruct session records from raw memStore entries when sessionsStore is missing them.
   // Groups entries by {dayId, date} and builds a minimal session object.
+  // Key guard: entries with an explicit dayId are only attributed to that day.
+  // Entries without a dayId are attributed to the FIRST day block that contains the exercise,
+  // preventing duplicates when the same exercise appears in multiple day blocks.
+  const exFirstDay = {}; // exName → first dayId that owns it
+  DAYS.forEach(day => {
+    day.blocks.flatMap(b => b.exercises || []).forEach(ex => {
+      if (!(ex.name in exFirstDay)) exFirstDay[ex.name] = day.id;
+    });
+  });
   const byDayDate = {};
   DAYS.forEach(day => {
     day.blocks.flatMap(b => b.exercises || []).forEach(ex => {
       getEntries(ex.name).forEach(e => {
+        // If entry has an explicit dayId, only bucket it under that day
+        if (e.dayId && e.dayId !== day.id) return;
+        // If entry has no dayId, only bucket under the first day that owns this exercise
+        if (!e.dayId && exFirstDay[ex.name] !== day.id) return;
         const k = `${e.dayId || day.id}_${e.date}`;
         if (!byDayDate[k]) byDayDate[k] = {
           dayId: e.dayId || day.id,
@@ -3187,7 +4041,7 @@ function WorkoutHistoryCard({
     const sessionKey = `${s.date}_${s.dayId}`;
     const isOpen = expanded === sessionKey;
     return /*#__PURE__*/React.createElement("div", {
-      key: i,
+      key: sessionKey,
       style: {
         borderTop: `1px solid ${W.border}`
       }
@@ -3476,11 +4330,11 @@ function WorkoutSummaryModal({
       position: "fixed",
       inset: 0,
       background: "rgba(0,0,0,0.96)",
-      zIndex: 2000,
+      zIndex: 3000,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "env(safe-area-inset-top) 16px env(safe-area-inset-bottom)"
+      padding: `max(env(safe-area-inset-top),16px) 16px max(calc(env(safe-area-inset-bottom) + 80px),96px)`
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "au",
@@ -3509,6 +4363,10 @@ function WorkoutSummaryModal({
       background: W.borderHi,
       margin: "0 auto 18px"
     }
+  }), /*#__PURE__*/React.createElement(WorkoutAura, {
+    dayId: day.id,
+    elapsed: elapsed,
+    setsLogged: loggedExNames.length
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8,
@@ -3540,7 +4398,7 @@ function WorkoutSummaryModal({
       flexShrink: 0
     }
   }, [["Time", `${m}:${String(s).padStart(2, "0")}`], ["Exercises", `${loggedExNames.length}/${allEx.length}`], ["Volume", totalVol > 0 ? `${Math.round(totalVol).toLocaleString()}` : "—"]].map(([label, val], i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+    key: label,
     style: {
       padding: "14px 12px",
       borderRight: i < 2 ? `1px solid ${W.border}` : "none",
@@ -3593,7 +4451,7 @@ function WorkoutSummaryModal({
       gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", null, "\u2605"), /*#__PURE__*/React.createElement("span", null, "Personal Records")), prsToday.map((pr, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+    key: `${pr.name}-${pr.weight}`,
     style: {
       display: "flex",
       alignItems: "center",
@@ -3651,7 +4509,7 @@ function WorkoutSummaryModal({
       marginBottom: 8
     }
   }, "Sets Logged"), exSummary.map((ex, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+    key: ex.name,
     style: {
       display: "flex",
       alignItems: "center",
@@ -3960,7 +4818,8 @@ const DONUT_COLORS = {
   Push: "#ff5c7a",
   Pull: "#4fc3f7",
   Core: "#b57bee",
-  Stability: "#ff9a3c"
+  Stability: "#ff9a3c",
+  Mobility: "#80cbc4"
 };
 function DonutChart({
   data,
@@ -4526,10 +5385,10 @@ function ProgressView({
   })))))));
 }
 
-// ── NAV DOT ───────────────────────────────────────────────────────────────────
-const NAV_CONTENT_H = 64; // fixed content area, dots always live here
-const NAV_DOT_CY = 26; // vertical center of dots: (64 - (24+5+8))/2 + 12 = 25.5 ≈ 26
-
+// ── NAV ──────────────────────────────────────────────────────────────────────
+const NAV_CONTENT_H = 64;
+const NAV_DOT_CY = 26;
+const NAV_REST_COLOR = "rgba(255,255,255,0.55)";
 function NavDot({
   day,
   isActive,
@@ -4579,8 +5438,7 @@ function NavDot({
       height: 6,
       borderRadius: "50%",
       background: day.accent,
-      opacity: isDone ? 0.55 : 0.85,
-      transition: "opacity 0.2s"
+      opacity: isDone ? 0.55 : 0.85
     }
   }), isActive && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4602,9 +5460,6 @@ function NavDot({
     }
   }, day.label.slice(0, 3)));
 }
-
-// ── BOTTOM NAV ────────────────────────────────────────────────────────────────
-const NAV_REST_COLOR = "rgba(255,255,255,0.55)";
 function NavIconBtn({
   tapClass,
   onClick,
@@ -4666,6 +5521,7 @@ function BottomNav({
   const isDay = activeIdx >= 0;
   const [homeTap, triggerHome] = useTap();
   const [settingsTap, triggerSettings] = useTap();
+  const [statsTap, triggerStats] = useTap();
   const n = days.length;
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4782,8 +5638,8 @@ function BottomNav({
     }));
   })), days.map((d, i) => {
     const isActive = page === d.id;
-    const isDone = isDay && activeIdx > i;
-    const hasLogged = d.blocks.flatMap(b => b.exercises || []).some(ex => getEntries(ex.name).some(e => e.date >= monStr && e.date <= sunStr));
+    const isDone = sessionsStore.some(s => s.dayId === d.id && s.date >= monStr && s.date <= sunStr);
+    const hasLogged = d.blocks.flatMap(b => b.exercises || []).some(ex => getEntries(ex.name).some(e => e.date >= monStr && e.date <= sunStr && (e.dayId === d.id || !e.dayId)));
     return /*#__PURE__*/React.createElement(NavDot, {
       key: d.id,
       day: d,
@@ -4793,6 +5649,40 @@ function BottomNav({
       onTap: () => setPage(d.id)
     });
   })), /*#__PURE__*/React.createElement(NavIconBtn, {
+    tapClass: statsTap,
+    onClick: () => {
+      triggerStats();
+      setPage("stats");
+    },
+    isActive: page === "stats",
+    label: "Stats"
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 16 16",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "1",
+    y: "9",
+    width: "3",
+    height: "6",
+    rx: "1",
+    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "6",
+    y: "5",
+    width: "3",
+    height: "10",
+    rx: "1",
+    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "11",
+    y: "1",
+    width: "3",
+    height: "14",
+    rx: "1",
+    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
+  }))), /*#__PURE__*/React.createElement(NavIconBtn, {
     tapClass: settingsTap,
     onClick: () => {
       triggerSettings();
@@ -4824,19 +5714,1514 @@ function BottomNav({
     }
   }));
 }
+// ── FEATURE COMPONENTS ───────────────────────────────────────────────────────
+
+// CNS Readiness Modal
+function ReadinessModal({
+  onComplete,
+  onSkip
+}) {
+  const [sleep, setSleep] = useState(3);
+  const [stress, setStress] = useState(3);
+  const [soreness, setSoreness] = useState(3);
+  const score = Math.round((sleep + (6 - stress) + (6 - soreness)) / 15 * 100);
+  const scoreColor = score >= 75 ? W.cyan : score >= 50 ? W.yellow : W.red;
+  const labels = {
+    sleep: ["Terrible", "Poor", "Fair", "Good", "Great"],
+    stress: ["None", "Low", "Moderate", "High", "Extreme"],
+    soreness: ["Fresh", "Mild", "Moderate", "Sore", "Wrecked"]
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 2000,
+      background: "rgba(0,0,0,0.85)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: W.surface,
+      border: `1px solid ${W.border}`,
+      borderRadius: 16,
+      padding: 24,
+      maxWidth: 360,
+      width: "100%",
+      animation: "scaleIn 0.2s ease both"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.25em",
+      color: W.textDim,
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Pre-Workout Check"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: W.text,
+      marginBottom: 20
+    }
+  }, "CNS Readiness"), [["Sleep Quality", "sleep", sleep, setSleep], ["Stress Level", "stress", stress, setStress], ["Muscle Soreness", "soreness", soreness, setSoreness]].map(([label, key, val, setter]) => /*#__PURE__*/React.createElement("div", {
+    key: key,
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: W.text
+    }
+  }, label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.cyan
+    }
+  }, labels[key][val - 1])), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, [1, 2, 3, 4, 5].map(n => /*#__PURE__*/React.createElement("button", {
+    key: n,
+    onClick: () => setter(n),
+    style: {
+      flex: 1,
+      height: 32,
+      borderRadius: 6,
+      border: `1px solid ${val === n ? W.cyan : W.border}`,
+      background: val === n ? W.cyanDim : "transparent",
+      color: val === n ? W.cyan : W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      transition: "all 0.15s"
+    }
+  }, n))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      margin: "16px 0",
+      padding: "12px",
+      background: `${scoreColor}11`,
+      border: `1px solid ${scoreColor}33`,
+      borderRadius: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      fontWeight: 900,
+      color: scoreColor,
+      fontFamily: "'DM Mono',monospace",
+      lineHeight: 1
+    }
+  }, score), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      letterSpacing: "0.2em",
+      color: scoreColor,
+      fontFamily: "'DM Mono',monospace",
+      marginTop: 4,
+      textTransform: "uppercase"
+    }
+  }, "Readiness Score")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onSkip,
+    style: {
+      flex: 1,
+      padding: "11px",
+      borderRadius: 8,
+      border: `1px solid ${W.border}`,
+      background: "transparent",
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12,
+      cursor: "pointer"
+    }
+  }, "Skip"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onComplete(sleep, stress, soreness, score),
+    style: {
+      flex: 2,
+      padding: "11px",
+      borderRadius: 8,
+      border: "none",
+      background: W.cyan,
+      color: "#000",
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "Log & Train"))));
+}
+
+// Seasonal accent — applied globally via CSS variable
+function useSeasonalTheme() {
+  const theme = getSeasonalTheme();
+  useEffect(() => {
+    document.documentElement.style.setProperty("--seasonal-accent", theme.accent);
+    document.documentElement.style.setProperty("--seasonal-speed", String(theme.speed));
+  }, []);
+  return theme;
+}
+
+// Workout Aura — generative SVG based on session data
+function WorkoutAura({
+  dayId,
+  elapsed,
+  setsLogged
+}) {
+  const day = DAYS.find(d => d.id === dayId);
+  const accent = day?.accent || W.cyan;
+  const intensity = Math.min(1, setsLogged / 20);
+  const readiness = getTodayReadiness()?.score || 50;
+  const isHeavy = intensity > 0.6 && readiness > 60;
+  const seed = elapsed + setsLogged * 7;
+  const shapes = [];
+  const rng = n => (seed * n * 9301 + 49297) % 233280 / 233280;
+  for (let i = 0; i < (isHeavy ? 18 : 12); i++) {
+    const x = 40 + rng(i + 1) * 220,
+      y = 40 + rng(i + 2) * 120;
+    const r = isHeavy ? 8 + rng(i + 3) * 28 : 4 + rng(i + 3) * 16;
+    const op = 0.04 + rng(i + 4) * 0.12;
+    shapes.push({
+      x,
+      y,
+      r,
+      op,
+      i
+    });
+  }
+  // Connecting lines for heavy sessions
+  const lines = isHeavy ? shapes.slice(0, 8).map((s, i) => ({
+    x1: s.x,
+    y1: s.y,
+    x2: shapes[(i + 3) % 8].x,
+    y2: shapes[(i + 3) % 8].y,
+    op: 0.04 + rng(i + 10) * 0.08
+  })) : [];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      borderRadius: 12,
+      overflow: "hidden",
+      background: "#050505",
+      border: `1px solid ${W.border}`,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 300 200",
+    style: {
+      width: "100%",
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("radialGradient", {
+    id: "aura-bg",
+    cx: "50%",
+    cy: "50%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: accent,
+    stopOpacity: "0.06"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#050505",
+    stopOpacity: "0"
+  })), /*#__PURE__*/React.createElement("filter", {
+    id: "aura-blur"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "8"
+  })), /*#__PURE__*/React.createElement("filter", {
+    id: "aura-glow"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "3",
+    result: "blur"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "blur"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  })))), /*#__PURE__*/React.createElement("rect", {
+    width: "300",
+    height: "200",
+    fill: "#050505"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "150",
+    cy: "100",
+    rx: 80 + intensity * 60,
+    ry: 50 + intensity * 40,
+    fill: "url(#aura-bg)",
+    filter: "url(#aura-blur)"
+  }), lines.map((l, i) => /*#__PURE__*/React.createElement("line", {
+    key: i,
+    x1: l.x1,
+    y1: l.y1,
+    x2: l.x2,
+    y2: l.y2,
+    stroke: accent,
+    strokeWidth: "0.5",
+    strokeOpacity: l.op
+  })), shapes.map(s => /*#__PURE__*/React.createElement("circle", {
+    key: s.i,
+    cx: s.x,
+    cy: s.y,
+    r: s.r,
+    fill: accent,
+    fillOpacity: s.op,
+    filter: s.r > 15 ? "url(#aura-glow)" : undefined
+  })), isHeavy && /*#__PURE__*/React.createElement("text", {
+    x: "150",
+    y: "172",
+    textAnchor: "middle",
+    fill: accent,
+    fillOpacity: "0.3",
+    fontSize: "7",
+    fontFamily: "'DM Mono',monospace",
+    letterSpacing: "0.3em"
+  }, "HEAVY SESSION"), /*#__PURE__*/React.createElement("text", {
+    x: "150",
+    y: isHeavy ? 185 : 175,
+    textAnchor: "middle",
+    fill: accent,
+    fillOpacity: "0.18",
+    fontSize: "6",
+    fontFamily: "'DM Mono',monospace",
+    letterSpacing: "0.25em"
+  }, day?.title?.toUpperCase() || "")));
+}
+
+// Nervous System Map
+function NervousSystemMap({
+  version
+}) {
+  const allEx = getAllWorkingExercises();
+  // CNS cost lookup: compound heavy = high, mobility = low
+  const CNS_COST = {
+    "CNS": 90,
+    "Legs": 70,
+    "Push": 55,
+    "Pull": 50,
+    "Core": 35,
+    "Stability": 30,
+    "Mobility": 15
+  };
+  const sevenAgo = new Date();
+  sevenAgo.setDate(sevenAgo.getDate() - 7);
+  const sa = sevenAgo.toISOString().split("T")[0];
+  const zoneLoad = {
+    upper: 0,
+    lower: 0,
+    spine: 0,
+    peripheral: 0
+  };
+  let totalLoad = 0;
+  allEx.forEach(ex => {
+    const g = EX_GROUP[ex.name];
+    if (!g) return;
+    const cost = CNS_COST[g] || 30;
+    const ents = getEntries(ex.name).filter(e => e.date >= sa);
+    const vol = ents.reduce((s, e) => s + e.sets * e.reps, 0);
+    const load = vol * cost;
+    if (g === "CNS" || g === "Push" || g === "Pull") zoneLoad.upper += load;else if (g === "Legs") zoneLoad.lower += load;else if (g === "Core" || g === "Stability") zoneLoad.spine += load;else zoneLoad.peripheral += load;
+    totalLoad += load;
+  });
+  if (totalLoad === 0) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px 16px",
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      textAlign: "center"
+    }
+  }, "Train this week to see your nervous system map");
+  const norm = v => Math.min(1, v / Math.max(...Object.values(zoneLoad), 1));
+  const zones = [{
+    label: "Upper CNS",
+    key: "upper",
+    cy: 60,
+    desc: "Brain + upper motor cortex"
+  }, {
+    label: "Spinal",
+    key: "spine",
+    cy: 105,
+    desc: "Core neural trunk"
+  }, {
+    label: "Lower CNS",
+    key: "lower",
+    cy: 150,
+    desc: "Leg drive + hip power"
+  }, {
+    label: "Peripheral",
+    key: "peripheral",
+    cy: 190,
+    desc: "Stabilizers + mobility"
+  }];
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 280 230",
+    style: {
+      width: "100%",
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("filter", {
+    id: "ns-glow"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "4",
+    result: "blur"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "blur"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  }))), /*#__PURE__*/React.createElement("linearGradient", {
+    id: "spine-grad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: W.cyan,
+    stopOpacity: "0.6"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#4fc3f7",
+    stopOpacity: "0.2"
+  }))), /*#__PURE__*/React.createElement("line", {
+    x1: "140",
+    y1: "40",
+    x2: "140",
+    y2: "210",
+    stroke: "url(#spine-grad)",
+    strokeWidth: "2",
+    strokeDasharray: "4 3"
+  }), zones.map(z => {
+    const n = norm(zoneLoad[z.key]);
+    const r = 8 + n * 28;
+    const color = n > 0.7 ? W.red : n > 0.4 ? W.yellow : W.cyan;
+    const opacity = 0.15 + n * 0.6;
+    return /*#__PURE__*/React.createElement("g", {
+      key: z.key
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "140",
+      cy: z.cy,
+      r: r,
+      fill: color,
+      fillOpacity: opacity * 0.5,
+      filter: "url(#ns-glow)"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "140",
+      cy: z.cy,
+      r: r * 0.5,
+      fill: color,
+      fillOpacity: opacity
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: 160 + r,
+      y1: z.cy,
+      x2: 200,
+      y2: z.cy,
+      stroke: W.border,
+      strokeWidth: "1"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: "204",
+      y: z.cy + 4,
+      fill: color,
+      fillOpacity: 0.8,
+      fontSize: "9",
+      fontFamily: "'DM Mono',monospace"
+    }, z.label), /*#__PURE__*/React.createElement("text", {
+      x: "204",
+      y: z.cy + 14,
+      fill: W.textDim,
+      fillOpacity: "0.5",
+      fontSize: "7",
+      fontFamily: "'DM Mono',monospace"
+    }, Math.round(n * 100), "%"));
+  }));
+}
+
+// Muscle Shadow — body silhouette with volume overlays
+function MuscleShadow({
+  version
+}) {
+  const sevenAgo = new Date();
+  sevenAgo.setDate(sevenAgo.getDate() - 7);
+  const sa = sevenAgo.toISOString().split("T")[0];
+  const allEx = getAllWorkingExercises();
+  const groupVol = {
+    CNS: 0,
+    Legs: 0,
+    Push: 0,
+    Pull: 0,
+    Core: 0,
+    Stability: 0,
+    Mobility: 0
+  };
+  allEx.forEach(ex => {
+    const g = EX_GROUP[ex.name];
+    if (!g) return;
+    getEntries(ex.name).filter(e => e.date >= sa).forEach(e => {
+      groupVol[g] += (e.weight || 10) * e.sets * e.reps;
+    });
+  });
+  const maxVol = Math.max(...Object.values(groupVol), 1);
+  const glow = (g, base = 0.15) => Math.max(0, Math.min(1, base + groupVol[g] / maxVol * 0.7));
+  const dimColor = g => {
+    const v = glow(g, 0);
+    return v < 0.15 ? "#111" : "";
+  };
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 200 360",
+    style: {
+      width: "100%",
+      maxWidth: 200,
+      display: "block",
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, ["push", "pull", "legs", "core", "stab", "mob", "cns"].map(id => /*#__PURE__*/React.createElement("filter", {
+    key: id,
+    id: `ms-${id}`
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "6",
+    result: "b"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "b"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  }))))), /*#__PURE__*/React.createElement("path", {
+    d: "M100 15 C90 15 82 20 80 30 L75 55 C65 60 55 65 50 78 L45 110 C43 120 45 130 48 135 L50 180 L40 260 L45 320 L55 320 L60 260 L68 200 L100 205 L132 200 L140 260 L145 320 L155 320 L160 260 L150 180 L152 135 C155 130 157 120 155 110 L150 78 C145 65 135 60 125 55 L120 30 C118 20 110 15 100 15Z",
+    fill: "#0a0a0a",
+    stroke: W.border,
+    strokeWidth: "1.5"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "16",
+    rx: "15",
+    ry: "18",
+    fill: "#0d0d0d",
+    stroke: W.border,
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "88",
+    rx: "35",
+    ry: "20",
+    fill: W.orange,
+    fillOpacity: glow("Push", 0.05),
+    filter: "url(#ms-push)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "110",
+    rx: "30",
+    ry: "18",
+    fill: "#4fc3f7",
+    fillOpacity: glow("Pull", 0.04),
+    filter: "url(#ms-pull)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "65",
+    cy: "72",
+    rx: "14",
+    ry: "10",
+    fill: W.yellow,
+    fillOpacity: glow("CNS", 0.05),
+    filter: "url(#ms-cns)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "135",
+    cy: "72",
+    rx: "14",
+    ry: "10",
+    fill: W.yellow,
+    fillOpacity: glow("CNS", 0.05),
+    filter: "url(#ms-cns)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "138",
+    rx: "22",
+    ry: "22",
+    fill: "#ab97e8",
+    fillOpacity: glow("Core", 0.05),
+    filter: "url(#ms-core)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "80",
+    cy: "230",
+    rx: "18",
+    ry: "50",
+    fill: W.cyan,
+    fillOpacity: glow("Legs", 0.05),
+    filter: "url(#ms-legs)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "120",
+    cy: "230",
+    rx: "18",
+    ry: "50",
+    fill: W.cyan,
+    fillOpacity: glow("Legs", 0.05),
+    filter: "url(#ms-legs)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "160",
+    rx: "28",
+    ry: "12",
+    fill: "#80cbc4",
+    fillOpacity: glow("Stability", 0.04),
+    filter: "url(#ms-stab)"
+  }), Object.entries(groupVol).filter(([g, v]) => v > 0).slice(0, 3).map(([g, v], i) => /*#__PURE__*/React.createElement("text", {
+    key: g,
+    x: i % 2 === 0 ? 148 : 48,
+    y: 85 + i * 22,
+    fill: GROUP_COLORS[g] || W.cyan,
+    fillOpacity: "0.7",
+    fontSize: "7",
+    fontFamily: "'DM Mono',monospace"
+  }, g)));
+}
+
+// Gravity — solar system of strength
+function GravityMap({
+  version
+}) {
+  const allEx = getAllWorkingExercises().filter(ex => !BODYWEIGHT_EX.has(ex.name) && !LIGHT_INTENT.has(ex.name));
+  const lifts = [];
+  allEx.forEach(ex => {
+    const ents = getEntries(ex.name);
+    if (!ents.length) return;
+    const best = Math.max(...ents.map(e => calc1RM(e.weight, e.reps)));
+    const recent = ents.filter(e => e.date >= new Date(Date.now() - 30 * 864e5).toISOString().split("T")[0]);
+    const recentBest = recent.length ? Math.max(...recent.map(e => calc1RM(e.weight, e.reps))) : 0;
+    lifts.push({
+      name: ex.name,
+      best,
+      recentBest,
+      accent: ex.dayAccent,
+      sessions: new Set(ents.map(e => e.date)).size
+    });
+  });
+  if (!lifts.length) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px",
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      textAlign: "center"
+    }
+  }, "Log sessions to see your gravity map");
+  lifts.sort((a, b) => b.best - a.best);
+  const center = lifts[0];
+  const maxBest = center.best;
+  const planets = lifts.slice(1, 9);
+  const cx = 140,
+    cy = 120;
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 280 240",
+    style: {
+      width: "100%",
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("filter", {
+    id: "grav-glow"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "6",
+    result: "b"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "b"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  }))), /*#__PURE__*/React.createElement("radialGradient", {
+    id: "grav-center",
+    cx: "50%",
+    cy: "50%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: center.accent,
+    stopOpacity: "0.5"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: center.accent,
+    stopOpacity: "0.05"
+  }))), planets.map((_, i) => {
+    const orbitR = 40 + i * 18;
+    return /*#__PURE__*/React.createElement("circle", {
+      key: i,
+      cx: cx,
+      cy: cy,
+      r: orbitR,
+      fill: "none",
+      stroke: W.border,
+      strokeWidth: "0.5",
+      strokeDasharray: "3 4"
+    });
+  }), planets.map((p, i) => {
+    const orbitR = 40 + i * 18;
+    const angle = i / planets.length * Math.PI * 2 - Math.PI / 2;
+    const px = cx + Math.cos(angle) * orbitR;
+    const py = cy + Math.sin(angle) * orbitR;
+    const r = 3 + p.best / maxBest * 8;
+    const isRecent = p.recentBest >= p.best * 0.95;
+    return /*#__PURE__*/React.createElement("g", {
+      key: p.name
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: px,
+      cy: py,
+      r: r,
+      fill: p.accent,
+      fillOpacity: isRecent ? 0.85 : 0.35,
+      filter: isRecent ? "url(#grav-glow)" : undefined
+    }), i < 4 && /*#__PURE__*/React.createElement("text", {
+      x: px + r + 3,
+      y: py + 3,
+      fill: p.accent,
+      fillOpacity: "0.6",
+      fontSize: "6",
+      fontFamily: "'DM Mono',monospace"
+    }, p.name.split(" ")[0]));
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: cx,
+    cy: cy,
+    r: 22,
+    fill: "url(#grav-center)",
+    filter: "url(#grav-glow)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: cx,
+    cy: cy,
+    r: 12,
+    fill: center.accent,
+    fillOpacity: "0.9"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: cx,
+    y: cy - 28,
+    textAnchor: "middle",
+    fill: center.accent,
+    fillOpacity: "0.8",
+    fontSize: "7",
+    fontFamily: "'DM Mono',monospace"
+  }, center.name.split(" ")[0]), /*#__PURE__*/React.createElement("text", {
+    x: cx,
+    y: cy + 36,
+    textAnchor: "middle",
+    fill: center.accent,
+    fillOpacity: "0.5",
+    fontSize: "7",
+    fontFamily: "'DM Mono',monospace"
+  }, center.best, " lbs est 1RM"));
+}
+
+// Migration — year of training as flight paths
+function MigrationMap({
+  version
+}) {
+  const now = new Date();
+  const yearAgo = new Date();
+  yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+  const sessions = sessionsStore.filter(s => new Date(s.date) >= yearAgo).sort((a, b) => a.date.localeCompare(b.date));
+  if (sessions.length < 5) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px",
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      textAlign: "center"
+    }
+  }, "More sessions needed to see your migration");
+  const W_SVG = 280,
+    H_SVG = 140;
+  const totalMs = now - yearAgo;
+  const toX = date => (new Date(date) - yearAgo) / totalMs * W_SVG;
+  const dayOrder = ["sun", "mon", "tue", "wed", "thu", "fri"];
+  const toY = dayId => {
+    const i = dayOrder.indexOf(dayId);
+    return 20 + (i < 0 ? 3 : i) * (H_SVG - 30) / 5;
+  };
+  const paths = {};
+  DAYS.forEach(d => {
+    paths[d.id] = [];
+  });
+  sessions.forEach(s => {
+    if (paths[s.dayId]) paths[s.dayId].push({
+      x: toX(s.date),
+      y: toY(s.dayId),
+      date: s.date
+    });
+  });
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W_SVG} ${H_SVG}`,
+    style: {
+      width: "100%",
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("filter", {
+    id: "mig-glow"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "2",
+    result: "b"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "b"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  })))), DAYS.map(d => {
+    const pts = paths[d.id];
+    if (pts.length < 2) return null;
+    const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    return /*#__PURE__*/React.createElement("g", {
+      key: d.id
+    }, /*#__PURE__*/React.createElement("path", {
+      d: path,
+      fill: "none",
+      stroke: d.accent,
+      strokeWidth: "1",
+      strokeOpacity: "0.25"
+    }), pts.map((p, i) => /*#__PURE__*/React.createElement("circle", {
+      key: i,
+      cx: p.x,
+      cy: p.y,
+      r: "1.5",
+      fill: d.accent,
+      fillOpacity: "0.6"
+    })));
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "2",
+    y: "10",
+    fill: W.textDim,
+    fillOpacity: "0.4",
+    fontSize: "6",
+    fontFamily: "'DM Mono',monospace"
+  }, yearAgo.getFullYear()), /*#__PURE__*/React.createElement("text", {
+    x: W_SVG - 30,
+    y: "10",
+    fill: W.textDim,
+    fillOpacity: "0.4",
+    fontSize: "6",
+    fontFamily: "'DM Mono',monospace"
+  }, "Now"));
+}
+
+// Scar Tissue Indicator — used inline on exercise rows in StatsView
+function ScarIndicator({
+  exName
+}) {
+  const intensity = getScarIntensity(exName);
+  if (intensity < 0.1) return null;
+  const dots = Math.round(intensity * 5);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 1,
+      alignItems: "center",
+      marginTop: 3
+    }
+  }, Array.from({
+    length: 5
+  }, (_, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      width: 4,
+      height: 4,
+      borderRadius: 1,
+      background: i < dots ? "rgba(255,71,87,0.5)" : W.border,
+      transition: "background 0.3s"
+    }
+  })));
+}
+
+// Last Rep Screen
+function LastRepModal({
+  exName,
+  onClose
+}) {
+  const [weight, setWeight] = useState("");
+  const [reps, setReps] = useState("");
+  const [countdown, setCountdown] = useState(null);
+  const [result, setResult] = useState(null); // null | "made" | "missed"
+  const countRef = useRef(null);
+  const attempts = lastRepStore.filter(a => a.exName === exName).slice(-10).reverse();
+  const winRate = attempts.length ? Math.round(attempts.filter(a => a.success).length / attempts.length * 100) : null;
+  function startAttempt() {
+    setResult(null);
+    setCountdown(3);
+    haptic(100);
+    countRef.current = setInterval(() => {
+      setCountdown(c => {
+        if (c <= 1) {
+          clearInterval(countRef.current);
+          setCountdown(0);
+          haptic([60, 30, 120]);
+          return 0;
+        }
+        haptic(50);
+        return c - 1;
+      });
+    }, 1000);
+  }
+  function logResult(success) {
+    const entry = {
+      date: todayStr(),
+      exName,
+      weight: parseFloat(weight) || 0,
+      reps: parseInt(reps) || 1,
+      success
+    };
+    lastRepStore.unshift(entry);
+    if (lastRepStore.length > 500) lastRepStore = lastRepStore.slice(0, 500);
+    saveLastRep();
+    if (!success) recordStruggle(exName);else recordBreakthrough(exName);
+    setResult(success ? "made" : "missed");
+    playBeep(success ? 880 : 220, 0.3, 0.4);
+  }
+  useEffect(() => () => {
+    if (countRef.current) clearInterval(countRef.current);
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 3000,
+      background: "rgba(0,0,0,0.95)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.3em",
+      color: W.textDim,
+      marginBottom: 8,
+      textTransform: "uppercase"
+    }
+  }, "The Last Rep"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: W.text,
+      textAlign: "center",
+      marginBottom: 24
+    }
+  }, exName), winRate !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      marginBottom: 20
+    }
+  }, winRate, "% win rate \xB7 ", attempts.length, " attempt", attempts.length !== 1 ? "s" : ""), countdown === null && result === null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      maxWidth: 300
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: weight,
+    onChange: e => setWeight(e.target.value),
+    placeholder: "Weight (lbs)",
+    style: {
+      flex: 1,
+      background: W.surface,
+      border: `1px solid ${W.border}`,
+      borderRadius: 8,
+      padding: "10px 12px",
+      color: W.text,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 14,
+      textAlign: "center"
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    value: reps,
+    onChange: e => setReps(e.target.value),
+    placeholder: "Reps",
+    style: {
+      flex: 1,
+      background: W.surface,
+      border: `1px solid ${W.border}`,
+      borderRadius: 8,
+      padding: "10px 12px",
+      color: W.text,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 14,
+      textAlign: "center"
+    }
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: startAttempt,
+    style: {
+      width: "100%",
+      padding: "16px",
+      borderRadius: 12,
+      border: "none",
+      background: W.red,
+      color: "#fff",
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 14,
+      fontWeight: 700,
+      letterSpacing: "0.1em",
+      cursor: "pointer"
+    }
+  }, "BEGIN ATTEMPT")), countdown !== null && countdown > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 96,
+      fontWeight: 900,
+      fontFamily: "'DM Mono',monospace",
+      color: W.red,
+      lineHeight: 1,
+      animation: "scaleIn 0.2s ease both"
+    }
+  }, countdown), countdown === 0 && result === null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: W.text,
+      marginBottom: 24,
+      letterSpacing: "0.05em"
+    }
+  }, "EXECUTE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => logResult(true),
+    style: {
+      flex: 1,
+      padding: "18px",
+      borderRadius: 12,
+      border: "none",
+      background: "rgba(0,201,177,0.2)",
+      color: W.cyan,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "MADE IT"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => logResult(false),
+    style: {
+      flex: 1,
+      padding: "18px",
+      borderRadius: 12,
+      border: "none",
+      background: "rgba(255,71,87,0.2)",
+      color: W.red,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "MISSED"))), result && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 56,
+      marginBottom: 12
+    }
+  }, result === "made" ? "🔥" : "💀"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: result === "made" ? W.cyan : W.red,
+      marginBottom: 24,
+      letterSpacing: "0.05em"
+    }
+  }, result === "made" ? "MADE IT" : "MISSED"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setResult(null);
+      setCountdown(null);
+      setWeight("");
+      setReps("");
+    },
+    style: {
+      padding: "12px 24px",
+      borderRadius: 8,
+      border: `1px solid ${W.border}`,
+      background: "transparent",
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12,
+      cursor: "pointer"
+    }
+  }, "Another attempt")), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      position: "absolute",
+      top: 20,
+      right: 20,
+      background: "transparent",
+      border: "none",
+      color: W.textDim,
+      fontSize: 24,
+      cursor: "pointer",
+      lineHeight: 1
+    }
+  }, "\xD7"), attempts.length > 0 && result === null && countdown === null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 24,
+      width: "100%",
+      maxWidth: 300
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.2em",
+      color: W.textDim,
+      marginBottom: 10,
+      textTransform: "uppercase"
+    }
+  }, "Recent Attempts"), attempts.slice(0, 5).map((a, i) => /*#__PURE__*/React.createElement("div", {
+    key: `${a.date}-${a.weight}-${a.reps}`,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      padding: "6px 0",
+      borderBottom: `1px solid ${W.border}`,
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: a.success ? W.cyan : W.red
+    }
+  }, a.success ? "✓" : "✗"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.text
+    }
+  }, a.weight, "lbs \xD7 ", a.reps), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.textDim
+    }
+  }, fmtDate(a.date))))));
+}
+
+// The Void
+function VoidScreen({
+  onDismiss
+}) {
+  const [pos, setPos] = useState({
+    x: 0.5,
+    y: 0.5
+  });
+  useEffect(() => {
+    const id = setInterval(() => setPos({
+      x: 0.3 + Math.random() * 0.4,
+      y: 0.3 + Math.random() * 0.4
+    }), 3000);
+    return () => clearInterval(id);
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 5000,
+      background: "#000",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    onClick: onDismiss
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: `${pos.x * 100}%`,
+      top: `${pos.y * 100}%`,
+      transform: "translate(-50%,-50%)",
+      transition: "left 3s ease,top 3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: "#fff",
+      opacity: 0.7,
+      animation: "breathe 4s ease-in-out infinite",
+      boxShadow: "0 0 20px rgba(255,255,255,0.3)"
+    }
+  })), /*#__PURE__*/React.createElement("style", null, `@keyframes breathe{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.8);opacity:0.9}}`));
+}
+
+// Confession Booth
+function ConfessionModal({
+  onClose
+}) {
+  const [text, setText] = useState("");
+  const [saved, setSaved] = useState(false);
+  const prompts = ["What are you actually training for?", "Who are you trying to become?", "What are you running from?", "What would you do if no one was watching?", "What does strength mean to you right now?"];
+  const [prompt] = useState(() => prompts[Math.floor(Math.random() * prompts.length)]);
+  async function saveConfession() {
+    if (!text.trim()) return;
+    const encoded = btoa(unescape(encodeURIComponent(text)));
+    const entry = {
+      date: todayStr(),
+      encoded
+    };
+    const r = await window.storage.get("wt_confession_v1");
+    const existing = r?.value ? JSON.parse(r.value) : [];
+    existing.push(entry);
+    await window.storage.set("wt_confession_v1", JSON.stringify(existing));
+    setSaved(true);
+    setTimeout(onClose, 1800);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 4000,
+      background: "rgba(0,0,0,0.97)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 320,
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.3em",
+      color: "rgba(255,255,255,0.15)",
+      marginBottom: 24,
+      textTransform: "uppercase"
+    }
+  }, "The Confession Booth"), !saved ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 300,
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: 1.6,
+      marginBottom: 32,
+      fontStyle: "italic"
+    }
+  }, prompt), /*#__PURE__*/React.createElement("textarea", {
+    value: text,
+    onChange: e => setText(e.target.value),
+    placeholder: "Answer honestly. No one will see this.",
+    style: {
+      width: "100%",
+      minHeight: 120,
+      background: "transparent",
+      border: "none",
+      borderBottom: "1px solid rgba(255,255,255,0.15)",
+      color: "rgba(255,255,255,0.8)",
+      fontSize: 14,
+      fontFamily: "'DM Sans',sans-serif",
+      lineHeight: 1.7,
+      outline: "none",
+      resize: "none",
+      padding: "0 0 12px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 24
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      background: "transparent",
+      border: "none",
+      color: "rgba(255,255,255,0.2)",
+      fontSize: 12,
+      fontFamily: "'DM Mono',monospace",
+      cursor: "pointer"
+    }
+  }, "leave"), /*#__PURE__*/React.createElement("button", {
+    onClick: saveConfession,
+    style: {
+      background: "transparent",
+      border: "1px solid rgba(255,255,255,0.15)",
+      borderRadius: 6,
+      color: "rgba(255,255,255,0.5)",
+      fontSize: 12,
+      fontFamily: "'DM Mono',monospace",
+      padding: "8px 20px",
+      cursor: "pointer"
+    }
+  }, "seal it"))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      color: "rgba(255,255,255,0.3)",
+      fontSize: 13,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.1em"
+    }
+  }, "sealed.")));
+}
+
+// Resting Face — breathing overlay on rest timer
+function RestingFaceOverlay() {
+  const [phase, setPhase] = useState("inhale");
+  const [progress, setProgress] = useState(0);
+  const INHALE = 4000,
+    EXHALE = 6000;
+  useEffect(() => {
+    let start = Date.now();
+    let currentPhase = "inhale";
+    let duration = INHALE;
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const p = Math.min(1, elapsed / duration);
+      setProgress(p);
+      setPhase(currentPhase);
+      if (elapsed >= duration) {
+        currentPhase = currentPhase === "inhale" ? "exhale" : "inhale";
+        duration = currentPhase === "inhale" ? INHALE : EXHALE;
+        start = Date.now();
+      }
+    };
+    const id = setInterval(tick, 50);
+    return () => clearInterval(id);
+  }, []);
+  const scale = phase === "inhale" ? 1 + progress * 0.4 : 1.4 - progress * 0.4;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      pointerEvents: "none",
+      zIndex: 0,
+      opacity: 0.4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 120,
+      height: 120,
+      borderRadius: "50%",
+      border: `1px solid ${W.cyan}`,
+      transform: `scale(${scale})`,
+      transition: "transform 0.1s linear",
+      boxShadow: `0 0 ${20 * scale}px rgba(0,201,177,0.2)`
+    }
+  }));
+}
+
+// Undertow visual
+function UndertowBar({
+  debt
+}) {
+  const pct = Math.min(100, debt);
+  const color = pct > 70 ? W.red : pct > 40 ? W.yellow : W.cyan;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      height: 3,
+      background: W.border,
+      borderRadius: 2,
+      overflow: "hidden",
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      height: "100%",
+      width: `${pct}%`,
+      background: color,
+      borderRadius: 2,
+      transition: "width 1s ease",
+      opacity: 0.7,
+      boxShadow: `0 0 6px ${color}55`
+    }
+  }));
+}
+
+// Threshold Hum indicator
+function ThresholdHum({
+  exName,
+  currentWeight
+}) {
+  // Find threshold: weight where rest times spike
+  const ents = getEntries(exName);
+  if (ents.length < 6 || !currentWeight) return null;
+  const sorted = [...ents].sort((a, b) => a.weight - b.weight);
+  const mid = Math.floor(sorted.length * 0.6);
+  const threshold = sorted[mid]?.weight || 0;
+  if (!threshold || currentWeight < threshold * 0.9) return null;
+  const isOver = parseFloat(currentWeight) >= threshold;
+  if (!isOver) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: `linear-gradient(90deg,transparent,${W.cyan}44,transparent)`,
+      borderRadius: 1,
+      marginTop: 2,
+      animation: "fadeIn 0.5s ease both"
+    }
+  });
+}
+
+// Fossil Record card
+function FossilCard({
+  exName
+}) {
+  const fossil = fossilStore[exName];
+  if (!fossil) return null;
+  const entries = getEntries(exName);
+  if (entries.length < 3) return null; // Not interesting until there's real history
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 10px",
+      background: "rgba(255,255,255,0.02)",
+      border: `1px solid rgba(255,255,255,0.06)`,
+      borderRadius: 6,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.2em",
+      color: "rgba(255,255,255,0.2)",
+      marginBottom: 3,
+      textTransform: "uppercase"
+    }
+  }, "First Entry"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.35)",
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, fossil.weight, "lbs \xD7 ", fossil.reps, "r \xB7 ", fmtDate(fossil.date)));
+}
+
+// ReadinessDetail popover
+function ReadinessDetail({
+  color
+}) {
+  const r = getTodayReadiness();
+  if (!r) return null;
+  const label = r.score >= 75 ? "High Readiness" : r.score >= 50 ? "Moderate Readiness" : "Low Readiness";
+  const desc = r.score >= 75 ? "Your nervous system is primed. Sleep, stress, and soreness are all in a good window. Push intensity today — this is a day to accumulate quality work." : r.score >= 50 ? "Acceptable training conditions. Keep intensity moderate and stay attuned to how your body responds during warmup. Don't force PRs." : "Your system is taxed. Train, but reduce load by 10–15% and prioritize movement quality over numbers. Recovery is the work today.";
+  const sleepLabel = ["", "Terrible", "Poor", "Fair", "Good", "Great"][r.sleep] || "—";
+  const stressLabel = ["", "Extreme", "High", "Moderate", "Low", "None"][r.stress] || "—";
+  const sorenessLabel = ["", "Wrecked", "Sore", "Moderate", "Mild", "Fresh"][r.soreness] || "—";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: "calc(100% + 8px)",
+      right: 0,
+      zIndex: 200,
+      width: 260,
+      background: W.surfaceHi,
+      border: `1px solid ${color}33`,
+      borderRadius: 12,
+      padding: "14px 16px",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+      animation: "fadeIn 0.15s ease both"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.1em",
+      marginBottom: 6,
+      textTransform: "uppercase"
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textMid,
+      lineHeight: 1.65,
+      marginBottom: 12
+    }
+  }, desc), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 8
+    }
+  }, [["Sleep", sleepLabel, r.sleep], ["Stress", stressLabel, r.stress], ["Soreness", sorenessLabel, r.soreness]].map(([k, v, n]) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      textAlign: "center",
+      padding: "8px 4px",
+      background: `${color}09`,
+      borderRadius: 8,
+      border: `1px solid ${color}22`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.1em",
+      textTransform: "uppercase",
+      marginBottom: 3
+    }
+  }, k), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, n), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      color: W.textDim,
+      marginTop: 1
+    }
+  }, v)))));
+}
 
 // ── HOME PAGE ─────────────────────────────────────────────────────────────────
 function HomePage({
   version,
+  bwVersion = 0,
   setPage,
-  onViewProgress,
   onDeleteDate,
-  onBWUpdate
+  onBWUpdate,
+  onShowReadiness,
+  readinessScore
 }) {
+  const theme = getSeasonalTheme();
+  const [showReadinessDetail, setShowReadinessDetail] = useState(false);
+  useEffect(() => {
+    if (!showReadinessDetail) return;
+    const close = () => setShowReadinessDetail(false);
+    setTimeout(() => document.addEventListener("click", close), 0);
+    return () => document.removeEventListener("click", close);
+  }, [showReadinessDetail]);
+  const todayS = todayStr();
   const {
     monStr,
     sunStr
   } = thisWeekRange();
+  const sessions = new Set(sessionsStore.filter(s => s.date >= monStr && s.date <= sunStr).map(s => s.date + "_" + s.dayId)).size;
   const allWorkingEx = getAllWorkingExercises();
   let totalPRs = 0;
   allWorkingEx.forEach(ex => {
@@ -4845,90 +7230,30 @@ function HomePage({
       if (!e.bodyweight && isPR(ents, i)) totalPRs++;
     });
   });
-  // Count sessions this week from sessionsStore (proper ended sessions only)
-  const sessions = new Set(sessionsStore.filter(s => s.date >= monStr && s.date <= sunStr).map(s => s.date + "_" + s.dayId)).size;
-  const top1RMs = [];
-  allWorkingEx.filter(ex => !BODYWEIGHT_EX.has(ex.name) && !LIGHT_INTENT.has(ex.name)).forEach(ex => {
-    const ents = getEntries(ex.name);
-    if (!ents.length) return;
-    const best = Math.max(...ents.map(e => calc1RM(e.weight, e.reps)));
-    const bestEntry = ents.reduce((b, e) => calc1RM(e.weight, e.reps) >= calc1RM(b.weight, b.reps) ? e : b);
-    top1RMs.push({
-      name: ex.name,
-      orm: best,
-      weight: bestEntry.weight,
-      reps: bestEntry.reps,
-      accent: ex.dayAccent
-    });
+  const momentum = computeMomentum();
+  updateUndertow();
+  const undertow = undertowStore.debt;
+
+  // Oracle
+  const oracle = getOracle();
+  // Archaeology
+  const archaeology = getArchaeologyCard();
+  // Whisper — show last session's whisper
+  const lastSession = sessionsStore[0];
+  const whisper = lastSession ? generateWhisper(lastSession.dayId) : null;
+
+  // Void — 1% chance per day after 10+ sessions
+  const [showVoid, setShowVoid] = useState(() => {
+    if (sessionsStore.length < 10) return false;
+    const todayVoid = localStorage.getItem("wt_void_shown");
+    if (todayVoid === todayStr()) return false;
+    return Math.random() < 0.01;
   });
-  top1RMs.sort((a, b) => b.orm - a.orm);
-  const trends = [];
-  allWorkingEx.filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name)).forEach(ex => {
-    const ents = getEntries(ex.name);
-    if (ents.length < 2) return;
-    const first = ents[0].weight,
-      last = ents[ents.length - 1].weight;
-    if (first <= 0 || last <= 0) return; // skip BW/bodyweight-only or unweighted entries
-    const pct = (last - first) / first * 100;
-    const distinctDates = new Set(ents.map(e => e.date)).size;
-    if (distinctDates < 2) return; // need at least 2 separate days
-    trends.push({
-      name: ex.name,
-      pct,
-      first,
-      last,
-      sessions: distinctDates,
-      accent: ex.dayAccent
-    });
-  });
-  trends.sort((a, b) => b.pct - a.pct);
-  const topGainers = trends.slice(0, 3);
-  const PROGRESS_EXEMPT = new Set(["Hang Clean", "MB Slam → Lateral Toss", "MB Slam → MB Lateral Toss", "Snap Down → Split Jump", "Snap Down → Split Squat Jump", "Box Drop → Stick Landing", "Box Drop Stick", "Rear Delt Cable Fly", "Cable Rear Fly", "Cuban Press", "Cable Y Raise", "Cable Y Raises", "Band Pull-Aparts", "Band Pull-Aparts (overhand)", "Suitcase Carry", "Copenhagen Plank"]);
-  const fourWeeksAgo = new Date();
-  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
-  const fourWeeksAgoStr = fourWeeksAgo.toISOString().slice(0, 10);
-  const needsAttention = [];
-  allWorkingEx.filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name) && !PROGRESS_EXEMPT.has(ex.name)).forEach(ex => {
-    const allEnts = getEntries(ex.name);
-    const window4w = allEnts.filter(e => e.date >= fourWeeksAgoStr);
-    if (window4w.length < 2) return;
-    const wFirst = window4w[0].weight,
-      wLast = window4w[window4w.length - 1].weight;
-    const pct4w = wFirst === 0 ? wLast > 0 ? 100 : 0 : (wLast - wFirst) / wFirst * 100;
-    if (pct4w < 10) {
-      const distinctDates4w = new Set(window4w.map(e => e.date)).size;
-      needsAttention.push({
-        name: ex.name,
-        pct: pct4w,
-        first: wFirst,
-        last: wLast,
-        sessions: distinctDates4w,
-        accent: ex.dayAccent
-      });
-    }
-  });
-  needsAttention.sort((a, b) => a.pct - b.pct);
-  const [spiderWeekOffset, setSpiderWeekOffset] = useState(0);
-  const spiderRange = getWeekRange(spiderWeekOffset);
-  const groupVol = {
-    CNS: 0,
-    Legs: 0,
-    Push: 0,
-    Pull: 0,
-    Core: 0,
-    Stability: 0
-  };
-  allWorkingEx.forEach(ex => {
-    const g = EX_GROUP[ex.name];
-    if (!g) return;
-    getEntries(ex.name).filter(e => e.date >= spiderRange.sunStr && e.date <= spiderRange.satStr).forEach(e => {
-      groupVol[g] += e.weight > 0 ? e.weight * e.sets * e.reps : e.sets * e.reps * 10;
-    });
-  });
-  const totalVol = Object.values(groupVol).reduce((a, b) => a + b, 0) || 1;
-  const spiderData = Object.fromEntries(GROUPS.map(g => [g, groupVol[g] / totalVol]));
-  const spiderHasData = Object.values(groupVol).some(v => v > 0);
-  const spiderLabel = spiderWeekOffset === 0 ? "This Week" : spiderWeekOffset === 1 ? "Last Week" : `${spiderWeekOffset} Weeks Ago`;
+  useEffect(() => {
+    if (showVoid) localStorage.setItem("wt_void_shown", todayStr());
+  }, [showVoid]);
+  const [showConfession, setShowConfession] = useState(false);
+  const [confessionTaps, setConfessionTaps] = useState(0);
   const [heatMonthOffset, setHeatMonthOffset] = useState(0);
   const now = new Date();
   const heatDate = new Date(now.getFullYear(), now.getMonth() - heatMonthOffset, 1);
@@ -4939,7 +7264,6 @@ function HomePage({
   const firstDow = new Date(heatYear, heatMonth, 1).getDay();
   const loggedDates = new Set();
   allWorkingEx.forEach(ex => getEntries(ex.name).forEach(e => loggedDates.add(e.date)));
-  const todayS = todayStr();
   const calCells = [];
   for (let i = 0; i < firstDow; i++) calCells.push(null);
   for (let d = 1; d <= daysInMonth; d++) {
@@ -4956,19 +7280,6 @@ function HomePage({
   const calRows = [];
   for (let i = 0; i < calCells.length; i += 7) calRows.push(calCells.slice(i, i + 7));
   const totalLoggedDays = [...loggedDates].filter(d => d.startsWith(`${heatYear}-${String(heatMonth + 1).padStart(2, "0")}`)).length;
-  const allPRs = [];
-  allWorkingEx.filter(ex => !BODYWEIGHT_EX.has(ex.name)).forEach(ex => {
-    const ents = getEntries(ex.name);
-    ents.forEach((e, i) => {
-      if (isPR(ents, i)) allPRs.push({
-        name: ex.name,
-        ...e,
-        orm: calc1RM(e.weight, e.reps),
-        accent: ex.dayAccent
-      });
-    });
-  });
-  allPRs.sort((a, b) => b.date.localeCompare(a.date));
   const btnStyle = {
     background: "transparent",
     border: `1px solid ${W.border}`,
@@ -4981,84 +7292,139 @@ function HomePage({
     fontWeight: 500,
     letterSpacing: "0.05em"
   };
+  const readinessColor = !readinessScore ? W.textDim : readinessScore >= 75 ? W.cyan : readinessScore >= 50 ? W.yellow : W.red;
+
+  // Undertow header tint
+  const undertowAlpha = Math.min(0.25, undertow / 100 * 0.25);
+  const headerBg = undertow > 30 ? `linear-gradient(180deg,rgba(255,71,87,${undertowAlpha}) 0%,transparent 100%)` : "none";
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "0 0 calc(env(safe-area-inset-bottom) + 86px)",
+      padding: `0 0 calc(env(safe-area-inset-bottom) + 86px)`,
       maxWidth: 680,
-      margin: "0 auto",
-      background: "linear-gradient(180deg,#131313 0%,#0a0a0a 300px,#080808 100%)"
+      margin: "0 auto"
     },
     className: "ai"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, showVoid && /*#__PURE__*/React.createElement(VoidScreen, {
+    onDismiss: () => setShowVoid(false)
+  }), showConfession && /*#__PURE__*/React.createElement(ConfessionModal, {
+    onClose: () => setShowConfession(false)
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "calc(env(safe-area-inset-top) + 20px) 16px 16px",
-      borderBottom: `1px solid ${W.border}`
+      padding: "calc(env(safe-area-inset-top) + 16px) 16px 14px",
+      borderBottom: `1px solid ${W.border}`,
+      background: headerBg
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      alignItems: "flex-end",
+      alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 2
+      marginBottom: undertow > 20 ? 6 : 0
     }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: () => {
+      const t = confessionTaps + 1;
+      setConfessionTaps(t);
+      if (t >= 3) {
+        setConfessionTaps(0);
+        setShowConfession(true);
+      }
+    },
     style: {
-      fontSize: 9,
+      cursor: "pointer",
+      userSelect: "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
       fontFamily: "'DM Mono',monospace",
-      letterSpacing: "0.3em",
+      letterSpacing: "0.35em",
       color: W.textDim,
       textTransform: "uppercase",
-      marginBottom: 6
+      marginBottom: 4
     }
   }, "Training Program"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 28,
+      fontSize: 22,
       fontWeight: 800,
       letterSpacing: "-0.02em",
       color: W.text,
       lineHeight: 1
     }
-  }, "Weekly Tracker")), /*#__PURE__*/React.createElement("button", {
-    onClick: onViewProgress,
+  }, "Weekly Tracker")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      position: "relative"
+    }
+  }, readinessScore !== null && readinessScore !== undefined && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowReadinessDetail(s => !s),
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 6,
-      padding: "8px 14px",
-      borderRadius: 20,
+      gap: 5,
+      padding: "6px 10px",
+      borderRadius: 16,
+      border: `1px solid ${readinessColor}33`,
+      background: `${readinessColor}11`,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: readinessColor,
+      boxShadow: `0 0 8px ${readinessColor}`
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: readinessColor,
+      fontWeight: 700
+    }
+  }, readinessScore)), showReadinessDetail && /*#__PURE__*/React.createElement(ReadinessDetail, {
+    color: readinessColor
+  })), !readinessScore && /*#__PURE__*/React.createElement("button", {
+    onClick: onShowReadiness,
+    style: {
+      padding: "7px 12px",
+      borderRadius: 16,
       border: `1px solid ${W.border}`,
       background: W.surface,
-      color: W.cyan,
-      fontFamily: "'DM Sans',sans-serif",
-      fontSize: 12,
-      fontWeight: 600,
-      letterSpacing: "0.02em"
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 10,
+      cursor: "pointer",
+      letterSpacing: "0.05em"
     }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "12",
-    height: "12",
-    viewBox: "0 0 16 16",
-    fill: "none"
-  }, /*#__PURE__*/React.createElement("polyline", {
-    points: "1,12 5,6 9,9 15,2",
-    stroke: W.cyan,
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  })), "Charts"))), /*#__PURE__*/React.createElement("div", {
+  }, "Check In"))), undertow > 20 && /*#__PURE__*/React.createElement(UndertowBar, {
+    debt: undertow
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 16px 0",
+      borderBottom: `1px solid ${W.border}`,
+      background: W.surface
+    }
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      borderBottom: `1px solid ${W.border}`
+      gap: 10,
+      paddingBottom: 12
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      padding: "14px 16px",
-      borderRight: `1px solid ${W.border}`
+      background: W.bg,
+      borderRadius: 10,
+      padding: "12px 14px",
+      border: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
+      fontSize: 8,
       fontFamily: "'DM Mono',monospace",
       color: W.textDim,
       letterSpacing: "0.2em",
@@ -5068,92 +7434,117 @@ function HomePage({
   }, "This Week"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 32,
-      fontWeight: 800,
-      letterSpacing: "-0.02em",
+      fontWeight: 900,
       color: W.cyan,
-      lineHeight: 1
+      lineHeight: 1,
+      fontFamily: "'DM Mono',monospace"
     }
   }, sessions), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
+      fontSize: 9,
       color: W.textDim,
       marginTop: 3,
-      fontFamily: "'DM Mono',monospace"
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.05em"
     }
-  }, "sessions")), /*#__PURE__*/React.createElement("div", {
+  }, "sessions logged")), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      padding: "14px 16px",
-      borderRight: `1px solid ${W.border}`
+      background: W.bg,
+      borderRadius: 10,
+      padding: "12px 14px",
+      border: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
+      fontSize: 8,
       fontFamily: "'DM Mono',monospace",
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "All-Time PRs"), /*#__PURE__*/React.createElement("div", {
+  }, "Momentum"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 32,
-      fontWeight: 800,
-      letterSpacing: "-0.02em",
-      color: W.text,
-      lineHeight: 1
-    }
-  }, totalPRs), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: W.textDim,
-      marginTop: 3,
+      fontWeight: 900,
+      color: momentum > 70 ? W.cyan : momentum > 40 ? W.yellow : W.red,
+      lineHeight: 1,
       fontFamily: "'DM Mono',monospace"
     }
-  }, "records")), /*#__PURE__*/React.createElement("div", {
+  }, momentum), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      padding: "14px 16px"
+      height: 3,
+      borderRadius: 2,
+      background: "rgba(255,255,255,0.06)",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      width: `${momentum}%`,
+      background: momentum > 70 ? W.cyan : momentum > 40 ? W.yellow : W.red,
+      borderRadius: 2,
+      transition: "width 0.6s ease"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "/100"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      background: W.bg,
+      borderRadius: 10,
+      padding: "12px 14px",
+      border: `1px solid ${W.border}`
     }
   }, (() => {
     const overdueDay = DAYS.filter(d => d.id !== "fri").find(d => {
       const last = dayLastLoggedDate(d.id);
       if (!last) return false;
-      const diffDays = Math.floor((new Date() - new Date(last)) / (1000 * 60 * 60 * 24));
-      return diffDays > 7;
+      return Math.floor((new Date() - new Date(last)) / (1000 * 60 * 60 * 24)) > 7;
     });
-    if (!overdueDay) {
-      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 9,
-          fontFamily: "'DM Mono',monospace",
-          color: W.textDim,
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          marginBottom: 4
-        }
-      }, "On Track"), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 26,
-          fontWeight: 800,
-          letterSpacing: "-0.02em",
-          color: W.cyan,
-          lineHeight: 1
-        }
-      }, "\u2713"), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 10,
-          color: W.textDim,
-          marginTop: 3,
-          fontFamily: "'DM Mono',monospace"
-        }
-      }, "all days current"));
-    }
+    if (!overdueDay) return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 8,
+        fontFamily: "'DM Mono',monospace",
+        color: W.textDim,
+        letterSpacing: "0.2em",
+        textTransform: "uppercase",
+        marginBottom: 4
+      }
+    }, "Status"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 28,
+        fontWeight: 900,
+        color: W.cyan,
+        lineHeight: 1
+      }
+    }, "\u2713"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: W.cyan,
+        marginTop: 3,
+        fontFamily: "'DM Mono',monospace",
+        letterSpacing: "0.05em"
+      }
+    }, "on track"));
     const last = dayLastLoggedDate(overdueDay.id);
     const diffDays = Math.floor((new Date() - new Date(last)) / (1000 * 60 * 60 * 24));
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 9,
+        fontSize: 8,
         fontFamily: "'DM Mono',monospace",
         color: W.red,
         letterSpacing: "0.2em",
@@ -5163,300 +7554,106 @@ function HomePage({
     }, "Overdue"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 22,
-        fontWeight: 800,
+        fontWeight: 900,
         color: W.red,
-        lineHeight: 1,
-        letterSpacing: "-0.01em"
-      },
-      title: overdueDay.label
+        lineHeight: 1
+      }
     }, overdueDay.label.slice(0, 3).toUpperCase()), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10,
+        fontSize: 9,
         color: W.textDim,
         marginTop: 3,
         fontFamily: "'DM Mono',monospace"
       }
-    }, diffDays, "d since last"));
-  })())), /*#__PURE__*/React.createElement("div", {
+    }, diffDays, "d ago"));
+  })()))), oracle && /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      flexDirection: "column",
-      padding: "0",
-      gap: 0
+      margin: "0",
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`,
+      background: "rgba(245,200,66,0.03)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.25em",
+      color: W.yellow,
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "The Oracle"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: W.textMid,
+      lineHeight: 1.65,
+      fontStyle: "italic"
+    }
+  }, oracle)), archaeology && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 16px",
+      borderBottom: `1px solid ${W.border}`,
+      background: "rgba(255,255,255,0.015)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.25em",
+      color: "rgba(255,255,255,0.2)",
+      textTransform: "uppercase",
+      marginBottom: 5
+    }
+  }, "The Archaeology"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "rgba(255,255,255,0.45)",
+      lineHeight: 1.6
+    }
+  }, archaeology)), whisper && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px",
       borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px",
-      borderRight: `1px solid ${W.border}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim,
-      letterSpacing: "0.2em",
-      textTransform: "uppercase",
-      marginBottom: 2
-    }
-  }, "Top Gainers"), /*#__PURE__*/React.createElement("div", {
-    style: {
       fontSize: 11,
       color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
+      fontStyle: "italic",
+      lineHeight: 1.5
     }
-  }, "Biggest weight increase"))), topGainers.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "20px 0",
-      fontSize: 11,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim,
-      textAlign: "center"
-    }
-  }, "Log 2+ sessions per lift") : topGainers.map(t => {
-    const barW = Math.min(100, Math.max(2, t.pct * 2.5));
-    return /*#__PURE__*/React.createElement("div", {
-      key: t.name,
-      style: {
-        marginBottom: 14
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "baseline",
-        marginBottom: 5
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 12,
-        fontWeight: 600,
-        color: W.text,
-        flex: 1,
-        minWidth: 0,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap"
-      }
-    }, t.name), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14,
-        fontWeight: 700,
-        color: W.cyan,
-        marginLeft: 10,
-        flexShrink: 0,
-        fontFamily: "'DM Mono',monospace"
-      }
-    }, "+", t.pct.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: 2,
-        background: W.border,
-        borderRadius: 1,
-        marginBottom: 4
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: "100%",
-        width: `${barW}%`,
-        background: W.cyan,
-        borderRadius: 1,
-        transition: "width 0.4s ease"
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: W.textDim,
-        fontFamily: "'DM Mono',monospace"
-      }
-    }, t.first, " \u2192 ", t.last, " lbs \xB7 ", t.sessions, " sessions"));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim,
-      letterSpacing: "0.2em",
-      textTransform: "uppercase",
-      marginBottom: 2
-    }
-  }, "Muscle Balance"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, spiderLabel)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    style: btnStyle,
-    onClick: () => setSpiderWeekOffset(o => o + 1)
-  }, "\u2190"), spiderWeekOffset > 0 && /*#__PURE__*/React.createElement("button", {
-    style: btnStyle,
-    onClick: () => setSpiderWeekOffset(o => o - 1)
-  }, "\u2192"))), !spiderHasData ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "20px 0",
-      fontSize: 11,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim,
-      textAlign: "center"
-    }
-  }, "No sessions for ", spiderLabel.toLowerCase()) : /*#__PURE__*/React.createElement(DonutChart, {
-    data: spiderData,
-    size: 220
-  }))), /*#__PURE__*/React.createElement("div", {
+  }, "\"", whisper, "\"")), /*#__PURE__*/React.createElement("div", {
     style: {
       borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 16px 12px",
+      padding: "16px 16px 10px",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between"
     }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim,
-      letterSpacing: "0.2em",
-      textTransform: "uppercase",
-      marginBottom: 2
-    }
-  }, "Needs Attention"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, "<", "10% gain \xB7 last 4 weeks")), needsAttention.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      fontFamily: "'DM Mono',monospace",
-      color: W.red,
-      background: "rgba(255,71,87,0.1)",
-      border: `1px solid rgba(255,71,87,0.2)`,
-      borderRadius: 12,
-      padding: "3px 10px",
-      fontWeight: 600
-    }
-  }, needsAttention.length, " lift", needsAttention.length !== 1 ? "s" : "")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "0 16px 16px"
-    }
-  }, needsAttention.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "10px 0",
-      fontSize: 12,
-      color: W.cyan,
-      fontFamily: "'DM Mono',monospace",
-      display: "flex",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 6,
-      height: 6,
-      borderRadius: "50%",
-      background: W.cyan,
-      boxShadow: `0 0 8px ${W.cyan}`
-    }
-  }), allWorkingEx.filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name)).some(ex => getEntries(ex.name).length >= 2) ? "All tracked lifts progressing" : "Log 2+ sessions per lift to track") : needsAttention.map(t => /*#__PURE__*/React.createElement("div", {
-    key: t.name,
-    style: {
-      padding: "11px 12px",
-      borderRadius: 8,
-      marginBottom: 6,
-      background: "rgba(255,71,87,0.04)",
-      border: `1px solid rgba(255,71,87,0.1)`
-    }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 3
+      alignItems: "baseline",
+      gap: 10
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      fontWeight: 600,
-      color: W.text,
-      flex: 1,
-      minWidth: 0,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
-    }
-  }, t.name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontWeight: 700,
-      color: t.pct < 0 ? W.red : W.textMid,
-      marginLeft: 10,
-      flexShrink: 0,
-      fontFamily: "'DM Mono',monospace"
+      color: W.text,
+      letterSpacing: "-0.01em"
     }
-  }, t.pct >= 0 ? "+" : "", t.pct.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, t.first, " \u2192 ", t.last, " lbs \xB7 ", t.sessions, " sessions"))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderBottom: `1px solid ${W.border}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px 16px 12px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between"
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, monthNames[heatMonth], " ", heatYear), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       fontFamily: "'DM Mono',monospace",
       color: W.textDim,
-      letterSpacing: "0.2em",
-      textTransform: "uppercase",
-      marginBottom: 2
+      letterSpacing: "0.1em"
     }
-  }, monthNames[heatMonth], " ", heatYear), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, totalLoggedDays, " training day", totalLoggedDays !== 1 ? "s" : "")), /*#__PURE__*/React.createElement("div", {
+  }, totalLoggedDays, " day", totalLoggedDays !== 1 ? "s" : "")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 4
@@ -5476,17 +7673,17 @@ function HomePage({
       display: "grid",
       gridTemplateColumns: "repeat(7,1fr)",
       gap: 4,
-      marginBottom: 6
+      marginBottom: 8
     }
   }, ["S", "M", "T", "W", "T", "F", "S"].map((l, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
-      fontSize: 9,
+      fontSize: 8,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
       textAlign: "center",
-      fontWeight: 500,
-      letterSpacing: "0.05em"
+      fontWeight: 600,
+      letterSpacing: "0.1em"
     }
   }, l))), calRows.map((row, ri) => /*#__PURE__*/React.createElement("div", {
     key: ri,
@@ -5501,36 +7698,267 @@ function HomePage({
     onClick: () => cell && cell.logged && !cell.isFuture && onDeleteDate(cell.ds),
     style: {
       aspectRatio: "1",
-      borderRadius: 6,
-      background: !cell ? "transparent" : cell.isFuture ? "rgba(255,255,255,0.01)" : cell.logged ? W.cyan : "rgba(255,255,255,0.03)",
-      border: cell?.isToday ? `1px solid ${W.cyan}` : cell?.logged ? "none" : "1px solid transparent",
-      outline: cell?.isToday ? `2px solid ${W.cyan}22` : "none",
+      borderRadius: 7,
+      background: !cell ? "transparent" : cell.isFuture ? "rgba(255,255,255,0.01)" : cell.logged ? W.cyan : "rgba(255,255,255,0.04)",
+      border: cell?.isToday ? `2px solid ${W.cyan}` : `1px solid ${cell?.logged ? "transparent" : "rgba(255,255,255,0.05)"}`,
       cursor: cell?.logged && !cell.isFuture ? "pointer" : "default",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      transition: "all 0.15s"
+      transition: "transform 0.1s",
+      boxShadow: cell?.logged && !cell.isFuture ? `0 0 10px ${W.cyan}40` : undefined
     }
   }, cell && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: cell.logged ? "#000" : cell.isFuture ? W.border : W.textDim,
+      color: cell.logged ? "#000" : cell.isFuture ? "rgba(255,255,255,0.1)" : W.textDim,
       fontFamily: "'DM Mono',monospace",
       fontWeight: cell.logged ? 700 : 400
     }
   }, cell.d))))))), /*#__PURE__*/React.createElement(WorkoutHistoryCard, {
     version: version,
     onDelete: onDeleteDate
-  }), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(BodyweightCard, {
+    onUpdate: onBWUpdate
+  }), /*#__PURE__*/React.createElement(BodyweightGraph, {
+    key: bwVersion
+  })));
+}
+
+// ── STATS PAGE ─────────────────────────────────────────────────────────────────
+function StatsPage({
+  version
+}) {
+  const [tab, setTab] = useState("progress");
+  const [spiderWeekOffset, setSpiderWeekOffset] = useState(0);
+  const tabs = [{
+    id: "progress",
+    label: "Progress"
+  }, {
+    id: "balance",
+    label: "Balance"
+  }, {
+    id: "deep",
+    label: "Deep"
+  }];
+
+  // All expensive derivations — computed fresh each render (StatsPage only re-renders on version/spiderWeekOffset changes)
+  const {
+    allWorkingEx,
+    top1RMs,
+    topGainers,
+    needsAttention,
+    allPRs,
+    spiderData,
+    spiderHasData,
+    spiderLabel,
+    circadianPeak,
+    momentum,
+    bloodInsights,
+    btnStyle
+  } = (() => {
+    const allWorkingEx = getAllWorkingExercises();
+    const top1RMs = [];
+    allWorkingEx.filter(ex => !BODYWEIGHT_EX.has(ex.name) && !LIGHT_INTENT.has(ex.name)).forEach(ex => {
+      const ents = getEntries(ex.name);
+      if (!ents.length) return;
+      const best = Math.max(...ents.map(e => calc1RM(e.weight, e.reps)));
+      const bestEntry = ents.reduce((b, e) => calc1RM(e.weight, e.reps) >= calc1RM(b.weight, b.reps) ? e : b);
+      top1RMs.push({
+        name: ex.name,
+        orm: best,
+        weight: bestEntry.weight,
+        reps: bestEntry.reps,
+        accent: ex.dayAccent
+      });
+    });
+    top1RMs.sort((a, b) => b.orm - a.orm);
+    const trends = [];
+    allWorkingEx.filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name)).forEach(ex => {
+      const ents = getEntries(ex.name);
+      if (ents.length < 2) return;
+      const first = ents[0].weight,
+        last = ents[ents.length - 1].weight;
+      if (first <= 0 || last <= 0) return;
+      const pct = (last - first) / first * 100;
+      const distinctDates = new Set(ents.map(e => e.date)).size;
+      if (distinctDates < 2) return;
+      trends.push({
+        name: ex.name,
+        pct,
+        first,
+        last,
+        sessions: distinctDates,
+        accent: ex.dayAccent
+      });
+    });
+    trends.sort((a, b) => b.pct - a.pct);
+    const topGainers = trends.slice(0, 5);
+    const fourWeeksAgo = new Date();
+    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+    const fwaStr = fourWeeksAgo.toISOString().slice(0, 10);
+    const PROGRESS_EXEMPT = new Set(["Hang Clean", "MB Slam → Lateral Toss", "Snap Down → Split Jump", "Box Drop → Stick Landing", "Rear Delt Cable Fly", "Cable Rear Fly", "Cuban Press", "Cable Y Raise", "Band Pull-Aparts", "Suitcase Carry", "Copenhagen Plank"]);
+    const needsAttention = [];
+    allWorkingEx.filter(ex => !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name) && !PROGRESS_EXEMPT.has(ex.name)).forEach(ex => {
+      const allEnts = getEntries(ex.name);
+      const w4 = allEnts.filter(e => e.date >= fwaStr);
+      if (w4.length < 2) return;
+      const wFirst = w4[0].weight,
+        wLast = w4[w4.length - 1].weight;
+      const pct4w = wFirst === 0 ? wLast > 0 ? 100 : 0 : (wLast - wFirst) / wFirst * 100;
+      if (pct4w < 10) needsAttention.push({
+        name: ex.name,
+        pct: pct4w,
+        first: wFirst,
+        last: wLast,
+        sessions: new Set(w4.map(e => e.date)).size,
+        accent: ex.dayAccent
+      });
+    });
+    needsAttention.sort((a, b) => a.pct - b.pct);
+    const allPRs = [];
+    allWorkingEx.filter(ex => !BODYWEIGHT_EX.has(ex.name)).forEach(ex => {
+      const ents = getEntries(ex.name);
+      ents.forEach((e, i) => {
+        if (isPR(ents, i)) allPRs.push({
+          name: ex.name,
+          ...e,
+          orm: calc1RM(e.weight, e.reps),
+          accent: ex.dayAccent
+        });
+      });
+    });
+    allPRs.sort((a, b) => b.date.localeCompare(a.date));
+    const spiderRange = getWeekRange(spiderWeekOffset);
+    const groupVol = {
+      CNS: 0,
+      Legs: 0,
+      Push: 0,
+      Pull: 0,
+      Core: 0,
+      Stability: 0,
+      Mobility: 0
+    };
+    const allExForVol = [];
+    DAYS.forEach(day => {
+      day.blocks.forEach(b => (b.exercises || []).forEach(ex => allExForVol.push(ex.name)));
+      (day.warmup?.phases || []).forEach(ph => (ph.exercises || []).forEach(ex => allExForVol.push(ex.name)));
+      (day.warmdown?.phases || []).forEach(ph => (ph.exercises || []).forEach(ex => allExForVol.push(ex.name)));
+    });
+    [...new Set(allExForVol)].forEach(exName => {
+      const g = EX_GROUP[exName];
+      if (!g) return;
+      getEntries(exName).filter(e => e.date >= spiderRange.sunStr && e.date <= spiderRange.satStr).forEach(e => {
+        if (g === "Mobility") groupVol[g] += e.sets * e.reps * 5;else groupVol[g] += e.weight > 0 ? e.weight * e.sets * e.reps : e.sets * e.reps * 10;
+      });
+    });
+    const totalVol = Object.values(groupVol).reduce((a, b) => a + b, 0) || 1;
+    const spiderData = Object.fromEntries(GROUPS.map(g => [g, groupVol[g] / totalVol]));
+    const spiderHasData = Object.values(groupVol).some(v => v > 0);
+    const spiderLabel = spiderWeekOffset === 0 ? "This Week" : spiderWeekOffset === 1 ? "Last Week" : `${spiderWeekOffset} Weeks Ago`;
+    const btnStyle = {
+      background: "transparent",
+      border: `1px solid ${W.border}`,
+      borderRadius: 6,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 11,
+      padding: "4px 10px",
+      cursor: "pointer"
+    };
+    const circadianPeak = getCircadianPeak();
+    const momentum = computeMomentum();
+    const bloodInsights = [];
+    allWorkingEx.slice(0, 8).forEach(ex => {
+      const insight = getBloodMemoryInsight(ex.name);
+      if (insight) bloodInsights.push({
+        exName: ex.name,
+        ...insight
+      });
+    });
+    return {
+      allWorkingEx,
+      top1RMs,
+      topGainers,
+      needsAttention,
+      allPRs,
+      spiderData,
+      spiderHasData,
+      spiderLabel,
+      circadianPeak,
+      momentum,
+      bloodInsights,
+      btnStyle
+    };
+  })();
+  return /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
-      borderBottom: `1px solid ${W.border}`
-    }
+      padding: `calc(env(safe-area-inset-top) + 16px) 0 calc(env(safe-area-inset-bottom) + 86px)`,
+      maxWidth: 680,
+      margin: "0 auto"
+    },
+    className: "ai"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px",
-      borderRight: `1px solid ${W.border}`
+      padding: "0 16px 14px",
+      borderBottom: `1px solid ${W.border}`,
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.3em",
+      color: W.textDim,
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Analysis"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      fontWeight: 800,
+      color: W.text,
+      letterSpacing: "-0.02em"
+    }
+  }, "Stats")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim
+    }
+  }, "Momentum ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: momentum > 70 ? W.cyan : momentum > 40 ? W.yellow : W.red,
+      fontWeight: 700
+    }
+  }, momentum), "/100")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.id,
+    onClick: () => setTab(t.id),
+    style: {
+      flex: 1,
+      padding: "11px 0",
+      border: "none",
+      background: "transparent",
+      color: tab === t.id ? W.cyan : W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 11,
+      fontWeight: tab === t.id ? 700 : 400,
+      borderBottom: tab === t.id ? `2px solid ${W.cyan}` : "2px solid transparent",
+      cursor: "pointer",
+      letterSpacing: "0.05em",
+      transition: "color 0.2s"
+    }
+  }, t.label))), tab === "progress" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5539,30 +7967,29 @@ function HomePage({
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
-      marginBottom: 14
+      marginBottom: 12
     }
-  }, "Top Est. 1RMs"), top1RMs.slice(0, 5).length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Top Est. 1RMs"), top1RMs.slice(0, 7).length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px 0",
       fontSize: 11,
+      color: W.textDim,
       fontFamily: "'DM Mono',monospace",
-      color: W.textDim
+      padding: "12px 0"
     }
-  }, "Log sets to see your top lifts") : top1RMs.slice(0, 5).map((t, i) => /*#__PURE__*/React.createElement("div", {
+  }, "Log sets to see your top lifts") : top1RMs.slice(0, 7).map((t, i, arr) => /*#__PURE__*/React.createElement("div", {
     key: t.name,
     style: {
       display: "flex",
       alignItems: "center",
       gap: 10,
-      padding: "10px 0",
-      borderBottom: i < 4 ? `1px solid ${W.border}` : "none",
-      animation: `setRowIn 0.2s ease ${i * 0.05}s both`
+      padding: "9px 0",
+      borderBottom: i < arr.length - 1 ? `1px solid ${W.border}` : "none"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 22,
-      height: 22,
-      borderRadius: 6,
+      width: 20,
+      height: 20,
+      borderRadius: 5,
       background: i === 0 ? W.cyanDim : W.surface,
       border: `1px solid ${i === 0 ? W.cyan : W.border}`,
       display: "flex",
@@ -5572,7 +7999,7 @@ function HomePage({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 10,
+      fontSize: 9,
       fontFamily: "'DM Mono',monospace",
       color: i === 0 ? W.cyan : W.textDim,
       fontWeight: 700
@@ -5593,7 +8020,7 @@ function HomePage({
     }
   }, t.name), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
+      fontSize: 9,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
       marginTop: 1
@@ -5605,7 +8032,7 @@ function HomePage({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: 800,
       color: i === 0 ? W.cyan : W.text,
       lineHeight: 1,
@@ -5613,7 +8040,7 @@ function HomePage({
     }
   }, t.orm), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 8,
+      fontSize: 7,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
       letterSpacing: "0.1em",
@@ -5621,7 +8048,8 @@ function HomePage({
     }
   }, "EST 1RM"))))), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "16px"
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5630,30 +8058,177 @@ function HomePage({
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
-      marginBottom: 14
+      marginBottom: 12
     }
-  }, "PR Timeline"), /*#__PURE__*/React.createElement("div", {
+  }, "Top Gainers"), topGainers.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
-      maxHeight: 300,
-      overflowY: "auto"
-    }
-  }, allPRs.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px 0",
       fontSize: 11,
-      fontFamily: "'DM Mono',monospace",
-      color: W.textDim
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
     }
-  }, "No PRs logged yet") : allPRs.slice(0, 12).map((pr, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+  }, "Log 2+ sessions per lift") : topGainers.map(t => {
+    const barW = Math.min(100, Math.max(2, t.pct * 2.5));
+    return /*#__PURE__*/React.createElement("div", {
+      key: t.name,
+      style: {
+        marginBottom: 13
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: W.text,
+        flex: 1,
+        minWidth: 0,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, t.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: W.cyan,
+        marginLeft: 10,
+        flexShrink: 0,
+        fontFamily: "'DM Mono',monospace"
+      }
+    }, "+", t.pct.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 2,
+        background: W.border,
+        borderRadius: 1,
+        marginBottom: 3
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: "100%",
+        width: `${barW}%`,
+        background: W.cyan,
+        borderRadius: 1
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: W.textDim,
+        fontFamily: "'DM Mono',monospace"
+      }
+    }, t.first, " \u2192 ", t.last, " lbs \xB7 ", t.sessions, " sessions"));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase"
+    }
+  }, "Needs Attention"), needsAttention.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontFamily: "'DM Mono',monospace",
+      color: W.red,
+      background: "rgba(255,71,87,0.1)",
+      border: `1px solid rgba(255,71,87,0.2)`,
+      borderRadius: 12,
+      padding: "3px 10px"
+    }
+  }, needsAttention.length, " lift", needsAttention.length !== 1 ? "s" : "")), needsAttention.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.cyan,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "All tracked lifts progressing") : needsAttention.slice(0, 4).map(t => /*#__PURE__*/React.createElement("div", {
+    key: t.name,
+    style: {
+      padding: "10px 12px",
+      borderRadius: 8,
+      marginBottom: 6,
+      background: "rgba(255,71,87,0.04)",
+      border: `1px solid rgba(255,71,87,0.1)`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: W.text,
+      flex: 1,
+      minWidth: 0,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, t.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: t.pct < 0 ? W.red : W.textMid,
+      marginLeft: 10,
+      flexShrink: 0,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, t.pct >= 0 ? "+" : "", t.pct.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, t.first, " \u2192 ", t.last, " lbs \xB7 ", t.sessions, " sessions"), /*#__PURE__*/React.createElement(ScarIndicator, {
+    exName: t.name
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 12
+    }
+  }, "PR Timeline"), allPRs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "No PRs yet") : allPRs.slice(0, 15).map((pr, i, arr) => /*#__PURE__*/React.createElement("div", {
+    key: `${pr.name}-${pr.date}-${i}`,
     style: {
       display: "flex",
       alignItems: "flex-start",
       gap: 10,
       paddingBottom: 10,
       marginBottom: 4,
-      borderBottom: i < Math.min(allPRs.length, 12) - 1 ? `1px solid ${W.border}` : "none",
-      animation: `setRowIn 0.18s ease ${i * 0.03}s both`
+      borderBottom: i < arr.length - 1 ? `1px solid ${W.border}` : "none"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5673,7 +8248,7 @@ function HomePage({
       flexShrink: 0,
       boxShadow: `0 0 6px ${W.cyanGlow}`
     }
-  }), i < Math.min(allPRs.length, 12) - 1 && /*#__PURE__*/React.createElement("div", {
+  }), i < arr.length - 1 && /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
       flex: 1,
@@ -5715,15 +8290,383 @@ function HomePage({
       fontSize: 10,
       fontFamily: "'DM Mono',monospace",
       color: W.textMid,
-      marginTop: 2
+      marginTop: 1
     }
   }, pr.weight, "lbs \xD7 ", pr.reps, "r \xB7 ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: W.cyan
     }
-  }, "~", pr.orm, " 1RM")))))))), /*#__PURE__*/React.createElement(BodyweightCard, {
-    onUpdate: onBWUpdate
-  })));
+  }, "~", pr.orm, " 1RM"))))))), tab === "balance" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderRight: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 10
+    }
+  }, "Muscle Shadow"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 8
+    }
+  }, "Last 7 days"), /*#__PURE__*/React.createElement(MuscleShadow, {
+    version: version
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase"
+    }
+  }, "Volume Split"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 3
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    style: btnStyle,
+    onClick: () => setSpiderWeekOffset(o => o + 1)
+  }, "\u2190"), spiderWeekOffset > 0 && /*#__PURE__*/React.createElement("button", {
+    style: btnStyle,
+    onClick: () => setSpiderWeekOffset(o => o - 1)
+  }, "\u2192"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 8
+    }
+  }, spiderLabel), !spiderHasData ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      padding: "20px 0",
+      textAlign: "center"
+    }
+  }, "No data") : /*#__PURE__*/React.createElement(DonutChart, {
+    data: spiderData,
+    size: 180
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Nervous System Map"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 10
+    }
+  }, "CNS load by zone \xB7 last 7 days"), /*#__PURE__*/React.createElement(NervousSystemMap, {
+    version: version
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Gravity"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 10
+    }
+  }, "Heaviest lift = gravitational center"), /*#__PURE__*/React.createElement(GravityMap, {
+    version: version
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "The Migration"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 10
+    }
+  }, "A year of training as flight paths"), /*#__PURE__*/React.createElement(MigrationMap, {
+    version: version
+  }))), tab === "deep" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Circadian Peak"), circadianPeak !== null ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 10
+    }
+  }, "Your strongest training window (based on session data)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      fontWeight: 900,
+      color: W.cyan,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, circadianPeak, ":00"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textMid
+    }
+  }, "\xB1 1 hour. You tend to lift ", isInPeakWindow() ? "right now." : "outside this window.", " ", isInPeakWindow() && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.cyan
+    }
+  }, "Peak window active.")))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      padding: "8px 0"
+    }
+  }, "Needs 3+ entries per hour to surface your peak. Keep logging \u2014 timestamps are being recorded now.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Blood Memory"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 10
+    }
+  }, "Exercise pairings that affect performance"), bloodInsights.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "Needs 6+ sessions per lift to find patterns") : bloodInsights.map(ins => /*#__PURE__*/React.createElement("div", {
+    key: ins.exName,
+    style: {
+      padding: "10px 12px",
+      borderRadius: 8,
+      marginBottom: 6,
+      background: `rgba(0,201,177,0.03)`,
+      border: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: W.text,
+      marginBottom: 3
+    }
+  }, ins.exName), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: W.textMid,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "You perform ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.cyan
+    }
+  }, "+", ins.delta, "%"), " when preceded by ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.text
+    }
+  }, ins.pairedWith))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 10
+    }
+  }, "Readiness History"), readinessStore.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "Use the Check In button before workouts") : readinessStore.slice(-10).reverse().map((r, i, arr) => {
+    const color = r.score >= 75 ? W.cyan : r.score >= 50 ? W.yellow : W.red;
+    return /*#__PURE__*/React.createElement("div", {
+      key: r.date,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 0",
+        borderBottom: i < arr.length - 1 ? `1px solid ${W.border}` : "none"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 36,
+        height: 36,
+        borderRadius: "50%",
+        border: `2px solid ${color}44`,
+        background: `${color}11`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 800,
+        color,
+        fontFamily: "'DM Mono',monospace"
+      }
+    }, r.score)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: W.text,
+        fontWeight: 600
+      }
+    }, fmtDate(r.date)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: W.textDim,
+        fontFamily: "'DM Mono',monospace"
+      }
+    }, "sleep ", r.sleep, " \xB7 stress ", r.stress, " \xB7 soreness ", r.soreness)));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase",
+      marginBottom: 10
+    }
+  }, "The Fossil Record"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 12
+    }
+  }, "First-ever logged entry per exercise"), Object.keys(fossilStore).length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, "Fossils are preserved as you log") : Object.entries(fossilStore).slice(0, 10).map(([name, f], i, arr) => /*#__PURE__*/React.createElement("div", {
+    key: name,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "8px 0",
+      borderBottom: i < arr.length - 1 ? `1px solid ${W.border}` : "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: "rgba(255,255,255,0.5)"
+    }
+  }, name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.2)",
+      fontFamily: "'DM Mono',monospace",
+      marginTop: 1
+    }
+  }, fmtDate(f.date))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: "rgba(255,255,255,0.3)",
+      fontFamily: "'DM Mono',monospace"
+    }
+  }, f.weight, "lbs \xD7 ", f.reps))))));
 }
 
 // ── EXERCISE DESCRIPTIONS ─────────────────────────────────────────────────────
@@ -5772,8 +8715,11 @@ const EX_DESC = {
   "Wall Angels": "Like snow angels against a wall. Full contact required. Diagnoses and improves thoracic mobility and scapular control.",
   "Elevated Band Hip Flexor/Glute": "Band above knees, drive hips forward or backward to target glutes and hip flexors. High rep activation work.",
   "Force Plate CMJ": "Counter-movement jump on force plate. Measures CNS readiness/power output. Jump for maximum height — diagnostic tool.",
-  "Hang Clean": "Pull bar from hang position at hip crease, triple-extend (ankles/knees/hips), catch in front rack. Full-body power development.",
-  "MB Slam → MB Lateral Toss": "Overhead slam into lateral rotation throw. Combines anti-rotation core work with explosive extension. CNS primer.",
+  "Hang Clean": "Pull bar explosively from hang at hip crease — triple extension of ankles, knees, and hips — then catch in front rack. Full-body power. The standard for athletic CNS development.",
+  "MB Slam → Lateral Toss": "Overhead slam into ground, immediately rotate and throw ball laterally. Combines anti-rotation core work with explosive triple extension. CNS primer.",
+  "Cable Rear Fly": "Cable set at head height, fly across body maintaining slight elbow bend. Isolates posterior delt and horizontal abductors. Direct fix for the rounded-shoulder posture pattern.",
+  "Weighted Pull-Ups": "Dead hang start with belt/vest load. Drive elbows to hips, chin clears bar. The premium strength builder for lat width and bicep tendon integrity. Add weight only when bodyweight reps exceed 10 cleanly.",
+  "MB Slam → MB Lateral Toss": "Overhead slam into ground, immediately rotate and throw ball laterally. Combines anti-rotation core work with explosive triple extension. CNS primer.",
   "Snap Down → Split Squat Jump": "Drop into athletic stance then immediately jump into split squat landing. Trains reactive strength and landing mechanics.",
   "MB Slam x3 (easy)": "Overhead to ground slam at moderate effort. Warms up full extension pattern and activates lat/core without taxing CNS.",
   "Snap Down x3 (sub-max)": "Drop to athletic stance — reactive deceleration drill. Primes nervous system without maximal effort.",
@@ -5863,7 +8809,21 @@ const EX_DESC = {
   "Tempo Goblet Squat": "Slow 3-second descent with goblet hold. Teaches squat mechanics, builds positional strength, and activates full lower body before heavy work.",
   "Snap Down": "From quarter squat, rapidly pull feet into athletic stance. Trains reactive hip loading pattern that transfers to jump and sprint mechanics.",
   "Vertical Jump": "Max effort vertical jump. True CNS activation and lower body power expression. Full reset between reps.",
-  "Snap Down → Split Jump": "Snap down to loaded position then explode into alternating split jump. High CNS demand reactive power exercise."
+  "Snap Down → Split Jump": "Snap down to loaded position then explode into alternating split jump. High CNS demand reactive power exercise.",
+  // New warmdown exercises
+  "90-90 Breathing": "Lie on back, knees bent at 90°. Breathe wide into ribcage — posterior, lateral, and anterior expansion. Full exhale before each inhale. Resets diaphragm and fully downregulates the nervous system.",
+  "Lat Bench Stretch": "Kneel beside bench, arms extended and stacked on bench, sink hips back toward heels. Let bodyweight open the lats under gravity. Decompresses thoracic spine and stretches the entire lat from hip to armpit.",
+  "Calf Stretch": "Wall lean with straight rear leg, heel pressed firmly to floor. Full soleus and gastrocnemius release. Holds tight calves that accumulate during squats and walks. Both sides.",
+  "Incline Treadmill Walk": "Low speed, slight incline, nasal breathing only. Forces heart rate down efficiently. The incline adds glute activation for active recovery without loading the CNS. Don't touch rails.",
+  "Adductor Stretch": "Wide stance standing or sumo squat position, sink hips down and rock gently. Releases inner groin and hip capsule after heavy leg volume. Breathe into the stretch, don't force it.",
+  "Slow Walk": "Easy walking at 50% pace. No destination. Heart rate drops naturally. Do not use your phone. Let the nervous system decompress through rhythmic movement.",
+  "Band Shoulder Traction": "Loop band overhead, step away for tension, let shoulder be pulled into traction. Complete shoulder joint decompression after pressing. Breathe slowly — let the capsule open.",
+  "Pec Minor Stretch": "Corner stretch or doorframe — arm at 90°, step through slowly. The pec minor drags the scapula forward after pressing. This reverses it. Hold and breathe. Both sides.",
+  "Thoracic Extension Breathing": "Lie over foam roller at mid-back. Arms crossed or overhead. Inhale to expand ribcage into extension. Pause. Exhale and let gravity do the work. Reverses thoracic flexion from bench and daily posture.",
+  "Deep Nasal Breathing": "Seated or supine. Slow 4-count inhale through nose, 6-count exhale. Full exhale activates parasympathetic system hardest. Drop shoulders on each exhale. Let the training session settle.",
+  "Nasal Incline Walk": "Low speed incline treadmill walk, nasal breathing only. Triggers active recovery response — blood flow to muscles, parasympathetic activation, cortisol clearance. Don't let pace elevate breathing above comfortable nasal threshold.",
+  "Deep Squat Hold Breathing": "Sink into deepest comfortable squat. Use counter-balance if needed. Breathe into hips and lower back. Passively releases quad, hip flexor, and adductor compression from heavy leg work.",
+  "Supine Legs-Up Breathing": "Lie on back, legs up against wall. Gravity drains lactic acid from legs. Breathe slow and full. Parasympathetic reset. This position alone accelerates lower body recovery significantly."
 };
 
 // ── EXERCISE ROW ──────────────────────────────────────────────────────────────
@@ -5890,32 +8850,33 @@ function ExRow({
   const desc = EX_DESC[ex.name];
   useEffect(() => {
     if (isActive && isWorking) setShowInline(true);
-  }, [isActive]);
+  }, [isActive, isWorking]);
   const rootRef = useCallback(el => {
     if (exRefs && el) exRefs.current[ex.name] = el;
   }, [ex.name]);
   return /*#__PURE__*/React.createElement("div", {
     ref: rootRef,
     style: {
-      borderBottom: `1px solid ${W.border}`
+      borderBottom: `1px solid rgba(255,255,255,0.06)`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
       gap: 10,
-      padding: "14px 0",
-      minHeight: 56
+      padding: "12px 0",
+      minHeight: 52
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: W.border,
-      width: 18,
+      color: W.textDim,
+      width: 20,
       flexShrink: 0,
       textAlign: "center",
       fontFamily: "'DM Mono',monospace",
-      fontWeight: 500
+      fontWeight: 700,
+      opacity: 0.5
     }
   }, num), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5933,15 +8894,16 @@ function ExRow({
       fontSize: F?.body || 13,
       fontWeight: 600,
       color: W.text,
-      lineHeight: 1.3
+      lineHeight: 1.25,
+      letterSpacing: "-0.01em"
     }
   }, ex.name), desc && /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowDesc(d => !d),
     style: {
       background: "transparent",
       border: "none",
-      color: showDesc ? W.cyan : W.textDim,
-      fontSize: 12,
+      color: showDesc ? W.cyan : "rgba(255,255,255,0.2)",
+      fontSize: 11,
       padding: "2px 4px",
       flexShrink: 0,
       lineHeight: 1,
@@ -5949,10 +8911,11 @@ function ExRow({
     }
   }, "\u24D8")), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: F?.label || 10,
+      fontSize: F?.label || 9,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
-      marginTop: 2
+      marginTop: 2,
+      letterSpacing: "0.04em"
     }
   }, ex.detail), showDesc && desc && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5971,11 +8934,12 @@ function ExRow({
     const ents = getEntries(ex.name);
     if (!ents.length) return isWorking ? /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 9,
+        fontSize: 8,
         fontFamily: "'DM Mono',monospace",
-        color: W.border,
-        marginTop: 2,
-        letterSpacing: "0.05em"
+        color: "rgba(255,255,255,0.15)",
+        marginTop: 3,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase"
       }
     }, "First session") : null;
     const dates = [...new Set(ents.map(e => e.date))].sort();
@@ -5988,21 +8952,43 @@ function ExRow({
       style: {
         fontSize: 9,
         fontFamily: "'DM Mono',monospace",
-        color: W.textMid,
-        marginTop: 2,
-        letterSpacing: "0.03em"
+        color: W.textDim,
+        marginTop: 3,
+        display: "flex",
+        alignItems: "center",
+        gap: 5
       }
-    }, "Last: ", /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: W.textDim,
+        fontSize: 8,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase"
+      }
+    }, "Last"), /*#__PURE__*/React.createElement("span", {
       style: {
         color: W.cyan,
-        fontWeight: 600
+        fontWeight: 700,
+        fontSize: 9
       }
-    }, label, " \xD7 ", best.reps), " ", /*#__PURE__*/React.createElement("span", {
+    }, label), /*#__PURE__*/React.createElement("span", {
       style: {
-        color: W.border,
+        color: "rgba(255,255,255,0.25)",
         fontSize: 8
       }
-    }, "(", fmtDate(lastDate), ")"));
+    }, "\xD7"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: W.text,
+        fontWeight: 600,
+        fontSize: 9
+      }
+    }, best.reps, "r"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "rgba(255,255,255,0.2)",
+        fontSize: 8,
+        marginLeft: 2
+      }
+    }, fmtDate(lastDate)));
   })()), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -6135,77 +9121,89 @@ function Block({
       });
     },
     style: {
-      padding: "15px 16px",
+      padding: "14px 16px",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       cursor: "pointer",
-      background: open ? W.surface : "transparent",
+      background: open ? W.surfaceHi : "transparent",
       userSelect: "none",
-      minHeight: 54,
-      transition: "background 0.15s"
+      minHeight: 52,
+      transition: "background 0.15s",
+      borderLeft: !isWarmup ? `3px solid ${blockComplete ? W.cyan : accent}` : "3px solid transparent"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 10
+      gap: 12
     }
   }, !isWarmup && /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 3,
-      height: 20,
-      borderRadius: 2,
-      background: blockComplete ? W.cyan : accent,
-      opacity: blockComplete ? 1 : 0.5,
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       flexShrink: 0,
-      transition: "background 0.3s,opacity 0.3s",
-      boxShadow: blockComplete ? `0 0 6px ${W.cyan}88` : undefined
+      transition: "all 0.3s",
+      background: blockComplete ? `${W.cyan}22` : `${accent}18`,
+      border: `1px solid ${blockComplete ? W.cyan : accent}55`,
+      boxShadow: blockComplete ? `0 0 12px ${W.cyan}44` : undefined
     }
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: isWarmup ? 12 : 13,
-      fontWeight: 600,
+      fontSize: 10,
+      fontFamily: "'DM Mono',monospace",
+      fontWeight: 800,
+      color: blockComplete ? W.cyan : accent,
+      letterSpacing: "0.02em"
+    }
+  }, block.icon || "·")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: isWarmup ? 11 : 13,
+      fontWeight: 700,
       color: isWarmup ? warmupDone ? W.cyan : W.text : W.text,
-      letterSpacing: "0.01em",
+      letterSpacing: "-0.01em",
       display: "flex",
       alignItems: "center",
       gap: 7
     }
   }, block.title, blockComplete && /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 8,
+      fontSize: 7,
       fontFamily: "'DM Mono',monospace",
       color: W.cyan,
       background: W.cyanDim,
       border: `1px solid rgba(0,201,177,0.25)`,
-      borderRadius: 4,
+      borderRadius: 3,
       padding: "1px 6px",
       fontWeight: 700,
       letterSpacing: "0.08em",
       animation: "setRowIn 0.3s ease both"
     }
-  }, "\u2713 DONE"), isWarmup && warmupDone && /*#__PURE__*/React.createElement("span", {
+  }, "DONE"), isWarmup && warmupDone && /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 8,
+      fontSize: 7,
       fontFamily: "'DM Mono',monospace",
       color: W.cyan,
       background: W.cyanDim,
       border: `1px solid rgba(0,201,177,0.25)`,
-      borderRadius: 4,
+      borderRadius: 3,
       padding: "1px 6px",
       fontWeight: 700,
       letterSpacing: "0.08em",
       animation: "setRowIn 0.3s ease both"
     }
-  }, "\u2713 DONE")), /*#__PURE__*/React.createElement("div", {
+  }, "DONE")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
-      color: warmupDone ? W.cyan : W.textMid,
+      color: warmupDone ? W.cyan : W.textDim,
       fontFamily: "'DM Mono',monospace",
       textTransform: "uppercase",
       letterSpacing: "0.12em",
-      marginTop: 1
+      marginTop: 2
     }
   }, block.sub))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6312,7 +9310,7 @@ function Block({
     }
   }, "\u25BC"))), open && /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "2px 16px 12px",
+      padding: "8px 16px 14px",
       animation: "blockOpen 0.2s cubic-bezier(0.16,1,0.3,1) both"
     }
   }, block.phases ? block.phases.map((ph, pi) => /*#__PURE__*/React.createElement("div", {
@@ -6335,8 +9333,8 @@ function Block({
       height: "1px",
       background: W.border
     }
-  })), ph.exercises.map((ex, i) => /*#__PURE__*/React.createElement(ExRow, {
-    key: i,
+  })), (ph.exercises || []).map((ex, i) => /*#__PURE__*/React.createElement(ExRow, {
+    key: ex.name,
     ex: ex,
     num: i + 1,
     isWorking: false,
@@ -6347,8 +9345,8 @@ function Block({
     bodyweight: bodyweight,
     version: version,
     dayId: dayId
-  })))) : /*#__PURE__*/React.createElement(React.Fragment, null, block.exercises.map((ex, i) => /*#__PURE__*/React.createElement(ExRow, {
-    key: i,
+  })))) : /*#__PURE__*/React.createElement(React.Fragment, null, (block.exercises || []).map((ex, i) => /*#__PURE__*/React.createElement(ExRow, {
+    key: ex.name,
     ex: ex,
     num: i + 1,
     isWorking: !isWarmup,
@@ -6480,7 +9478,7 @@ function DayPage({
     if (prev) setPage(prev.id);
   }, [prev]));
 
-  // Auto-clear ended state at 1am Sunday each week
+  // Auto-clear ended state at 1am Sunday each week (weekly reset for all days)
   useEffect(() => {
     if (!ended) return;
     function checkSundayReset() {
@@ -6511,8 +9509,33 @@ function DayPage({
       startTime
     });
   }, [started, ended, elapsed, finalElapsed, startTime]);
+  // Daily midnight reset: clear any ended workout state at start of new day
   useEffect(() => {
-    if (!started || ended) return;
+    function checkMidnightReset() {
+      const cached = workoutStateCache[day.id];
+      if (!cached || !cached.startTime) return;
+      const startDate = new Date(cached.startTime).toDateString();
+      const today = new Date().toDateString();
+      if (startDate !== today) {
+        // Workout started on a different calendar day — clear it
+        setStarted(false);
+        setEnded(false);
+        setElapsed(0);
+        setFinalElapsed(0);
+        setStartTime(null);
+        setShowSummary(false);
+        delete workoutStateCache[day.id];
+        try {
+          window.storage.delete('wt_wstate_' + day.id);
+        } catch (e) {}
+      }
+    }
+    checkMidnightReset();
+    const id = setInterval(checkMidnightReset, 60000);
+    return () => clearInterval(id);
+  }, [day.id]);
+  useEffect(() => {
+    if (!started || ended || !startTime) return;
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
     return () => clearInterval(id);
   }, [started, ended, startTime]);
@@ -6615,7 +9638,7 @@ function DayPage({
       exercisesTotal: allEx.length,
       sets: loggedSets
     });
-    if (day.id === "thu" || day.id === "fri") onWorkoutComplete(day.id);
+    onWorkoutComplete(day.id);
   }
   const todayS = todayStr();
   const allBlocksComplete = started && !ended && day.blocks.length > 0 && day.blocks.every(block => {
@@ -6626,13 +9649,6 @@ function DayPage({
       return getEntries(ex.name).filter(e => e.date === todayS && (e.dayId === day.id || !e.dayId)).length >= needed;
     });
   });
-  useEffect(() => {
-    if (allBlocksComplete && !autoEndShown) {
-      setAutoEndShown(true);
-      haptic([40, 30, 60, 30, 80]);
-      setTimeout(() => setShowEndConfirm(true), 600); // slight delay so last set toggle settles
-    }
-  }, [allBlocksComplete, version]);
   const loggedToday = day.blocks.flatMap(b => b.exercises || []).filter(ex => getEntries(ex.name).some(e => e.date === todayS && (e.dayId === day.id || !e.dayId))).length;
   const totalEx = day.blocks.flatMap(b => b.exercises || []).length;
   const warmup = {
@@ -6649,6 +9665,19 @@ function DayPage({
     phases: warmdownData.phases || []
   } : null;
   const saved = () => setVersion(v => v + 1);
+  // Gate auto end-popup: blocks must be done AND warmdown must be ticked off (if present)
+  const warmdownGate = !warmdown || warmdownDone;
+  useEffect(() => {
+    if (allBlocksComplete && warmdownGate && !autoEndShown) {
+      setAutoEndShown(true);
+      haptic([40, 30, 60, 30, 80]);
+      setTimeout(() => setShowEndConfirm(true), 600);
+    }
+  }, [allBlocksComplete, warmdownGate, version]);
+  // Dynamic estTime: recompute whenever rest settings change
+  useEffect(() => {
+    setEstTime(computeEstimatedTime(day));
+  }, [restVersion]);
   function onExerciseDone(exName) {
     // Find next incomplete exercise in flat ordered list
     const allEx = day.blocks.flatMap(b => b.exercises || []);
@@ -6685,32 +9714,33 @@ function DayPage({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      height: 3,
-      background: `linear-gradient(90deg,${day.accent},${day.accent}44,transparent)`
+      height: 2,
+      background: `linear-gradient(90deg,${day.accent},${day.accent}66,transparent)`
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "calc(env(safe-area-inset-top) + 16px) 16px 18px",
-      background: `linear-gradient(135deg,${day.accent}08 0%,transparent 60%)`
+      padding: "calc(env(safe-area-inset-top) + 16px) 16px 16px",
+      background: `${day.accent}07`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 10
+      marginBottom: 12
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 9,
+      fontSize: 8,
       fontFamily: "'DM Mono',monospace",
-      padding: "4px 10px",
-      borderRadius: 12,
-      background: W.cyanDim,
-      color: W.cyan,
-      letterSpacing: "0.15em",
-      fontWeight: 600,
-      textTransform: "uppercase"
+      padding: "3px 9px",
+      borderRadius: 4,
+      background: `${day.accent}18`,
+      color: day.accent,
+      letterSpacing: "0.2em",
+      fontWeight: 700,
+      textTransform: "uppercase",
+      border: `1px solid ${day.accent}33`
     }
   }, day.label), started ? /*#__PURE__*/React.createElement("span", {
     style: {
@@ -6718,34 +9748,35 @@ function DayPage({
       fontFamily: "'DM Mono',monospace",
       color: W.cyan,
       fontWeight: 700,
-      letterSpacing: "0.05em"
+      letterSpacing: "0.04em"
     }
   }, "\u23F1 ", fmtElapsed(elapsed)) : /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
+      fontSize: 10,
       fontFamily: "'DM Mono',monospace",
       color: W.textDim,
       letterSpacing: "0.03em"
     }
   }, estTime)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 22,
+      fontSize: 24,
       fontWeight: 700,
       color: W.text,
-      letterSpacing: "-0.01em",
-      lineHeight: 1.2,
+      letterSpacing: "-0.02em",
+      lineHeight: 1.15,
       marginBottom: 3
     }
   }, day.title), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11,
+      fontSize: 10,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
-      marginBottom: 4
+      marginBottom: 12,
+      letterSpacing: "0.03em"
     }
-  }, day.focus), /*#__PURE__*/React.createElement("div", {
+  }, day.focus), prev || next ? /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
+      fontSize: 8,
       fontFamily: "'DM Mono',monospace",
       color: W.border,
       letterSpacing: "0.1em",
@@ -6756,7 +9787,7 @@ function DayPage({
     }
   }, prev && /*#__PURE__*/React.createElement("span", {
     style: {
-      color: W.borderHi
+      color: W.textDim
     }
   }, "\u2190 ", prev.label), prev && next && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -6765,9 +9796,9 @@ function DayPage({
     }
   }, "\xB7"), next && /*#__PURE__*/React.createElement("span", {
     style: {
-      color: W.borderHi
+      color: W.textDim
     }
-  }, next.label, " \u2192")), !started && /*#__PURE__*/React.createElement(TapButton, {
+  }, next.label, " \u2192")) : null, !started && /*#__PURE__*/React.createElement(TapButton, {
     onClick: () => {
       haptic(20);
       setShowStartConfirm(true);
@@ -6785,7 +9816,7 @@ function DayPage({
       cursor: "pointer",
       textTransform: "uppercase"
     }
-  }, "Start Workout"), started && !ended && /*#__PURE__*/React.createElement(TapButton, {
+  }, "Start Workout"), started && !ended && warmdownGate && /*#__PURE__*/React.createElement(TapButton, {
     onClick: () => {
       haptic(20);
       setShowEndConfirm(true);
@@ -6802,7 +9833,19 @@ function DayPage({
       padding: "13px 0",
       cursor: "pointer"
     }
-  }, "End Workout"), ended && /*#__PURE__*/React.createElement("div", {
+  }, "End Workout"), started && !ended && !warmdownGate && /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      textAlign: "center",
+      padding: "13px 0",
+      borderRadius: 10,
+      border: `1px solid ${W.border}`,
+      color: W.textDim,
+      fontSize: 12,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.05em"
+    }
+  }, "\u2193 Complete warm down to finish"), ended && /*#__PURE__*/React.createElement("div", {
     style: {
       background: W.cyanDim,
       border: `1px solid rgba(0,201,177,0.15)`,
@@ -6895,10 +9938,41 @@ function DayPage({
   }, "Delete")))))), /*#__PURE__*/React.createElement("div", {
     ref: blocksRef,
     style: {
-      borderBottom: `1px solid ${W.border}`,
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderBottom: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px 0",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.25em",
+      textTransform: "uppercase",
+      flexShrink: 0
+    }
+  }, "Warm Up"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       opacity: started && warmupDone ? 0.35 : 1,
       transition: "opacity 0.4s"
@@ -6917,8 +9991,36 @@ function DayPage({
     version: version,
     warmupDone: warmupDone,
     onWarmupDone: () => setWarmupDone(d => !d)
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px 0",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      color: day.accent,
+      letterSpacing: "0.25em",
+      textTransform: "uppercase",
+      flexShrink: 0
+    }
+  }, "Main Work"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
   })), day.blocks.map((b, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+    key: b.title,
     ref: i === 0 ? firstBlockRef : null
   }, /*#__PURE__*/React.createElement(Block, {
     block: b,
@@ -6934,7 +10036,39 @@ function DayPage({
     version: version,
     onExerciseDone: onExerciseDone,
     exRefs: exRefs
-  }))), warmdown && /*#__PURE__*/React.createElement("div", {
+  })))), warmdown && /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: `1px solid ${W.border}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px 0",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      color: W.textDim,
+      letterSpacing: "0.25em",
+      textTransform: "uppercase",
+      flexShrink: 0
+    }
+  }, "Warm Down"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: "1px",
+      background: W.border
+    }
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       opacity: started && warmdownDone ? 0.35 : 1,
       transition: "opacity 0.4s"
@@ -6953,10 +10087,11 @@ function DayPage({
     version: version,
     warmupDone: warmdownDone,
     onWarmupDone: () => setWarmdownDone(d => !d)
-  })), cooldown && ended && /*#__PURE__*/React.createElement("div", {
+  }))), cooldown && ended && /*#__PURE__*/React.createElement("div", {
     style: {
       opacity: cooldownDone ? 0.35 : 1,
-      transition: "opacity 0.4s"
+      transition: "opacity 0.4s",
+      borderTop: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement(Block, {
     block: cooldown,
@@ -6974,7 +10109,8 @@ function DayPage({
     onWarmupDone: () => setCooldownDone(d => !d)
   })), cooldown && !ended && started && /*#__PURE__*/React.createElement("div", {
     style: {
-      opacity: 0.4
+      opacity: 0.4,
+      borderTop: `1px solid ${W.border}`
     }
   }, /*#__PURE__*/React.createElement(Block, {
     block: cooldown,
@@ -6993,7 +10129,7 @@ function DayPage({
     style: {
       display: "flex",
       gap: 8,
-      padding: "0 12px"
+      padding: "12px 16px"
     }
   }, prev ? /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage(prev.id),
@@ -7002,26 +10138,35 @@ function DayPage({
       background: W.surface,
       border: `1px solid ${W.border}`,
       borderRadius: 10,
-      padding: "12px 14px",
+      padding: "10px 12px",
       cursor: "pointer",
-      textAlign: "left"
+      textAlign: "left",
+      display: "flex",
+      alignItems: "center",
+      gap: 8
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.textDim,
+      fontSize: 14
+    }
+  }, "\u2190"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
-      marginBottom: 3,
-      letterSpacing: "0.15em",
-      textTransform: "uppercase"
+      letterSpacing: "0.1em",
+      textTransform: "uppercase",
+      marginBottom: 1
     }
-  }, "\u2190 Prev"), /*#__PURE__*/React.createElement("div", {
+  }, "Prev"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: W.text
+      fontSize: 11,
+      fontWeight: 700,
+      color: W.text,
+      letterSpacing: "-0.01em"
     }
-  }, prev.label)) : /*#__PURE__*/React.createElement("div", {
+  }, prev.label))) : /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1
     }
@@ -7032,26 +10177,36 @@ function DayPage({
       background: W.surface,
       border: `1px solid ${W.border}`,
       borderRadius: 10,
-      padding: "12px 14px",
+      padding: "10px 12px",
       cursor: "pointer",
-      textAlign: "right"
+      textAlign: "right",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: 8
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
-      marginBottom: 3,
-      letterSpacing: "0.15em",
-      textTransform: "uppercase"
+      letterSpacing: "0.1em",
+      textTransform: "uppercase",
+      marginBottom: 1
     }
-  }, "Next \u2192"), /*#__PURE__*/React.createElement("div", {
+  }, "Next"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: W.text
+      fontSize: 11,
+      fontWeight: 700,
+      color: W.text,
+      letterSpacing: "-0.01em"
     }
-  }, next.label)) : /*#__PURE__*/React.createElement("div", {
+  }, next.label)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: W.textDim,
+      fontSize: 14
+    }
+  }, "\u2192")) : /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1
     }
@@ -7076,6 +10231,7 @@ function DayPage({
   }), showSummary && /*#__PURE__*/React.createElement(WorkoutSummaryModal, {
     day: day,
     elapsed: finalElapsed,
+    setsLogged: loggedToday,
     onClose: () => setShowSummary(false),
     onDelete: () => {
       setShowSummary(false);
@@ -7103,12 +10259,12 @@ function DayPage({
 }
 
 // ── APP ───────────────────────────────────────────────────────────────────────
-window.App = function App() {
+function App() {
   const [page, setPage] = useState("home");
   const [historyModal, setHistoryModal] = useState(null);
   const [showProg, setShowProg] = useState(false);
   const [version, setVersion] = useState(0);
-  const [deleteDate, setDeleteDate] = useState(null); // {date, dayId} or just date string
+  const [deleteDate, setDeleteDate] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [thuCompletedWeek, setThuCompletedWeek] = useState(null);
   const [thuFriVis, setThuFriVis] = useState({
@@ -7120,6 +10276,10 @@ window.App = function App() {
   const [fontScale, setFontScale] = useState("md");
   const [saveFlash, setSaveFlash] = useState(null);
   const saveFlashTimer = useRef(null);
+  const [showReadiness, setShowReadiness] = useState(false);
+  const [readinessScore, setReadinessScore] = useState(null);
+  const [readinessDate, setReadinessDate] = useState(null);
+  const [showLastRep, setShowLastRep] = useState(null); // exName
   function handleFontScaleChange(v) {
     setFontScale(v);
     saveFontScale(v);
@@ -7154,16 +10314,38 @@ window.App = function App() {
         refreshVisibility(null);
       }
       setFontScale(fontScaleStore);
+      // Load today's readiness if already checked in
+      const todayR = readinessStore.find(r => r.date === todayStr());
+      if (todayR) {
+        setReadinessScore(todayR.score);
+        setReadinessDate(todayR.date);
+      }
       setLoaded(true);
     });
     const s = document.createElement("script");
     s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js";
     document.head.appendChild(s);
-    const interval = setInterval(() => setThuCompletedWeek(prev => {
-      refreshVisibility(prev);
-      return prev;
-    }), 60000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      setThuCompletedWeek(prev => {
+        refreshVisibility(prev);
+        return prev;
+      });
+    }, 60000);
+    // Reset readiness score when app is reopened on a new day (stays open overnight)
+    function checkReadinessReset() {
+      setReadinessDate(d => {
+        if (d && d !== todayStr()) {
+          setReadinessScore(null);
+          return null;
+        }
+        return d;
+      });
+    }
+    document.addEventListener("visibilitychange", checkReadinessReset);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", checkReadinessReset);
+    };
   }, []);
   useEffect(() => {
     refreshVisibility(thuCompletedWeek);
@@ -7202,7 +10384,7 @@ window.App = function App() {
     return true;
   }).map(d => d.id);
   // Global page order for swipe navigation
-  const allPages = ["home", ...visibleDayIds, "settings"];
+  const allPages = ["home", ...visibleDayIds, "stats", "settings"];
   const globalSwipe = useSwipe(useCallback(() => {
     const i = allPages.indexOf(page);
     if (i < allPages.length - 1) setPage(allPages[i + 1]);
@@ -7213,7 +10395,7 @@ window.App = function App() {
   const currentDay = DAYS.find(d => d.id === page);
   const bodyweight = getLatestBW();
   useEffect(() => {
-    if (page !== "home" && page !== "settings" && !visibleDayIds.includes(page)) setPage("home");
+    if (page !== "home" && page !== "settings" && page !== "stats" && !visibleDayIds.includes(page)) setPage("home");
   }, [visibleDayIds]);
   if (!loaded) return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7227,19 +10409,19 @@ window.App = function App() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 40,
-      height: 40,
+      width: 36,
+      height: 36,
       borderRadius: "50%",
       border: `2px solid ${W.border}`,
       borderTopColor: W.cyan,
       animation: "spin 0.8s linear infinite"
     }
-  }), /*#__PURE__*/React.createElement("style", null, `@keyframes spin{to{transform:rotate(360deg)}}`), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "'DM Mono',monospace",
       color: W.textDim,
-      fontSize: 10,
-      letterSpacing: "0.3em",
+      fontSize: 9,
+      letterSpacing: "0.35em",
       textTransform: "uppercase"
     }
   }, "Loading"));
@@ -7264,6 +10446,7 @@ window.App = function App() {
         ::-webkit-scrollbar-thumb{background:#1e1e1e;border-radius:2px;}
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+        ::selection{background:rgba(0,201,177,0.2);color:#f0f0f0;}
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
@@ -7272,19 +10455,24 @@ window.App = function App() {
         @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
         @keyframes prFlash{0%{opacity:1}60%{opacity:0.8}100%{opacity:0}}
         @keyframes tapPop{0%{transform:scale(1)}35%{transform:scale(0.87)}100%{transform:scale(1)}}
+        @keyframes spin{to{transform:rotate(360deg)}}
         .au{animation:fadeUp 0.22s cubic-bezier(0.16,1,0.3,1) both;}
         .ai{animation:fadeIn 0.18s ease both;}
         .as{animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;}
         .tap{animation:tapPop 0.25s cubic-bezier(0.34,1.56,0.64,1) both;}
       `), page === "home" ? /*#__PURE__*/React.createElement(HomePage, {
     version: version,
+    bwVersion: bwVersion,
     setPage: setPage,
-    onViewProgress: () => setShowProg(true),
     onDeleteDate: (d, dId = null) => setDeleteDate({
       date: d,
       dayId: dId
     }),
-    onBWUpdate: () => setBwVersion(v => v + 1)
+    onBWUpdate: () => setBwVersion(v => v + 1),
+    onShowReadiness: () => setShowReadiness(true),
+    readinessScore: readinessScore
+  }) : page === "stats" ? /*#__PURE__*/React.createElement(StatsPage, {
+    version: version
   }) : page === "settings" ? /*#__PURE__*/React.createElement(RestSettingsPage, {
     onRestUpdate: () => {
       saved();
@@ -7293,6 +10481,7 @@ window.App = function App() {
     fontScale: fontScale,
     onFontScaleChange: handleFontScaleChange
   }) : currentDay && /*#__PURE__*/React.createElement(DayPage, {
+    key: currentDay.id,
     day: currentDay,
     onHistory: name => setHistoryModal(name),
     setPage: setPage,
@@ -7321,6 +10510,17 @@ window.App = function App() {
       handleAfterDelete();
       setDeleteDate(null);
     }
+  }), showReadiness && /*#__PURE__*/React.createElement(ReadinessModal, {
+    onComplete: (sleep, stress, soreness, score) => {
+      logReadiness(sleep, stress, soreness);
+      setReadinessScore(score);
+      setReadinessDate(todayStr());
+      setShowReadiness(false);
+    },
+    onSkip: () => setShowReadiness(false)
+  }), showLastRep && /*#__PURE__*/React.createElement(LastRepModal, {
+    exName: showLastRep,
+    onClose: () => setShowLastRep(null)
   }), saveFlash === "error" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
@@ -7341,4 +10541,16 @@ window.App = function App() {
       animation: "fadeUp 0.2s ease both"
     }
   }, "\u26A0 Save failed \u2014 check connection"));
-};
+}
+
+// Mount the app
+(function () {
+  const root = document.getElementById('root');
+  if (root && typeof ReactDOM !== 'undefined') {
+    if (ReactDOM.createRoot) {
+      ReactDOM.createRoot(root).render(React.createElement(App));
+    } else {
+      ReactDOM.render(React.createElement(App), root);
+    }
+  }
+})();
