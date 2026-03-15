@@ -1130,6 +1130,14 @@ function saveWorkoutState(dayId, state) {
     }));
   } catch (e) {}
 }
+// In-progress set state cache — survives tab switches within same session
+const setsProgressCache = {};
+function cacheSetsProgress(dayId, exName, sets) {
+  setsProgressCache[dayId + "_" + exName] = sets;
+}
+function getCachedSets(dayId, exName) {
+  return setsProgressCache[dayId + "_" + exName] || null;
+}
 function loadWorkoutState(dayId) {
   // Check in-memory cache first
   const s = workoutStateCache[dayId];
@@ -2820,17 +2828,26 @@ function InlineSetLogger({
     // fallback: use last entry's reps, then default
     return lastR || defaultReps;
   };
-  const [sets, setSets] = useState(() => Array.from({
-    length: defaultSets
-  }, (_, i) => ({
-    weight: prefillW > 0 ? String(prefillW) : "",
-    reps: String(prefillR(i)),
-    done: false,
-    id: i
-  })));
+  const [sets, setSets] = useState(() => {
+    const cached = getCachedSets(dayId, ex.name);
+    if (cached && cached.length > 0) return cached;
+    return Array.from({
+      length: defaultSets
+    }, (_, i) => ({
+      weight: prefillW > 0 ? String(prefillW) : "",
+      reps: String(prefillR(i)),
+      done: false,
+      id: i
+    }));
+  });
+  // Persist set progress to cache on every change (survives tab switches)
+  useEffect(() => {
+    if (dayId) cacheSetsProgress(dayId, ex.name, sets);
+  }, [sets]);
   const [showRestSettings, setShowRestSettings] = useState(false);
   const [restTime, setRestTimeLocal] = useState(getRestTime(ex.name));
   const [prFlashIdx, setPrFlashIdx] = useState(null);
+  const [confirmDeleteIdx, setConfirmDeleteIdx] = useState(null);
   function handleSetRestTime(t) {
     setRestTime(ex.name, t);
     setRestTimeLocal(t);
@@ -3150,7 +3167,7 @@ function InlineSetLogger({
       done: s.done,
       onToggle: () => toggleSet(i)
     }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => removeSet(i),
+      onClick: () => setConfirmDeleteIdx(i),
       style: {
         height: 28,
         width: 28,
@@ -3246,7 +3263,87 @@ function InlineSetLogger({
       flexShrink: 0,
       whiteSpace: "nowrap"
     }
-  }, doneCount, "/", sets.length)), showRestSettings && /*#__PURE__*/React.createElement(RestSettingsModal, {
+  }, doneCount, "/", sets.length)), confirmDeleteIdx !== null && /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.target === e.currentTarget && setConfirmDeleteIdx(null),
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.85)",
+      zIndex: 2200,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: W.surfaceHi,
+      border: `1px solid rgba(255,71,87,0.3)`,
+      borderRadius: 16,
+      padding: "20px 22px 24px",
+      maxWidth: 320,
+      width: "100%",
+      animation: "scaleIn 0.15s ease both"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.2em",
+      color: W.red,
+      textTransform: "uppercase",
+      marginBottom: 8,
+      fontWeight: 600
+    }
+  }, "Delete Set"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: W.text,
+      marginBottom: 4
+    }
+  }, "Remove set ", confirmDeleteIdx + 1, "?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      marginBottom: 18,
+      lineHeight: 1.5
+    }
+  }, sets[confirmDeleteIdx]?.done ? "This will also remove the logged entry from your history." : "This set has not been logged yet."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setConfirmDeleteIdx(null),
+    style: {
+      flex: 1,
+      padding: "11px",
+      borderRadius: 8,
+      border: `1px solid ${W.border}`,
+      background: "transparent",
+      color: W.textMid,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12
+    }
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      removeSet(confirmDeleteIdx);
+      setConfirmDeleteIdx(null);
+    },
+    style: {
+      flex: 1,
+      padding: "11px",
+      borderRadius: 8,
+      border: "none",
+      background: "rgba(255,71,87,0.15)",
+      color: W.red,
+      fontFamily: "'DM Mono',monospace",
+      fontSize: 12,
+      fontWeight: 700
+    }
+  }, "Delete")))), showRestSettings && /*#__PURE__*/React.createElement(RestSettingsModal, {
     exName: ex.name,
     current: restTime,
     onSave: handleSetRestTime,
@@ -6007,21 +6104,61 @@ function WorkoutAura({
   }, day?.title?.toUpperCase() || "")));
 }
 
-// Nervous System Map
+// Nervous System Map — evidence-based neural load model
+// Neural Demand Factor (NDF) per exercise type based on:
+// - Motor unit recruitment threshold (Henneman's size principle)
+// - Rate of force development demands
+// - Multi-joint coordination complexity
+// - Eccentric load component (produces greater CNS fatigue per Enoka 1996)
+// References: Gandevia (2001) Spinal/supraspinal factors in fatigue;
+// Taylor & Gandevia (2008) Central vs peripheral fatigue comparison;
+// Thomas et al. (2018) Neuromuscular fatigue after heavy resistance/jump/sprint
+const NDF_MAP = {};
+// Explosive/ballistic: highest NDF — max motor unit recruitment + rate coding
+["Force Plate CMJ", "Hang Clean", "Snap Down \u2192 Split Jump", "Snap Down \u2192 Split Squat Jump", "MB Slam \u2192 Lateral Toss", "MB Slam \u2192 MB Lateral Toss", "Pogos", "Vertical Jump", "CMJ", "Box Drop \u2192 Stick Landing", "Box Drop Stick", "Snap Down", "Weighted Pull-Ups"].forEach(n => {
+  NDF_MAP[n] = 0.90;
+});
+// Heavy compounds: high NDF — large muscle mass, high absolute load, multi-joint
+["BB Back Squat", "Trap Bar Deadlift", "BB Bench Press", "BB Row", "RDL", "Nordic Curl", "Hip Thrust", "BB Split Squat"].forEach(n => {
+  NDF_MAP[n] = 0.75;
+});
+// Moderate compounds: substantial recruitment but lower absolute loads
+["DB Incline Press", "DB Incline Bench Press", "DB Incline Bench", "Bulgarian Split Squat", "SA DB Row", "Chest Supported Row", "Chest Supported DB Row", "Pull-Ups", "Lat Pulldown", "SA DB Shoulder Press", "Half-Kneeling Landmine Press", "Rear Foot Elevated Split Squat", "Single Leg RDL"].forEach(n => {
+  NDF_MAP[n] = 0.55;
+});
+// Isolation: lower NDF — single joint, smaller motor unit pools
+["DB Lateral Raise", "DB Lateral Raises", "Straight Bar Pushdown", "OH DB Extension", "Overhead DB Tricep Extension", "Incline Curl", "Incline Dumbbell Curl", "Hammer Curl", "Cable Y Raise", "Cable Y Raises"].forEach(n => {
+  NDF_MAP[n] = 0.35;
+});
+// Core: moderate — primarily isometric/anti-movement patterns
+["Copenhagen Plank", "Copenhagen Short Lever", "V-Ups", "Hanging Leg Raises", "Suitcase Carry", "Banded Deadbug", "Deadbugs", "Pallof Press"].forEach(n => {
+  NDF_MAP[n] = 0.30;
+});
+// Stability/mobility: minimal CNS cost
+["Cuban Press", "Cable External Rotation", "Cable External Rotations", "Band Pull-Aparts", "Serratus Wall Slides", "Wall Angels", "Scapular Wall Slides", "Rack Hip CARs", "Shoulder CARs", "World's Greatest Stretch", "Diaphragmatic Breathing", "Tibialis Raises", "Face Pull to External Rotation", "Cable Rear Fly", "Rear Delt Cable Fly", "Band Pull-Aparts (overhand)"].forEach(n => {
+  NDF_MAP[n] = 0.12;
+});
+
+// Zone mapping based on primary motor cortex regions and spinal segments
+// Upper motor cortex: controls upper body force production (C5-T1 spinal segments)
+// Lower motor cortex: controls lower body (L1-S2 spinal segments)
+// Spinal/core: trunk stabilizers that cross the thoracolumbar junction
+// Peripheral: fine motor control, joint stabilizers, low-threshold motor units
+const ZONE_MAP = {};
+["BB Bench Press", "DB Incline Press", "DB Incline Bench Press", "DB Incline Bench", "SA DB Shoulder Press", "Pull-Ups", "Weighted Pull-Ups", "SA DB Row", "Chest Supported Row", "Chest Supported DB Row", "BB Row", "Lat Pulldown", "Hang Clean", "MB Slam \u2192 Lateral Toss", "MB Slam \u2192 MB Lateral Toss", "Half-Kneeling Landmine Press", "Straight Arm Pulldown", "DB Lateral Raise", "DB Lateral Raises", "Straight Bar Pushdown", "OH DB Extension", "Overhead DB Tricep Extension", "Incline Curl", "Incline Dumbbell Curl", "Hammer Curl", "Cable Y Raise", "Cable Y Raises", "Face Pull to External Rotation", "Empty Bar Bench Press", "50\u201360% Bench Press", "Explosive Empty Bar Bench"].forEach(n => {
+  ZONE_MAP[n] = "upper";
+});
+["BB Back Squat", "Trap Bar Deadlift", "RDL", "Hip Thrust", "Bulgarian Split Squat", "BB Split Squat", "Nordic Curl", "Snap Down \u2192 Split Jump", "Snap Down \u2192 Split Squat Jump", "Pogos", "Vertical Jump", "CMJ", "Force Plate CMJ", "Box Drop \u2192 Stick Landing", "Box Drop Stick", "Snap Down", "Band Lateral Walk", "Tempo Goblet Squat", "Rear Foot Elevated Split Squat", "Single Leg RDL", "SL Glute Bridge", "Glute Bridge Hold", "Glute Bridge + ISO Hold", "Nordic Hamstring Curl ISO", "Tibialis Raises"].forEach(n => {
+  ZONE_MAP[n] = "lower";
+});
+["Copenhagen Plank", "Copenhagen Short Lever", "V-Ups", "Hanging Leg Raises", "Suitcase Carry", "Banded Deadbug", "Deadbugs", "Pallof Press"].forEach(n => {
+  ZONE_MAP[n] = "spine";
+});
 function NervousSystemMap({
   version
 }) {
   const allEx = getAllWorkingExercises();
-  // CNS cost lookup: compound heavy = high, mobility = low
-  const CNS_COST = {
-    "CNS": 90,
-    "Legs": 70,
-    "Push": 55,
-    "Pull": 50,
-    "Core": 35,
-    "Stability": 30,
-    "Mobility": 15
-  };
+  const now = new Date();
   const sevenAgo = new Date();
   sevenAgo.setDate(sevenAgo.getDate() - 7);
   const sa = sevenAgo.toISOString().split("T")[0];
@@ -6033,14 +6170,22 @@ function NervousSystemMap({
   };
   let totalLoad = 0;
   allEx.forEach(ex => {
-    const g = EX_GROUP[ex.name];
-    if (!g) return;
-    const cost = CNS_COST[g] || 30;
+    const ndf = NDF_MAP[ex.name] || 0.12;
+    const zone = ZONE_MAP[ex.name] || "peripheral";
     const ents = getEntries(ex.name).filter(e => e.date >= sa);
-    const vol = ents.reduce((s, e) => s + e.sets * e.reps, 0);
-    const load = vol * cost;
-    if (g === "CNS" || g === "Push" || g === "Pull") zoneLoad.upper += load;else if (g === "Legs") zoneLoad.lower += load;else if (g === "Core" || g === "Stability") zoneLoad.spine += load;else zoneLoad.peripheral += load;
-    totalLoad += load;
+    ents.forEach(e => {
+      // Intensity approximation: use weight relative to exercise's best as proxy for %1RM
+      const allEnts = getEntries(ex.name);
+      const bestW = allEnts.length ? Math.max(...allEnts.map(x => x.weight)) : e.weight || 1;
+      const intensity = bestW > 0 ? Math.min(1, e.weight / bestW) : 0.5;
+      // Time decay: more recent sessions contribute more (exponential decay, τ=3 days)
+      const daysAgo = Math.max(0, (now - new Date(e.date)) / (1000 * 60 * 60 * 24));
+      const decay = Math.exp(-daysAgo / 3);
+      // Neural load = sets × reps × intensity × NDF × decay
+      const load = e.sets * e.reps * intensity * ndf * decay;
+      zoneLoad[zone] += load;
+      totalLoad += load;
+    });
   });
   if (totalLoad === 0) return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6155,7 +6300,101 @@ function NervousSystemMap({
   }));
 }
 
-// Muscle Shadow — body silhouette with volume overlays
+// Muscle Shadow — Hevy-style anatomical heatmap with real muscle groups
+// Maps exercises to specific muscles, then highlights trained muscles on body outline
+const EX_MUSCLES = {
+  // Compound leg movements
+  "BB Back Squat": ["quads", "glutes", "hamstrings", "core"],
+  "Trap Bar Deadlift": ["hamstrings", "glutes", "lowerBack", "quads", "traps"],
+  "Bulgarian Split Squat": ["quads", "glutes"],
+  "BB Split Squat": ["quads", "glutes"],
+  "RDL": ["hamstrings", "glutes", "lowerBack"],
+  "Hip Thrust": ["glutes", "hamstrings"],
+  "Nordic Curl": ["hamstrings"],
+  "Nordic Hamstring Curl ISO": ["hamstrings"],
+  "Rear Foot Elevated Split Squat": ["quads", "glutes"],
+  "Single Leg RDL": ["hamstrings", "glutes"],
+  "SL Glute Bridge": ["glutes"],
+  "Glute Bridge Hold": ["glutes"],
+  "Glute Bridge + ISO Hold": ["glutes"],
+  "Band Lateral Walk": ["glutes"],
+  "Tempo Goblet Squat": ["quads", "glutes", "core"],
+  // Push
+  "BB Bench Press": ["chest", "shoulders", "triceps"],
+  "DB Incline Press": ["chest", "shoulders", "triceps"],
+  "DB Incline Bench Press": ["chest", "shoulders", "triceps"],
+  "DB Incline Bench": ["chest", "shoulders", "triceps"],
+  "DB Lateral Raise": ["shoulders"],
+  "DB Lateral Raises": ["shoulders"],
+  "Cable Y Raise": ["shoulders", "traps"],
+  "Cable Y Raises": ["shoulders", "traps"],
+  "Straight Bar Pushdown": ["triceps"],
+  "OH DB Extension": ["triceps"],
+  "Overhead DB Tricep Extension": ["triceps"],
+  "SA DB Shoulder Press": ["shoulders", "triceps"],
+  "Half-Kneeling Landmine Press": ["shoulders", "chest", "core"],
+  "Empty Bar Bench Press": ["chest", "shoulders"],
+  "50\u201360% Bench Press": ["chest", "shoulders", "triceps"],
+  "Explosive Empty Bar Bench": ["chest", "shoulders"],
+  // Pull
+  "Weighted Pull-Ups": ["lats", "biceps", "upperBack"],
+  "Pull-Ups": ["lats", "biceps", "upperBack"],
+  "SA DB Row": ["upperBack", "lats", "biceps"],
+  "Chest Supported Row": ["upperBack", "lats"],
+  "Chest Supported DB Row": ["upperBack", "lats"],
+  "Lat Pulldown": ["lats", "biceps"],
+  "BB Row": ["upperBack", "lats", "biceps"],
+  "Incline Curl": ["biceps"],
+  "Incline Dumbbell Curl": ["biceps"],
+  "Hammer Curl": ["biceps", "forearms"],
+  "Straight Arm Pulldown": ["lats"],
+  "Scap Pull-Ups": ["upperBack", "traps"],
+  "Scapular Pull-Ups": ["upperBack", "traps"],
+  "Face Pull to External Rotation": ["upperBack", "shoulders"],
+  // Core
+  "Copenhagen Plank": ["core"],
+  "Copenhagen Short Lever": ["core"],
+  "V-Ups": ["core"],
+  "Hanging Leg Raises": ["core"],
+  "Suitcase Carry": ["core", "forearms"],
+  "Banded Deadbug": ["core"],
+  "Deadbugs": ["core"],
+  "Pallof Press": ["core"],
+  // CNS / Power
+  "Hang Clean": ["traps", "shoulders", "glutes", "hamstrings"],
+  "Snap Down \u2192 Split Jump": ["quads", "glutes"],
+  "Snap Down \u2192 Split Squat Jump": ["quads", "glutes"],
+  "Pogos": ["calves"],
+  "Vertical Jump": ["quads", "glutes", "calves"],
+  "CMJ": ["quads", "glutes", "calves"],
+  "Force Plate CMJ": ["quads", "glutes", "calves"],
+  // Stability / Shoulders
+  "Cuban Press": ["shoulders"],
+  "Cable External Rotation": ["shoulders"],
+  "Cable External Rotations": ["shoulders"],
+  "Cable Rear Fly": ["shoulders", "upperBack"],
+  "Rear Delt Cable Fly": ["shoulders", "upperBack"],
+  "Band Pull-Aparts": ["upperBack", "shoulders"],
+  "Band Pull-Aparts (overhand)": ["upperBack", "shoulders"],
+  "Serratus Wall Slides": ["shoulders"],
+  "Tibialis Raises": ["calves"]
+};
+const MUSCLE_COLORS = {
+  chest: "#ff5c7a",
+  shoulders: "#ff9a3c",
+  triceps: "#ff7043",
+  biceps: "#4fc3f7",
+  forearms: "#80cbc4",
+  upperBack: "#4fc3f7",
+  lats: "#6ba3f7",
+  lowerBack: "#4fc3f7",
+  traps: "#b57bee",
+  core: "#ab97e8",
+  quads: "#00e5a0",
+  hamstrings: "#00c9b1",
+  glutes: "#5ecb7c",
+  calves: "#80cbc4"
+};
 function MuscleShadow({
   version
 }) {
@@ -6163,132 +6402,283 @@ function MuscleShadow({
   sevenAgo.setDate(sevenAgo.getDate() - 7);
   const sa = sevenAgo.toISOString().split("T")[0];
   const allEx = getAllWorkingExercises();
-  const groupVol = {
-    CNS: 0,
-    Legs: 0,
-    Push: 0,
-    Pull: 0,
-    Core: 0,
-    Stability: 0,
-    Mobility: 0
-  };
+  const muscleVol = {};
+  Object.keys(MUSCLE_COLORS).forEach(m => {
+    muscleVol[m] = 0;
+  });
   allEx.forEach(ex => {
-    const g = EX_GROUP[ex.name];
-    if (!g) return;
-    getEntries(ex.name).filter(e => e.date >= sa).forEach(e => {
-      groupVol[g] += (e.weight || 10) * e.sets * e.reps;
+    const muscles = EX_MUSCLES[ex.name];
+    if (!muscles) return;
+    const ents = getEntries(ex.name).filter(e => e.date >= sa);
+    const vol = ents.reduce((s, e) => s + (e.weight || 10) * e.sets * e.reps, 0);
+    muscles.forEach(m => {
+      if (muscleVol[m] !== undefined) muscleVol[m] += vol;
     });
   });
-  const maxVol = Math.max(...Object.values(groupVol), 1);
-  const glow = (g, base = 0.15) => Math.max(0, Math.min(1, base + groupVol[g] / maxVol * 0.7));
-  const dimColor = g => {
-    const v = glow(g, 0);
-    return v < 0.15 ? "#111" : "";
+  const maxVol = Math.max(...Object.values(muscleVol), 1);
+  const heat = m => Math.min(1, muscleVol[m] / maxVol);
+  const fill = m => {
+    const h = heat(m);
+    return h < 0.05 ? "rgba(255,255,255,0.03)" : MUSCLE_COLORS[m];
   };
-  return /*#__PURE__*/React.createElement("svg", {
-    viewBox: "0 0 200 360",
+  const op = m => {
+    const h = heat(m);
+    return h < 0.05 ? 0.03 : 0.12 + h * 0.7;
+  };
+  // Collect trained muscles for legend
+  const trained = Object.entries(muscleVol).filter(([m, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 200 380",
     style: {
       width: "100%",
       maxWidth: 200,
       display: "block",
       margin: "0 auto"
     }
-  }, /*#__PURE__*/React.createElement("defs", null, ["push", "pull", "legs", "core", "stab", "mob", "cns"].map(id => /*#__PURE__*/React.createElement("filter", {
-    key: id,
-    id: `ms-${id}`
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("filter", {
+    id: "ms-glow"
   }, /*#__PURE__*/React.createElement("feGaussianBlur", {
-    stdDeviation: "6",
+    stdDeviation: "4",
     result: "b"
   }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
     in: "b"
   }), /*#__PURE__*/React.createElement("feMergeNode", {
     in: "SourceGraphic"
-  }))))), /*#__PURE__*/React.createElement("path", {
-    d: "M100 15 C90 15 82 20 80 30 L75 55 C65 60 55 65 50 78 L45 110 C43 120 45 130 48 135 L50 180 L40 260 L45 320 L55 320 L60 260 L68 200 L100 205 L132 200 L140 260 L145 320 L155 320 L160 260 L150 180 L152 135 C155 130 157 120 155 110 L150 78 C145 65 135 60 125 55 L120 30 C118 20 110 15 100 15Z",
+  })))), /*#__PURE__*/React.createElement("path", {
+    d: "M100 30 C90 30 84 34 82 42 L78 62 C68 66 58 72 52 84 L47 115 C45 125 46 135 49 142 L52 185 L42 268 L46 335 L58 335 L62 268 L70 210 L100 214 L130 210 L138 268 L142 335 L154 335 L158 268 L148 185 L151 142 C154 135 155 125 153 115 L148 84 C142 72 132 66 122 62 L118 42 C116 34 110 30 100 30Z",
     fill: "#0a0a0a",
-    stroke: W.border,
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "100",
-    cy: "16",
-    rx: "15",
-    ry: "18",
-    fill: "#0d0d0d",
-    stroke: W.border,
+    stroke: "rgba(255,255,255,0.12)",
     strokeWidth: "1"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "100",
-    cy: "88",
-    rx: "35",
+    cy: "18",
+    rx: "14",
+    ry: "16",
+    fill: "#0a0a0a",
+    stroke: "rgba(255,255,255,0.12)",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "82",
+    cy: "65",
+    rx: "10",
+    ry: "6",
+    fill: fill("traps"),
+    fillOpacity: op("traps"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "118",
+    cy: "65",
+    rx: "10",
+    ry: "6",
+    fill: fill("traps"),
+    fillOpacity: op("traps"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "58",
+    cy: "80",
+    rx: "11",
+    ry: "14",
+    fill: fill("shoulders"),
+    fillOpacity: op("shoulders"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "142",
+    cy: "80",
+    rx: "11",
+    ry: "14",
+    fill: fill("shoulders"),
+    fillOpacity: op("shoulders"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "84",
+    cy: "95",
+    rx: "16",
+    ry: "14",
+    fill: fill("chest"),
+    fillOpacity: op("chest"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "116",
+    cy: "95",
+    rx: "16",
+    ry: "14",
+    fill: fill("chest"),
+    fillOpacity: op("chest"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "105",
+    rx: "24",
+    ry: "16",
+    fill: fill("upperBack"),
+    fillOpacity: op("upperBack") * 0.6,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "72",
+    cy: "120",
+    rx: "12",
     ry: "20",
-    fill: W.orange,
-    fillOpacity: glow("Push", 0.05),
-    filter: "url(#ms-push)"
+    fill: fill("lats"),
+    fillOpacity: op("lats"),
+    filter: "url(#ms-glow)"
   }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "100",
-    cy: "110",
-    rx: "30",
-    ry: "18",
-    fill: "#4fc3f7",
-    fillOpacity: glow("Pull", 0.04),
-    filter: "url(#ms-pull)"
+    cx: "128",
+    cy: "120",
+    rx: "12",
+    ry: "20",
+    fill: fill("lats"),
+    fillOpacity: op("lats"),
+    filter: "url(#ms-glow)"
   }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "65",
-    cy: "72",
-    rx: "14",
-    ry: "10",
-    fill: W.yellow,
-    fillOpacity: glow("CNS", 0.05),
-    filter: "url(#ms-cns)"
+    cx: "50",
+    cy: "108",
+    rx: "6",
+    ry: "14",
+    fill: fill("biceps"),
+    fillOpacity: op("biceps"),
+    filter: "url(#ms-glow)"
   }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "135",
-    cy: "72",
-    rx: "14",
-    ry: "10",
-    fill: W.yellow,
-    fillOpacity: glow("CNS", 0.05),
-    filter: "url(#ms-cns)"
+    cx: "150",
+    cy: "108",
+    rx: "6",
+    ry: "14",
+    fill: fill("biceps"),
+    fillOpacity: op("biceps"),
+    filter: "url(#ms-glow)"
   }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "100",
-    cy: "138",
-    rx: "22",
-    ry: "22",
-    fill: "#ab97e8",
-    fillOpacity: glow("Core", 0.05),
-    filter: "url(#ms-core)"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "80",
-    cy: "230",
-    rx: "18",
-    ry: "50",
-    fill: W.cyan,
-    fillOpacity: glow("Legs", 0.05),
-    filter: "url(#ms-legs)"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "120",
-    cy: "230",
-    rx: "18",
-    ry: "50",
-    fill: W.cyan,
-    fillOpacity: glow("Legs", 0.05),
-    filter: "url(#ms-legs)"
-  }), /*#__PURE__*/React.createElement("ellipse", {
-    cx: "100",
-    cy: "160",
-    rx: "28",
+    cx: "48",
+    cy: "100",
+    rx: "5",
     ry: "12",
-    fill: "#80cbc4",
-    fillOpacity: glow("Stability", 0.04),
-    filter: "url(#ms-stab)"
-  }), Object.entries(groupVol).filter(([g, v]) => v > 0).slice(0, 3).map(([g, v], i) => /*#__PURE__*/React.createElement("text", {
-    key: g,
-    x: i % 2 === 0 ? 148 : 48,
-    y: 85 + i * 22,
-    fill: GROUP_COLORS[g] || W.cyan,
-    fillOpacity: "0.7",
-    fontSize: "7",
-    fontFamily: "'DM Mono',monospace"
-  }, g)));
+    fill: fill("triceps"),
+    fillOpacity: op("triceps") * 0.7,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "152",
+    cy: "100",
+    rx: "5",
+    ry: "12",
+    fill: fill("triceps"),
+    fillOpacity: op("triceps") * 0.7,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "44",
+    cy: "130",
+    rx: "4",
+    ry: "14",
+    fill: fill("forearms"),
+    fillOpacity: op("forearms"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "156",
+    cy: "130",
+    rx: "4",
+    ry: "14",
+    fill: fill("forearms"),
+    fillOpacity: op("forearms"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "85",
+    y: "130",
+    width: "30",
+    height: "40",
+    rx: "6",
+    fill: fill("core"),
+    fillOpacity: op("core"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "100",
+    cy: "155",
+    rx: "18",
+    ry: "10",
+    fill: fill("lowerBack"),
+    fillOpacity: op("lowerBack") * 0.5,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "84",
+    cy: "192",
+    rx: "14",
+    ry: "10",
+    fill: fill("glutes"),
+    fillOpacity: op("glutes"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "116",
+    cy: "192",
+    rx: "14",
+    ry: "10",
+    fill: fill("glutes"),
+    fillOpacity: op("glutes"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "78",
+    cy: "240",
+    rx: "14",
+    ry: "32",
+    fill: fill("quads"),
+    fillOpacity: op("quads"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "122",
+    cy: "240",
+    rx: "14",
+    ry: "32",
+    fill: fill("quads"),
+    fillOpacity: op("quads"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "76",
+    cy: "248",
+    rx: "10",
+    ry: "28",
+    fill: fill("hamstrings"),
+    fillOpacity: op("hamstrings") * 0.6,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "124",
+    cy: "248",
+    rx: "10",
+    ry: "28",
+    fill: fill("hamstrings"),
+    fillOpacity: op("hamstrings") * 0.6,
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "74",
+    cy: "305",
+    rx: "8",
+    ry: "18",
+    fill: fill("calves"),
+    fillOpacity: op("calves"),
+    filter: "url(#ms-glow)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "126",
+    cy: "305",
+    rx: "8",
+    ry: "18",
+    fill: fill("calves"),
+    fillOpacity: op("calves"),
+    filter: "url(#ms-glow)"
+  })), trained.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 4,
+      marginTop: 8,
+      justifyContent: "center"
+    }
+  }, trained.slice(0, 6).map(([m, v]) => /*#__PURE__*/React.createElement("div", {
+    key: m,
+    style: {
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      color: MUSCLE_COLORS[m],
+      background: MUSCLE_COLORS[m] + "15",
+      border: `1px solid ${MUSCLE_COLORS[m]}33`,
+      borderRadius: 4,
+      padding: "2px 6px",
+      letterSpacing: "0.05em"
+    }
+  }, m, " ", Math.round(heat(m) * 100), "%"))));
 }
 
 // Gravity — solar system of strength
@@ -7245,12 +7635,18 @@ function HomePage({
   // Void — 1% chance per day after 10+ sessions
   const [showVoid, setShowVoid] = useState(() => {
     if (sessionsStore.length < 10) return false;
-    const todayVoid = localStorage.getItem("wt_void_shown");
-    if (todayVoid === todayStr()) return false;
+    try {
+      const todayVoid = localStorage.getItem("wt_void_shown");
+      if (todayVoid === todayStr()) return false;
+    } catch (e) {}
     return Math.random() < 0.01;
   });
   useEffect(() => {
-    if (showVoid) localStorage.setItem("wt_void_shown", todayStr());
+    if (showVoid) {
+      try {
+        localStorage.setItem("wt_void_shown", todayStr());
+      } catch (e) {}
+    }
   }, [showVoid]);
   const [showConfession, setShowConfession] = useState(false);
   const [confessionTaps, setConfessionTaps] = useState(0);
@@ -7725,6 +8121,54 @@ function HomePage({
   })));
 }
 
+// ── STAT EXPLAINER DROPDOWN ───────────────────────────────────────────────────
+function StatExplainer({
+  text
+}) {
+  const [open, setOpen] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: open ? 8 : 0
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setOpen(o => !o),
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      background: "transparent",
+      border: "none",
+      color: W.textDim,
+      fontSize: 8,
+      fontFamily: "'DM Mono',monospace",
+      letterSpacing: "0.1em",
+      padding: "2px 0",
+      cursor: "pointer",
+      textTransform: "uppercase",
+      opacity: 0.6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      transform: open ? "rotate(90deg)" : "none",
+      transition: "transform 0.15s",
+      display: "inline-block"
+    }
+  }, "\u25B8"), open ? "Hide" : "How it works"), open && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: W.textDim,
+      fontFamily: "'DM Mono',monospace",
+      lineHeight: 1.65,
+      padding: "8px 10px",
+      background: "rgba(255,255,255,0.02)",
+      border: `1px solid ${W.border}`,
+      borderRadius: 6,
+      marginTop: 4,
+      animation: "fadeIn 0.15s ease both"
+    }
+  }, text));
+}
+
 // ── STATS PAGE ─────────────────────────────────────────────────────────────────
 function StatsPage({
   version
@@ -7967,9 +8411,11 @@ function StatsPage({
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
-      marginBottom: 12
+      marginBottom: 6
     }
-  }, "Top Est. 1RMs"), top1RMs.slice(0, 7).length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Top Est. 1RMs"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Estimated one-rep max using Epley formula: weight \xD7 (1 + reps/30). Ranks your heaviest lifts by projected single-rep strength. Only includes working sets from progressive overload exercises."
+  }), top1RMs.slice(0, 7).length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: W.textDim,
@@ -8058,9 +8504,11 @@ function StatsPage({
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
-      marginBottom: 12
+      marginBottom: 6
     }
-  }, "Top Gainers"), topGainers.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "Top Gainers"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Percentage change from your first logged weight to your most recent for each exercise. Shows which lifts have improved the most since you started tracking. Requires 2+ sessions with distinct dates."
+  }), topGainers.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: W.textDim,
@@ -8314,9 +8762,11 @@ function StatsPage({
       color: W.textDim,
       letterSpacing: "0.2em",
       textTransform: "uppercase",
-      marginBottom: 10
+      marginBottom: 6
     }
-  }, "Muscle Shadow"), /*#__PURE__*/React.createElement("div", {
+  }, "Muscle Shadow"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Highlights which muscles you've trained in the past 7 days. Brightness = relative training volume (weight \xD7 sets \xD7 reps). Muscles are mapped per-exercise, so compound lifts like squats light up quads, glutes, hamstrings, and core."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: W.textDim,
@@ -8387,14 +8837,16 @@ function StatsPage({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Nervous System Map"), /*#__PURE__*/React.createElement("div", {
+  }, "Nervous System Map"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Estimates neural fatigue across four motor-pathway zones using a composite load score. Each exercise is weighted by its neural demand factor (NDF): explosive/CNS work=0.9, heavy compounds=0.7, isolation=0.4, mobility=0.1. Load = sets \xD7 reps \xD7 intensity% \xD7 NDF \xD7 recovery-decay. Higher loads in a zone indicate greater neural fatigue accumulation, which can impair motor unit recruitment and rate coding. Based on Henneman's size principle and central fatigue research (Gandevia 2001, Taylor & Gandevia 2008)."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: W.textDim,
       fontFamily: "'DM Mono',monospace",
       marginBottom: 10
     }
-  }, "CNS load by zone \xB7 last 7 days"), /*#__PURE__*/React.createElement(NervousSystemMap, {
+  }, "Neural load by zone \xB7 last 7 days"), /*#__PURE__*/React.createElement(NervousSystemMap, {
     version: version
   })), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -8410,7 +8862,9 @@ function StatsPage({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Gravity"), /*#__PURE__*/React.createElement("div", {
+  }, "Gravity"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Solar system visualization of your lifts. The heaviest estimated 1RM sits at the center. Other lifts orbit at distances proportional to their relative strength. Brighter planets = recently hit near your all-time best (within 95%)."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: W.textDim,
@@ -8455,7 +8909,9 @@ function StatsPage({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Circadian Peak"), circadianPeak !== null ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "Circadian Peak"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Finds the hour of day where your logged working weights are statistically highest. Based on timestamps recorded with each set. Needs 3+ entries per hour bucket to surface a pattern. Research shows most people peak in late afternoon when core body temperature is highest."
+  }), circadianPeak !== null ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: W.textDim,
@@ -8505,7 +8961,9 @@ function StatsPage({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Blood Memory"), /*#__PURE__*/React.createElement("div", {
+  }, "Blood Memory"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Correlational analysis of exercise pairings. For each lift, splits your sessions into days where a specific other exercise was also performed vs. days without it. Shows the percentage difference in average weight when the pairing is present. Requires 6+ sessions with 3+ co-occurrences."
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: W.textDim,
@@ -9450,7 +9908,7 @@ function DayPage({
     [finalElapsed, setFinalElapsed] = useState(_cached?.finalElapsed || 0),
     [startTime, setStartTime] = useState(_cached?.startTime || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
+  const [showSummary, setShowSummary] = useState(_cached?.showSummary || false);
   const [autoEndShown, setAutoEndShown] = useState(false);
   const [version, setVersion] = useState(0);
   const [warmupDone, setWarmupDone] = useState(false);
@@ -9506,9 +9964,10 @@ function DayPage({
       ended,
       elapsed,
       finalElapsed,
-      startTime
+      startTime,
+      showSummary
     });
-  }, [started, ended, elapsed, finalElapsed, startTime]);
+  }, [started, ended, elapsed, finalElapsed, startTime, showSummary]);
   // Daily midnight reset: clear any ended workout state at start of new day
   useEffect(() => {
     function checkMidnightReset() {
