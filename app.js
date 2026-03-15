@@ -6417,285 +6417,494 @@ function MuscleShadow({
   });
   const maxVol = Math.max(...Object.values(muscleVol), 1);
   const heat = m => Math.min(1, muscleVol[m] / maxVol);
-  const fc = m => {
-    const h = heat(m);
-    return h < 0.05 ? "rgba(255,255,255,0.04)" : MUSCLE_COLORS[m];
-  };
+  const fc = m => heat(m) < 0.05 ? "rgba(255,255,255,0.06)" : MUSCLE_COLORS[m];
   const fo = m => {
     const h = heat(m);
-    return h < 0.05 ? 0.04 : 0.15 + h * 0.75;
+    return h < 0.05 ? 0.06 : 0.18 + h * 0.72;
   };
   const trained = Object.entries(muscleVol).filter(([m, v]) => v > 0).sort((a, b) => b[1] - a[1]);
-  const OL = "#1a1a1a";
-  const OW = 0.6;
-  // Shared muscle path renderer
-  const M = ({
-    d,
-    m,
-    scaleOp
-  }) => React.createElement("path", {
-    d,
-    fill: fc(m),
-    fillOpacity: fo(m) * (scaleOp || 1),
-    stroke: heat(m) > 0.05 ? fc(m) : "none",
-    strokeWidth: 0.3,
-    strokeOpacity: 0.3
-  });
-  return React.createElement("div", null, React.createElement("svg", {
-    viewBox: "0 0 340 380",
+
+  // Simple body using ellipses — reliable across all renderers
+  // ox = x-offset for front (0) or back (160) view
+  function body(ox, label, backView) {
+    const cx = ox + 70; // center x of this body
+    const parts = [];
+    // Body outline
+    parts.push({
+      t: "ellipse",
+      cx: cx,
+      cy: 28,
+      rx: 12,
+      ry: 14,
+      fill: "#0d0d0d",
+      stroke: W.border,
+      sw: 0.8
+    }); // head
+    parts.push({
+      t: "rect",
+      x: cx - 18,
+      y: 48,
+      w: 36,
+      h: 56,
+      rx: 8,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.6
+    }); // torso
+    parts.push({
+      t: "rect",
+      x: cx - 20,
+      y: 96,
+      w: 40,
+      h: 32,
+      rx: 6,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.6
+    }); // hips
+    // Arms
+    parts.push({
+      t: "rect",
+      x: cx - 30,
+      y: 54,
+      w: 10,
+      h: 44,
+      rx: 4,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.5
+    }); // L upper arm
+    parts.push({
+      t: "rect",
+      x: cx + 20,
+      y: 54,
+      w: 10,
+      h: 44,
+      rx: 4,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.5
+    }); // R upper arm
+    parts.push({
+      t: "rect",
+      x: cx - 28,
+      y: 100,
+      w: 8,
+      h: 38,
+      rx: 3,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.4
+    }); // L forearm
+    parts.push({
+      t: "rect",
+      x: cx + 20,
+      y: 100,
+      w: 8,
+      h: 38,
+      rx: 3,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.4
+    }); // R forearm
+    // Legs
+    parts.push({
+      t: "rect",
+      x: cx - 17,
+      y: 130,
+      w: 14,
+      h: 56,
+      rx: 5,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.6
+    }); // L thigh
+    parts.push({
+      t: "rect",
+      x: cx + 3,
+      y: 130,
+      w: 14,
+      h: 56,
+      rx: 5,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.6
+    }); // R thigh
+    parts.push({
+      t: "rect",
+      x: cx - 15,
+      y: 190,
+      w: 12,
+      h: 44,
+      rx: 4,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.5
+    }); // L calf
+    parts.push({
+      t: "rect",
+      x: cx + 3,
+      y: 190,
+      w: 12,
+      h: 44,
+      rx: 4,
+      fill: "#0a0a0a",
+      stroke: W.border,
+      sw: 0.5
+    }); // R calf
+
+    // Muscle overlays — FRONT
+    const muscles = [];
+    if (!backView) {
+      // Traps
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 9,
+        cy: 50,
+        rx: 8,
+        ry: 4,
+        m: "traps"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 9,
+        cy: 50,
+        rx: 8,
+        ry: 4,
+        m: "traps"
+      });
+      // Shoulders
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 22,
+        cy: 58,
+        rx: 7,
+        ry: 10,
+        m: "shoulders"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 22,
+        cy: 58,
+        rx: 7,
+        ry: 10,
+        m: "shoulders"
+      });
+      // Chest
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 8,
+        cy: 62,
+        rx: 10,
+        ry: 8,
+        m: "chest"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 8,
+        cy: 62,
+        rx: 10,
+        ry: 8,
+        m: "chest"
+      });
+      // Biceps
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 25,
+        cy: 72,
+        rx: 5,
+        ry: 12,
+        m: "biceps"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 25,
+        cy: 72,
+        rx: 5,
+        ry: 12,
+        m: "biceps"
+      });
+      // Forearms
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 24,
+        cy: 112,
+        rx: 4,
+        ry: 14,
+        m: "forearms"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 24,
+        cy: 112,
+        rx: 4,
+        ry: 14,
+        m: "forearms"
+      });
+      // Core / Abs
+      muscles.push({
+        t: "rect",
+        x: cx - 9,
+        y: 74,
+        w: 18,
+        h: 28,
+        rx: 3,
+        m: "core"
+      });
+      // Quads
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 10,
+        cy: 150,
+        rx: 6,
+        ry: 22,
+        m: "quads"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 10,
+        cy: 150,
+        rx: 6,
+        ry: 22,
+        m: "quads"
+      });
+      // Calves (front - tibialis)
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 9,
+        cy: 208,
+        rx: 4,
+        ry: 16,
+        m: "calves",
+        so: 0.5
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 9,
+        cy: 208,
+        rx: 4,
+        ry: 16,
+        m: "calves",
+        so: 0.5
+      });
+    } else {
+      // BACK view muscles
+      // Traps (larger on back)
+      muscles.push({
+        t: "ellipse",
+        cx: cx,
+        cy: 52,
+        rx: 14,
+        ry: 6,
+        m: "traps"
+      });
+      // Rear delts
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 22,
+        cy: 58,
+        rx: 7,
+        ry: 8,
+        m: "shoulders"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 22,
+        cy: 58,
+        rx: 7,
+        ry: 8,
+        m: "shoulders"
+      });
+      // Upper back / rhomboids
+      muscles.push({
+        t: "ellipse",
+        cx: cx,
+        cy: 64,
+        rx: 12,
+        ry: 8,
+        m: "upperBack"
+      });
+      // Lats
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 10,
+        cy: 78,
+        rx: 9,
+        ry: 16,
+        m: "lats"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 10,
+        cy: 78,
+        rx: 9,
+        ry: 16,
+        m: "lats"
+      });
+      // Triceps
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 25,
+        cy: 74,
+        rx: 5,
+        ry: 14,
+        m: "triceps"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 25,
+        cy: 74,
+        rx: 5,
+        ry: 14,
+        m: "triceps"
+      });
+      // Forearms (back)
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 24,
+        cy: 112,
+        rx: 4,
+        ry: 14,
+        m: "forearms"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 24,
+        cy: 112,
+        rx: 4,
+        ry: 14,
+        m: "forearms"
+      });
+      // Lower back
+      muscles.push({
+        t: "ellipse",
+        cx: cx,
+        cy: 100,
+        rx: 12,
+        ry: 8,
+        m: "lowerBack"
+      });
+      // Glutes
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 9,
+        cy: 116,
+        rx: 10,
+        ry: 8,
+        m: "glutes"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 9,
+        cy: 116,
+        rx: 10,
+        ry: 8,
+        m: "glutes"
+      });
+      // Hamstrings
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 10,
+        cy: 152,
+        rx: 6,
+        ry: 22,
+        m: "hamstrings"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 10,
+        cy: 152,
+        rx: 6,
+        ry: 22,
+        m: "hamstrings"
+      });
+      // Calves
+      muscles.push({
+        t: "ellipse",
+        cx: cx - 9,
+        cy: 206,
+        rx: 5,
+        ry: 18,
+        m: "calves"
+      });
+      muscles.push({
+        t: "ellipse",
+        cx: cx + 9,
+        cy: 206,
+        rx: 5,
+        ry: 18,
+        m: "calves"
+      });
+    }
+    return {
+      parts,
+      muscles,
+      label,
+      lx: cx,
+      ly: 20
+    };
+  }
+  const front = body(0, "FRONT", false);
+  const back = body(160, "BACK", true);
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 300 248",
     style: {
       width: "100%",
       display: "block",
       margin: "0 auto"
     }
-  }, React.createElement("defs", null, React.createElement("filter", {
-    id: "mg"
-  }, React.createElement("feGaussianBlur", {
-    stdDeviation: "3",
-    result: "b"
-  }), React.createElement("feMerge", null, React.createElement("feMergeNode", {
-    in: "b"
-  }), React.createElement("feMergeNode", {
-    in: "SourceGraphic"
-  })))), React.createElement("text", {
-    x: 85,
-    y: 12,
-    fill: W.textDim,
-    fillOpacity: 0.4,
-    fontSize: 7,
-    fontFamily: "'DM Mono',monospace",
+  }, [front, back].map((b, bi) => /*#__PURE__*/React.createElement("g", {
+    key: bi
+  }, /*#__PURE__*/React.createElement("text", {
+    x: b.lx,
+    y: b.ly,
     textAnchor: "middle",
-    letterSpacing: "0.15em"
-  }, "FRONT"), React.createElement("text", {
-    x: 255,
-    y: 12,
     fill: W.textDim,
-    fillOpacity: 0.4,
-    fontSize: 7,
+    fillOpacity: "0.35",
+    fontSize: "6",
     fontFamily: "'DM Mono',monospace",
-    textAnchor: "middle",
     letterSpacing: "0.15em"
-  }, "BACK"),
-  // ═══ FRONT VIEW (centered at x=85) ═══
-  // Body outline - front
-  React.createElement("path", {
-    d: "M85 22 C78 22 74 26 72 32 L69 48 C62 52 54 58 49 68 L45 95 C43 103 44 112 47 118 L44 128 L38 142 L36 156 L40 156 L44 144 L49 134 L51 158 L48 175 L48 195 L53 195 L56 175 L57 166 L60 178 L54 240 L50 300 L54 332 L62 332 L66 300 L72 248 L78 210 L85 214 L92 210 L98 248 L104 300 L108 332 L116 332 L120 300 L116 240 L110 178 L113 166 L114 175 L117 195 L122 195 L122 175 L119 158 L121 134 L126 144 L130 156 L134 156 L132 142 L126 128 L123 118 C126 112 127 103 125 95 L121 68 C116 58 108 52 101 48 L98 32 C96 26 92 22 85 22Z",
-    fill: "#080808",
-    stroke: OL,
-    strokeWidth: OW
-  }),
-  // Head
-  React.createElement("ellipse", {
-    cx: 85,
-    cy: 18,
-    rx: 10,
-    ry: 11,
-    fill: "#080808",
-    stroke: OL,
-    strokeWidth: OW
-  }),
-  // Front muscles
-  // Traps
-  M({
-    d: "M72 42 L69 48 C66 50 63 53 60 56 L72 52 L85 50 L98 52 L110 56 C107 53 104 50 101 48 L98 42 L92 40 L85 39 L78 40 Z",
-    m: "traps"
-  }),
-  // Shoulders/Delts
-  M({
-    d: "M60 56 C54 60 50 66 48 72 L46 80 L49 86 L54 78 L60 68 L66 60 Z",
-    m: "shoulders"
-  }), M({
-    d: "M110 56 C116 60 120 66 122 72 L124 80 L121 86 L116 78 L110 68 L104 60 Z",
-    m: "shoulders"
-  }),
-  // Chest (pecs) - two halves
-  M({
-    d: "M66 66 L60 72 L56 82 L58 92 L66 96 L76 98 L84 96 L84 72 L78 66 Z",
-    m: "chest"
-  }), M({
-    d: "M104 66 L110 72 L114 82 L112 92 L104 96 L94 98 L86 96 L86 72 L92 66 Z",
-    m: "chest"
-  }),
-  // Biceps
-  M({
-    d: "M48 82 L45 95 L44 110 L44 122 L47 118 L50 108 L52 96 L50 86 Z",
-    m: "biceps"
-  }), M({
-    d: "M122 82 L125 95 L126 110 L126 122 L123 118 L120 108 L118 96 L120 86 Z",
-    m: "biceps"
-  }),
-  // Forearms
-  M({
-    d: "M44 124 L40 140 L37 154 L40 155 L44 144 L49 132 Z",
-    m: "forearms"
-  }), M({
-    d: "M126 124 L130 140 L133 154 L130 155 L126 144 L121 132 Z",
-    m: "forearms"
-  }), M({
-    d: "M49 134 L51 158 L48 175 L48 192 L52 192 L55 175 L56 162 L53 142 Z",
-    m: "forearms"
-  }), M({
-    d: "M121 134 L119 158 L122 175 L122 192 L118 192 L115 175 L114 162 L117 142 Z",
-    m: "forearms"
-  }),
-  // Abs/Core - segmented
-  M({
-    d: "M76 100 L84 98 L84 116 L76 116 Z",
-    m: "core"
-  }), M({
-    d: "M86 98 L94 100 L94 116 L86 116 Z",
-    m: "core"
-  }), M({
-    d: "M76 118 L84 118 L84 136 L76 136 Z",
-    m: "core"
-  }), M({
-    d: "M86 118 L94 118 L94 136 L86 136 Z",
-    m: "core"
-  }), M({
-    d: "M76 138 L84 138 L84 156 L78 160 Z",
-    m: "core"
-  }), M({
-    d: "M86 138 L94 138 L94 156 L92 160 Z",
-    m: "core"
-  }),
-  // Obliques
-  M({
-    d: "M62 98 L66 96 L74 100 L74 158 L68 164 L60 170 L56 164 L58 132 L60 110 Z",
-    m: "core",
-    scaleOp: 0.5
-  }), M({
-    d: "M108 98 L104 96 L96 100 L96 158 L102 164 L110 170 L114 164 L112 132 L110 110 Z",
-    m: "core",
-    scaleOp: 0.5
-  }),
-  // Quads - front thigh with teardrop shape
-  M({
-    d: "M60 178 L56 196 L52 224 L50 252 L52 272 L56 280 L62 272 L66 256 L70 236 L74 216 L78 204 L78 192 L72 182 Z",
-    m: "quads"
-  }), M({
-    d: "M110 178 L114 196 L118 224 L120 252 L118 272 L114 280 L108 272 L104 256 L100 236 L96 216 L92 204 L92 192 L98 182 Z",
-    m: "quads"
-  }),
-  // Inner thigh / adductors (subtle)
-  M({
-    d: "M78 200 L85 214 L85 250 L80 260 L74 240 L76 216 Z",
-    m: "quads",
-    scaleOp: 0.4
-  }), M({
-    d: "M92 200 L85 214 L85 250 L90 260 L96 240 L94 216 Z",
-    m: "quads",
-    scaleOp: 0.4
-  }),
-  // Tibialis / Shins
-  M({
-    d: "M56 282 L54 300 L54 328 L60 328 L62 306 L64 290 L60 280 Z",
-    m: "calves",
-    scaleOp: 0.5
-  }), M({
-    d: "M114 282 L116 300 L116 328 L110 328 L108 306 L106 290 L110 280 Z",
-    m: "calves",
-    scaleOp: 0.5
-  }),
-  // ═══ BACK VIEW (centered at x=255) ═══
-  // Body outline - back
-  React.createElement("path", {
-    d: "M255 22 C248 22 244 26 242 32 L239 48 C232 52 224 58 219 68 L215 95 C213 103 214 112 217 118 L214 128 L208 142 L206 156 L210 156 L214 144 L219 134 L221 158 L218 175 L218 195 L223 195 L226 175 L227 166 L230 178 L224 240 L220 300 L224 332 L232 332 L236 300 L242 248 L248 210 L255 214 L262 210 L268 248 L274 300 L278 332 L286 332 L290 300 L286 240 L280 178 L283 166 L284 175 L287 195 L292 195 L292 175 L289 158 L291 134 L296 144 L300 156 L304 156 L302 142 L296 128 L293 118 C296 112 297 103 295 95 L291 68 C286 58 278 52 271 48 L268 32 C266 26 262 22 255 22Z",
-    fill: "#080808",
-    stroke: OL,
-    strokeWidth: OW
-  }),
-  // Head
-  React.createElement("ellipse", {
-    cx: 255,
-    cy: 18,
-    rx: 10,
-    ry: 11,
-    fill: "#080808",
-    stroke: OL,
-    strokeWidth: OW
-  }),
-  // Back muscles
-  // Traps (upper back diamond)
-  M({
-    d: "M242 42 L239 48 L235 54 L245 58 L255 60 L265 58 L275 54 L271 48 L268 42 L262 40 L255 39 L248 40 Z",
-    m: "traps"
-  }),
-  // Rear delts
-  M({
-    d: "M230 56 C224 60 220 66 218 72 L216 80 L219 86 L224 78 L230 68 L236 60 Z",
-    m: "shoulders"
-  }), M({
-    d: "M280 56 C286 60 290 66 292 72 L294 80 L291 86 L286 78 L280 68 L274 60 Z",
-    m: "shoulders"
-  }),
-  // Upper back / Rhomboids
-  M({
-    d: "M240 60 L236 68 L238 82 L244 90 L255 92 L266 90 L272 82 L274 68 L270 60 L262 58 L255 57 L248 58 Z",
-    m: "upperBack"
-  }),
-  // Lats (V-taper)
-  M({
-    d: "M236 84 L228 92 L224 104 L226 118 L232 132 L240 140 L248 144 L254 142 L254 100 L244 90 Z",
-    m: "lats"
-  }), M({
-    d: "M274 84 L282 92 L286 104 L284 118 L278 132 L270 140 L262 144 L256 142 L256 100 L266 90 Z",
-    m: "lats"
-  }),
-  // Triceps (back of arm)
-  M({
-    d: "M218 78 L215 92 L214 108 L214 120 L217 116 L220 106 L222 94 L220 84 Z",
-    m: "triceps"
-  }), M({
-    d: "M292 78 L295 92 L296 108 L296 120 L293 116 L290 106 L288 94 L290 84 Z",
-    m: "triceps"
-  }),
-  // Forearms (back)
-  M({
-    d: "M214 122 L210 138 L207 152 L210 153 L214 142 L219 132 Z",
-    m: "forearms"
-  }), M({
-    d: "M296 122 L300 138 L303 152 L300 153 L296 142 L291 132 Z",
-    m: "forearms"
-  }),
-  // Lower back / Erectors
-  M({
-    d: "M244 132 L240 142 L238 160 L244 168 L255 170 L266 168 L272 160 L270 142 L266 132 L256 128 L254 128 Z",
-    m: "lowerBack"
-  }),
-  // Glutes
-  M({
-    d: "M238 168 L232 178 L228 192 L232 202 L242 208 L254 210 L254 178 L248 170 Z",
-    m: "glutes"
-  }), M({
-    d: "M272 168 L278 178 L282 192 L278 202 L268 208 L256 210 L256 178 L262 170 Z",
-    m: "glutes"
-  }),
-  // Hamstrings
-  M({
-    d: "M230 206 L226 220 L222 248 L222 272 L228 280 L234 270 L238 252 L240 232 L244 216 L248 208 L242 204 Z",
-    m: "hamstrings"
-  }), M({
-    d: "M280 206 L284 220 L288 248 L288 272 L282 280 L276 270 L272 252 L270 232 L266 216 L262 208 L268 204 Z",
-    m: "hamstrings"
-  }),
-  // Inner hamstring
-  M({
-    d: "M248 210 L255 214 L255 256 L250 264 L244 248 L246 224 Z",
-    m: "hamstrings",
-    scaleOp: 0.5
-  }), M({
-    d: "M262 210 L255 214 L255 256 L260 264 L266 248 L264 224 Z",
-    m: "hamstrings",
-    scaleOp: 0.5
-  }),
-  // Calves (back)
-  M({
-    d: "M224 280 L222 296 L224 318 L228 330 L234 330 L236 316 L234 296 L230 282 Z",
-    m: "calves"
-  }), M({
-    d: "M286 280 L288 296 L286 318 L282 330 L276 330 L274 316 L276 296 L280 282 Z",
-    m: "calves"
-  })), trained.length > 0 && React.createElement("div", {
+  }, b.label), b.parts.map((p, i) => p.t === "ellipse" ? /*#__PURE__*/React.createElement("ellipse", {
+    key: `o${bi}-${i}`,
+    cx: p.cx,
+    cy: p.cy,
+    rx: p.rx,
+    ry: p.ry,
+    fill: p.fill,
+    stroke: p.stroke,
+    strokeWidth: p.sw
+  }) : /*#__PURE__*/React.createElement("rect", {
+    key: `o${bi}-${i}`,
+    x: p.x,
+    y: p.y,
+    width: p.w,
+    height: p.h,
+    rx: p.rx,
+    fill: p.fill,
+    stroke: p.stroke,
+    strokeWidth: p.sw
+  })), b.muscles.map((p, i) => {
+    const color = fc(p.m);
+    const opacity = fo(p.m) * (p.so || 1);
+    return p.t === "ellipse" ? /*#__PURE__*/React.createElement("ellipse", {
+      key: `m${bi}-${i}`,
+      cx: p.cx,
+      cy: p.cy,
+      rx: p.rx,
+      ry: p.ry,
+      fill: color,
+      fillOpacity: opacity
+    }) : /*#__PURE__*/React.createElement("rect", {
+      key: `m${bi}-${i}`,
+      x: p.x,
+      y: p.y,
+      width: p.w,
+      height: p.h,
+      rx: p.rx,
+      fill: color,
+      fillOpacity: opacity
+    });
+  })))), trained.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -6703,22 +6912,19 @@ function MuscleShadow({
       marginTop: 8,
       justifyContent: "center"
     }
-  }, trained.slice(0, 8).map(function (entry) {
-    var m = entry[0];
-    return React.createElement("div", {
-      key: m,
-      style: {
-        fontSize: 7,
-        fontFamily: "'DM Mono',monospace",
-        color: MUSCLE_COLORS[m],
-        background: MUSCLE_COLORS[m] + "15",
-        border: "1px solid " + MUSCLE_COLORS[m] + "33",
-        borderRadius: 4,
-        padding: "2px 6px",
-        letterSpacing: "0.05em"
-      }
-    }, m + " " + Math.round(heat(m) * 100) + "%");
-  })));
+  }, trained.slice(0, 8).map(([m]) => /*#__PURE__*/React.createElement("div", {
+    key: m,
+    style: {
+      fontSize: 7,
+      fontFamily: "'DM Mono',monospace",
+      color: MUSCLE_COLORS[m],
+      background: MUSCLE_COLORS[m] + "15",
+      border: `1px solid ${MUSCLE_COLORS[m]}33`,
+      borderRadius: 4,
+      padding: "2px 6px",
+      letterSpacing: "0.05em"
+    }
+  }, m, " ", Math.round(heat(m) * 100), "%"))));
 }
 
 // Gravity — solar system of strength
