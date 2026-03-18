@@ -8168,35 +8168,45 @@ function StatsPage({
     return /*#__PURE__*/React.createElement("div", null, results.slice(0, 8).map(function(r, i) {
       var color = r.isWeak ? W.red : r.isStrong ? W.cyan : W.textMid;
       var statusLabel = r.isWeak ? "WEAK" : r.isStrong ? "STRONG" : "BALANCED";
-      var statusBg = r.isWeak ? "rgba(255,71,87,0.10)" : r.isStrong ? "rgba(0,201,177,0.08)" : "rgba(255,255,255,0.03)";
+      var borderColor = r.isWeak ? "rgba(255,71,87,0.18)" : r.isStrong ? "rgba(0,201,177,0.15)" : W.border;
+      var cardBg = r.isWeak ? "rgba(255,71,87,0.06)" : r.isStrong ? "rgba(0,201,177,0.04)" : W.surface;
       return /*#__PURE__*/React.createElement("div", {
         key: r.label,
         style: {
-          padding: "12px 14px", borderRadius: 10, marginBottom: 8,
-          background: statusBg, border: "1px solid " + (r.isWeak ? "rgba(255,71,87,0.15)" : r.isStrong ? "rgba(0,201,177,0.12)" : W.border),
-          animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.03) + "s"
+          padding: "16px 18px", borderRadius: 12, marginBottom: 10,
+          background: cardBg, border: "1px solid " + borderColor,
+          animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.04) + "s"
         }
       },
+      // Top row: label + status badge
       /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }
       },
-      /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: W.text } }, r.label),
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
-        /*#__PURE__*/React.createElement("span", {
-          style: { fontSize: 8, fontFamily: "'DM Mono',monospace", padding: "3px 8px", borderRadius: 4, background: color + "18", color: color, letterSpacing: "0.1em", fontWeight: 700 }
-        }, statusLabel),
-        /*#__PURE__*/React.createElement("span", {
-          style: { fontSize: 14, fontFamily: "'DM Mono',monospace", color: color, fontWeight: 800 }
-        }, r.actual.toFixed(2)))),
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 15, fontWeight: 700, color: W.text, letterSpacing: "-0.01em" } }, r.label),
+      /*#__PURE__*/React.createElement("span", {
+        style: { fontSize: 9, fontFamily: "'DM Mono',monospace", padding: "4px 10px", borderRadius: 6, background: color + "18", color: color, letterSpacing: "0.12em", fontWeight: 700 }
+      }, statusLabel)),
+      // Middle row: big ratio number + target
       /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", alignItems: "center", justifyContent: "space-between" }
+        style: { display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }
       },
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 10, color: W.textDim, fontFamily: "'DM Mono',monospace" }
-      }, r.a, " ", r.aVal, "lb  /  ", r.b, " ", r.bVal, "lb"),
+        style: { fontSize: 28, fontWeight: 800, color: color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }
+      }, r.actual.toFixed(2)),
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 10, color: W.textDim, fontFamily: "'DM Mono',monospace" }
-      }, "target ", r.expected.toFixed(2))));
+        style: { fontSize: 12, color: W.textDim, fontFamily: "'DM Mono',monospace" }
+      }, "/ ", r.expected.toFixed(2), " target")),
+      // Bottom row: exercise breakdown
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0 0", borderTop: "1px solid " + borderColor }
+      },
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2 } },
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.a),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: color, fontFamily: "'DM Mono',monospace" } }, r.aVal, " lb")),
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, color: W.textDim, padding: "0 8px" } }, "/"),
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2, textAlign: "right" } },
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.b),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: W.textMid, fontFamily: "'DM Mono',monospace" } }, r.bVal, " lb"))));
     }));
   })())), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -9475,14 +9485,7 @@ function WorkoutPage({ setPage, visibleDayIds, version }) {
     /*#__PURE__*/React.createElement("div", {
       style: { display: "flex", alignItems: "center", gap: 6 }
     },
-    hasSession && /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 8, fontFamily: "'DM Mono',monospace",
-        padding: "2px 7px", borderRadius: 4,
-        background: W.cyanDim, color: W.cyan,
-        fontWeight: 700, letterSpacing: "0.1em"
-      }
-    }, "\u2713"),
+    
     /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 8, fontFamily: "'DM Mono',monospace",
@@ -9517,7 +9520,7 @@ function WorkoutPage({ setPage, visibleDayIds, version }) {
         fontSize: 14, fontWeight: 700, letterSpacing: "0.06em",
         color: W.cyan
       }
-    }, isDone ? "\u2713 Completed" : "Start Routine"));
+    }, "Start Routine"));
   })));
 }
 
@@ -9625,28 +9628,7 @@ function DayPage({
     if (prev) setPage(prev.id);
   }, [prev]));
 
-  // Auto-clear ended state at 1am Sunday each week (weekly reset for all days)
-  useEffect(() => {
-    if (!ended) return;
-    function checkSundayReset() {
-      const now = new Date();
-      if (now.getDay() === 0 && now.getHours() >= 1) {
-        setStarted(false);
-        setEnded(false);
-        setElapsed(0);
-        setFinalElapsed(0);
-        setStartTime(null);
-        setShowSummary(false);
-        delete workoutStateCache[day.id];
-        try {
-          window.storage.delete('wt_wstate_' + day.id);
-        } catch (e) {}
-      }
-    }
-    checkSundayReset();
-    const id = setInterval(checkSundayReset, 60000);
-    return () => clearInterval(id);
-  }, [ended, day.id]);
+  // Weekly reset removed — workouts reset on summary dismiss
   useEffect(() => {
     saveWorkoutState(day.id, {
       started,
@@ -9890,7 +9872,14 @@ function DayPage({
       textTransform: "uppercase",
       border: `1px solid ${day.accent}33`
     }
-  }, day.label), started ? /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function() { setPage("workout"); },
+    style: {
+      background: "transparent", border: "none", color: W.textDim,
+      fontSize: 14, cursor: "pointer", padding: "0 8px 0 0",
+      fontFamily: "'DM Sans',sans-serif"
+    }
+  }, "\u2190"), day.label), started ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 13,
       fontFamily: "'DM Mono',monospace",
@@ -10380,7 +10369,21 @@ function DayPage({
     day: day,
     elapsed: finalElapsed,
     setsLogged: loggedToday,
-    onClose: () => setShowSummary(false),
+    onClose: () => {
+      // Reset workout state on summary dismiss — workout is complete
+      setShowSummary(false);
+      setStarted(false);
+      setEnded(false);
+      setElapsed(0);
+      setFinalElapsed(0);
+      setStartTime(null);
+      setWarmupDone(false);
+      setWarmdownDone(false);
+      setAutoEndShown(false);
+      delete workoutStateCache[day.id];
+      try { window.storage.delete('wt_wstate_' + day.id); } catch(e) {}
+      setPage("workout");
+    },
     onDelete: () => {
       setShowSummary(false);
       setShowDeleteModal(true);
