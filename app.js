@@ -8173,7 +8173,7 @@ function StatsPage({
       return /*#__PURE__*/React.createElement("div", {
         key: r.label,
         style: {
-          padding: "16px 18px", borderRadius: 12, marginBottom: 10,
+          padding: "20px 20px", borderRadius: 14, marginBottom: 12,
           background: cardBg, border: "1px solid " + borderColor,
           animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.04) + "s"
         }
@@ -8182,16 +8182,16 @@ function StatsPage({
       /*#__PURE__*/React.createElement("div", {
         style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }
       },
-      /*#__PURE__*/React.createElement("span", { style: { fontSize: 15, fontWeight: 700, color: W.text, letterSpacing: "-0.01em" } }, r.label),
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 16, fontWeight: 800, color: W.text, letterSpacing: "-0.01em" } }, r.label),
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 9, fontFamily: "'DM Mono',monospace", padding: "4px 10px", borderRadius: 6, background: color + "18", color: color, letterSpacing: "0.12em", fontWeight: 700 }
+        style: { fontSize: 10, fontFamily: "'DM Mono',monospace", padding: "5px 12px", borderRadius: 6, background: color + "20", color: color, letterSpacing: "0.12em", fontWeight: 700, border: "1px solid " + color + "30" }
       }, statusLabel)),
       // Middle row: big ratio number + target
       /*#__PURE__*/React.createElement("div", {
         style: { display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }
       },
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 28, fontWeight: 800, color: color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }
+        style: { fontSize: 32, fontWeight: 800, color: color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }
       }, r.actual.toFixed(2)),
       /*#__PURE__*/React.createElement("span", {
         style: { fontSize: 12, color: W.textDim, fontFamily: "'DM Mono',monospace" }
@@ -8201,12 +8201,12 @@ function StatsPage({
         style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0 0", borderTop: "1px solid " + borderColor }
       },
       /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2 } },
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.a),
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: color, fontFamily: "'DM Mono',monospace" } }, r.aVal, " lb")),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.a),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 15, fontWeight: 700, color: color, fontFamily: "'DM Mono',monospace" } }, r.aVal, " lb")),
       /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, color: W.textDim, padding: "0 8px" } }, "/"),
       /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2, textAlign: "right" } },
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.b),
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: W.textMid, fontFamily: "'DM Mono',monospace" } }, r.bVal, " lb"))));
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, color: W.text, fontFamily: "'DM Mono',monospace" } }, r.b),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 15, fontWeight: 700, color: W.textMid, fontFamily: "'DM Mono',monospace" } }, r.bVal, " lb"))));
     }));
   })())), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -9483,18 +9483,8 @@ function WorkoutPage({ setPage, visibleDayIds, version }) {
       style: { fontSize: 17, fontWeight: 700, color: W.text, letterSpacing: "-0.01em" }
     }, day.title),
     /*#__PURE__*/React.createElement("div", {
-      style: { display: "flex", alignItems: "center", gap: 6 }
-    },
-    
-    /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 8, fontFamily: "'DM Mono',monospace",
-        padding: "2px 8px", borderRadius: 4,
-        background: day.accent + "15", color: day.accent,
-        letterSpacing: "0.12em", fontWeight: 600,
-        textTransform: "uppercase"
-      }
-    }, day.id === "thu" ? "Thu / Fri" : day.label))),
+      style: { fontSize: 16, color: W.textDim, letterSpacing: "2px" }
+    }, "…")),
     /* Focus subtitle */
     /*#__PURE__*/React.createElement("div", {
       style: {
@@ -9845,7 +9835,7 @@ function DayPage({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       height: 2,
-      background: `linear-gradient(90deg,${day.accent},${day.accent}66,transparent)`
+      background: `linear-gradient(90deg,${W.cyan},${W.cyan}66,transparent)`
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -9865,8 +9855,8 @@ function DayPage({
       fontFamily: "'DM Mono',monospace",
       padding: "3px 9px",
       borderRadius: 4,
-      background: `${day.accent}18`,
-      color: day.accent,
+      background: `${W.cyan}18`,
+      color: W.cyan,
       letterSpacing: "0.2em",
       fontWeight: 700,
       textTransform: "uppercase",
@@ -9879,7 +9869,7 @@ function DayPage({
       fontSize: 14, cursor: "pointer", padding: "0 8px 0 0",
       fontFamily: "'DM Sans',sans-serif"
     }
-  }, "\u2190"), day.label), started ? /*#__PURE__*/React.createElement("span", {
+  }, "\u2190"), day.title), started ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 13,
       fontFamily: "'DM Mono',monospace",
