@@ -1,4 +1,4 @@
-const CACHE = 'workout-v4';
+const CACHE = 'workout-v5';
 const BASE = '/Lifting-App';
 const ASSETS = [
   BASE + '/',
@@ -8,7 +8,6 @@ const ASSETS = [
   BASE + '/icon-192.png',
   BASE + '/icon-512.png',
 ];
-
 self.addEventListener('install', e => {
   // Force immediate activation — don't wait for old tabs to close
   self.skipWaiting();
@@ -16,7 +15,6 @@ self.addEventListener('install', e => {
     caches.open(CACHE).then(c => c.addAll(ASSETS))
   );
 });
-
 self.addEventListener('activate', e => {
   e.waitUntil(
     // Delete ALL old caches immediately
@@ -31,7 +29,6 @@ self.addEventListener('activate', e => {
     })
   );
 });
-
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
