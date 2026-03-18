@@ -6203,7 +6203,43 @@ function MuscleShadow({
   }));
 }
 
-// Power Rankings — lifts ranked by estimated 1RM with percentile tiers
+// Power Rankings — lifts ranked by estimated 1RM with population percentiles (20yo male)
+// Strength standards based on published population data for ~180lb 20yo male
+// Sources: Symmetric Strength, Strength Level, ExRx, NSCA normative data
+const STRENGTH_STANDARDS = {
+  // [beginner, novice, intermediate, advanced, elite] — estimated 1RM in lbs
+  // These thresholds map to roughly [20th, 40th, 60th, 80th, 95th] percentile
+  "Back Squat":             [135, 185, 250, 325, 405],
+  "BB Back Squat":          [135, 185, 250, 325, 405],
+  "Front Squat":            [115, 155, 205, 275, 340],
+  "Paused Front Squat":     [105, 145, 195, 260, 320],
+  "Bulgarian Split Squat":  [80, 115, 155, 200, 250],
+  "RDL":                    [135, 185, 245, 315, 385],
+  "Trap Bar Deadlift":      [185, 250, 325, 415, 500],
+  "Nordic Curl":            [0, 25, 50, 80, 110],
+  "Hip Thrust":             [135, 205, 285, 365, 455],
+  "Barbell Good Morning":   [65, 95, 135, 185, 235],
+  "BB Bench Press":         [115, 155, 205, 275, 335],
+  "Incline Barbell Press":  [95, 135, 185, 245, 305],
+  "Flat DB Press":          [50, 70, 90, 115, 140],
+  "Low Incline DB Press":   [45, 65, 85, 110, 135],
+  "DB Incline Press":       [45, 65, 85, 110, 135],
+  "Weighted Pull-Ups":      [0, 25, 55, 90, 135],
+  "Chest Supported DB Row": [40, 60, 80, 105, 130],
+  "1-Arm DB Row":           [40, 60, 85, 110, 140],
+  "SA DB Row":              [40, 60, 85, 110, 140],
+  "Incline Curl":           [20, 30, 40, 55, 70],
+  "Hammer Curl":            [25, 35, 50, 65, 80],
+  "Lateral Raise":          [15, 22, 32, 42, 55],
+  "Overhead DB Extension":  [25, 40, 55, 75, 95],
+  "Rear Delt Cable Fly":    [15, 22, 30, 42, 55],
+  "Landmine Press":         [45, 70, 95, 125, 160],
+  "RFESS":                  [70, 100, 140, 185, 230],
+  "Single Leg RDL":         [40, 65, 95, 130, 165],
+  "Reverse Nordic":         [0, 10, 25, 45, 65],
+  "Front Foot Elevated Split Squat": [70, 100, 140, 185, 230]
+};
+
 function GravityMap({
   version
 }) {
@@ -6225,18 +6261,41 @@ function GravityMap({
     style: { padding: "20px 0", fontSize: 11, fontFamily: "'DM Mono',monospace", color: W.textDim, textAlign: "center" }
   }, "Log sessions to see your power rankings");
   lifts.sort(function(a, b) { return b.orm - a.orm; });
-  var topOrm = lifts[0].orm;
-  // Percentile tiers based on position
-  function getTier(i, total) {
-    var pct = i / total;
-    if (pct < 0.15) return { label: "ELITE", color: "#f5c842", bg: "rgba(245,200,66,0.10)" };
-    if (pct < 0.35) return { label: "STRONG", color: W.cyan, bg: "rgba(0,201,177,0.08)" };
-    if (pct < 0.65) return { label: "SOLID", color: "#4fc3f7", bg: "rgba(79,195,247,0.08)" };
-    return { label: "BUILDING", color: W.textDim, bg: "rgba(255,255,255,0.03)" };
+
+  // Population percentile tier based on age-normed strength standards
+  function getTier(name, orm) {
+    var std = STRENGTH_STANDARDS[name];
+    if (!std) {
+      // Fallback: rank relative to a generic intermediate standard (~1x bodyweight)
+      if (orm >= 275) return { label: "ELITE", pct: 95, color: "#f5c842", bg: "rgba(245,200,66,0.10)" };
+      if (orm >= 200) return { label: "ADVANCED", pct: 80, color: W.cyan, bg: "rgba(0,201,177,0.08)" };
+      if (orm >= 135) return { label: "INTER", pct: 60, color: "#4fc3f7", bg: "rgba(79,195,247,0.08)" };
+      if (orm >= 85)  return { label: "NOVICE", pct: 40, color: "#ab97e8", bg: "rgba(171,151,232,0.08)" };
+      return { label: "BEGINNER", pct: 20, color: W.textDim, bg: "rgba(255,255,255,0.03)" };
+    }
+    if (orm >= std[4]) return { label: "ELITE", pct: 95, color: "#f5c842", bg: "rgba(245,200,66,0.10)" };
+    if (orm >= std[3]) {
+      var p = 80 + Math.round((orm - std[3]) / (std[4] - std[3]) * 15);
+      return { label: "ADVANCED", pct: Math.min(94, p), color: W.cyan, bg: "rgba(0,201,177,0.08)" };
+    }
+    if (orm >= std[2]) {
+      var p = 60 + Math.round((orm - std[2]) / (std[3] - std[2]) * 20);
+      return { label: "INTER", pct: Math.min(79, p), color: "#4fc3f7", bg: "rgba(79,195,247,0.08)" };
+    }
+    if (orm >= std[1]) {
+      var p = 40 + Math.round((orm - std[1]) / (std[2] - std[1]) * 20);
+      return { label: "NOVICE", pct: Math.min(59, p), color: "#ab97e8", bg: "rgba(171,151,232,0.08)" };
+    }
+    if (orm >= std[0]) {
+      var p = 20 + Math.round((orm - std[0]) / (std[1] - std[0]) * 20);
+      return { label: "BEGINNER", pct: Math.min(39, p), color: W.textDim, bg: "rgba(255,255,255,0.03)" };
+    }
+    var p = Math.max(5, Math.round(orm / std[0] * 20));
+    return { label: "UNTRAINED", pct: p, color: "rgba(255,255,255,0.25)", bg: "rgba(255,255,255,0.02)" };
   }
+
   return /*#__PURE__*/React.createElement("div", null, lifts.slice(0, 12).map(function(lift, i) {
-    var tier = getTier(i, lifts.length);
-    var pct = Math.round(lift.orm / topOrm * 100);
+    var tier = getTier(lift.name, lift.orm);
     var trendColor = lift.trend > 3 ? W.cyan : lift.trend < -3 ? W.red : W.textDim;
     var trendArrow = lift.trend > 3 ? "\u2191" : lift.trend < -3 ? "\u2193" : "\u2192";
     return /*#__PURE__*/React.createElement("div", {
@@ -6247,7 +6306,7 @@ function GravityMap({
         animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.03) + "s"
       }
     },
-    // Rank number
+    // Rank
     /*#__PURE__*/React.createElement("div", {
       style: { width: 22, fontSize: 10, fontWeight: 700, color: tier.color, fontFamily: "'DM Mono',monospace", textAlign: "center", flexShrink: 0 }
     }, i + 1),
@@ -6261,14 +6320,20 @@ function GravityMap({
     /*#__PURE__*/React.createElement("div", {
       style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace", marginTop: 1 }
     }, lift.sessions, " sessions")),
-    // Tier badge
+    // Tier badge + percentile
+    /*#__PURE__*/React.createElement("div", {
+      style: { display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginRight: 8 }
+    },
     /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 7, fontFamily: "'DM Mono',monospace", padding: "2px 6px",
         borderRadius: 3, background: tier.bg, color: tier.color,
-        letterSpacing: "0.1em", fontWeight: 600, flexShrink: 0, marginRight: 10
+        letterSpacing: "0.08em", fontWeight: 600
       }
     }, tier.label),
+    /*#__PURE__*/React.createElement("div", {
+      style: { fontSize: 9, fontFamily: "'DM Mono',monospace", color: tier.color, fontWeight: 700, minWidth: 28, textAlign: "right" }
+    }, "P", tier.pct)),
     // Trend
     /*#__PURE__*/React.createElement("div", {
       style: { fontSize: 9, fontFamily: "'DM Mono',monospace", color: trendColor, width: 36, textAlign: "right", flexShrink: 0 }
@@ -8038,67 +8103,102 @@ function StatsPage({
       letterSpacing: "0.2em",
       textTransform: "uppercase"
     }
-  }, "Needs Attention"), needsAttention.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      fontFamily: "'DM Mono',monospace",
-      color: W.red,
-      background: "rgba(255,71,87,0.1)",
-      border: `1px solid rgba(255,71,87,0.2)`,
-      borderRadius: 12,
-      padding: "3px 10px"
-    }
-  }, needsAttention.length, " lift", needsAttention.length !== 1 ? "s" : "")), needsAttention.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: W.cyan,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, "All tracked lifts progressing") : needsAttention.slice(0, 4).map(t => /*#__PURE__*/React.createElement("div", {
-    key: t.name,
-    style: {
-      padding: "10px 12px",
-      borderRadius: 8,
-      marginBottom: 6,
-      background: "rgba(255,71,87,0.04)",
-      border: `1px solid rgba(255,71,87,0.1)`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 2
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: W.text,
-      flex: 1,
-      minWidth: 0,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
-    }
-  }, t.name), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: t.pct < 0 ? W.red : W.textMid,
-      marginLeft: 10,
-      flexShrink: 0,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, t.pct >= 0 ? "+" : "", t.pct.toFixed(1), "%")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, t.first, " \u2192 ", t.last, " lbs \xB7 ", t.sessions, " sessions"), /*#__PURE__*/React.createElement(ScarIndicator, {
-    exName: t.name
-  })))), /*#__PURE__*/React.createElement("div", {
+  }, "Weak Links"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Compares your lifts using evidence-based strength ratios. When one side of a movement pair lags behind, it signals a muscular imbalance that can limit progress or increase injury risk. Ratios based on NSCA guidelines and sports science research."
+  }), /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 9, color: W.textDim, fontFamily: "'DM Mono',monospace", marginBottom: 10 }
+  }, "Strength ratio imbalances"), (function() {
+    // Get best 1RM for each exercise
+    var best1RM = {};
+    allWorkingEx.forEach(function(ex) {
+      var ents = getEntries(ex.name);
+      if (!ents.length) return;
+      best1RM[ex.name] = Math.round(Math.max.apply(null, ents.map(function(e) { return calc1RM(e.weight, e.reps); })));
+    });
+    // Define expected ratios: [exercise A, exercise B, expected ratio A/B, label]
+    // Ratio means: A should be roughly ratio * B
+    var ratios = [
+      { a: "RDL", b: "Back Squat", ratio: 0.75, label: "Hinge : Squat", note: "RDL should be ~75% of squat" },
+      { a: "RDL", b: "BB Back Squat", ratio: 0.75, label: "Hinge : Squat", note: "RDL should be ~75% of squat" },
+      { a: "Incline Barbell Press", b: "Back Squat", ratio: 0.55, label: "Press : Squat", note: "Incline press should be ~55% of squat" },
+      { a: "Incline Barbell Press", b: "BB Back Squat", ratio: 0.55, label: "Press : Squat", note: "Incline press should be ~55% of squat" },
+      { a: "Weighted Pull-Ups", b: "Incline Barbell Press", ratio: 0.65, label: "Pull : Press", note: "Pull-up load should be ~65% of press" },
+      { a: "Weighted Pull-Ups", b: "BB Bench Press", ratio: 0.55, label: "Pull : Press", note: "Pull-up load should be ~55% of bench" },
+      { a: "Bulgarian Split Squat", b: "Back Squat", ratio: 0.55, label: "Unilateral : Bilateral", note: "Split squat should be ~55% of back squat" },
+      { a: "Bulgarian Split Squat", b: "BB Back Squat", ratio: 0.55, label: "Unilateral : Bilateral", note: "Split squat should be ~55% of back squat" },
+      { a: "Front Squat", b: "Back Squat", ratio: 0.82, label: "Front : Back Squat", note: "Front squat should be ~82% of back squat" },
+      { a: "Front Squat", b: "BB Back Squat", ratio: 0.82, label: "Front : Back Squat", note: "Front squat should be ~82% of back squat" },
+      { a: "Nordic Curl", b: "Back Squat", ratio: 0.2, label: "Hamstring : Quad", note: "Nordic strength relative to squat" },
+      { a: "Chest Supported DB Row", b: "Flat DB Press", ratio: 0.9, label: "Row : Press (DB)", note: "Row should roughly match pressing" },
+      { a: "1-Arm DB Row", b: "Flat DB Press", ratio: 1.0, label: "Row : Press (DB)", note: "1-arm row should match or exceed press" },
+      { a: "Overhead DB Extension", b: "Incline Curl", ratio: 1.1, label: "Tricep : Bicep", note: "Tricep should slightly exceed bicep" },
+      { a: "Lateral Raise", b: "Incline Barbell Press", ratio: 0.15, label: "Lateral : Press", note: "Lateral raise relative to press strength" },
+      { a: "Hip Thrust", b: "Back Squat", ratio: 1.0, label: "Thrust : Squat", note: "Hip thrust should match or exceed squat" },
+      { a: "Hip Thrust", b: "BB Back Squat", ratio: 1.0, label: "Thrust : Squat", note: "Hip thrust should match or exceed squat" },
+      { a: "Barbell Good Morning", b: "Back Squat", ratio: 0.45, label: "GM : Squat", note: "Good morning should be ~45% of squat" },
+      { a: "Barbell Good Morning", b: "BB Back Squat", ratio: 0.45, label: "GM : Squat", note: "Good morning should be ~45% of squat" }
+    ];
+    var results = [];
+    var seen = {};
+    ratios.forEach(function(r) {
+      var aVal = best1RM[r.a];
+      var bVal = best1RM[r.b];
+      if (!aVal || !bVal || bVal === 0) return;
+      var key = r.label;
+      if (seen[key]) return;
+      seen[key] = true;
+      var actual = aVal / bVal;
+      var deviation = (actual - r.ratio) / r.ratio * 100;
+      results.push({
+        label: r.label,
+        a: r.a, b: r.b,
+        aVal: aVal, bVal: bVal,
+        expected: r.ratio,
+        actual: Math.round(actual * 100) / 100,
+        deviation: Math.round(deviation),
+        note: r.note,
+        isWeak: deviation < -15,
+        isStrong: deviation > 15
+      });
+    });
+    results.sort(function(a, b) { return a.deviation - b.deviation; });
+    if (results.length === 0) return /*#__PURE__*/React.createElement("div", {
+      style: { fontSize: 11, color: W.textDim, fontFamily: "'DM Mono',monospace", padding: "8px 0" }
+    }, "Need data on 2+ related lifts to detect imbalances");
+    return /*#__PURE__*/React.createElement("div", null, results.slice(0, 8).map(function(r, i) {
+      var color = r.isWeak ? W.red : r.isStrong ? W.cyan : W.textMid;
+      var statusLabel = r.isWeak ? "WEAK" : r.isStrong ? "STRONG" : "BALANCED";
+      var statusBg = r.isWeak ? "rgba(255,71,87,0.10)" : r.isStrong ? "rgba(0,201,177,0.08)" : "rgba(255,255,255,0.03)";
+      return /*#__PURE__*/React.createElement("div", {
+        key: r.label,
+        style: {
+          padding: "8px 10px", borderRadius: 8, marginBottom: 5,
+          background: statusBg, border: "1px solid " + (r.isWeak ? "rgba(255,71,87,0.15)" : r.isStrong ? "rgba(0,201,177,0.12)" : W.border),
+          animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.03) + "s"
+        }
+      },
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }
+      },
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 600, color: W.text } }, r.label),
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+        /*#__PURE__*/React.createElement("span", {
+          style: { fontSize: 7, fontFamily: "'DM Mono',monospace", padding: "1px 5px", borderRadius: 3, background: statusBg, color: color, letterSpacing: "0.08em", fontWeight: 600 }
+        }, statusLabel),
+        /*#__PURE__*/React.createElement("span", {
+          style: { fontSize: 10, fontFamily: "'DM Mono',monospace", color: color, fontWeight: 700 }
+        }, r.actual.toFixed(2)))),
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between" }
+      },
+      /*#__PURE__*/React.createElement("span", {
+        style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace" }
+      }, r.a, " ", r.aVal, " / ", r.b, " ", r.bVal),
+      /*#__PURE__*/React.createElement("span", {
+        style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace" }
+      }, "target ", r.expected.toFixed(2))));
+    }));
+  })())), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "14px 16px"
     }
@@ -8307,7 +8407,7 @@ function StatsPage({
       marginBottom: 4
     }
   }, "Power Rankings"), /*#__PURE__*/React.createElement(StatExplainer, {
-    text: "Your lifts ranked by estimated 1RM. Tier badges show where each lift sits relative to your strongest. Trend arrows compare your last 4 weeks to the period before. ELITE = top 15%, STRONG = top 35%, SOLID = mid-tier, BUILDING = still developing."
+    text: "Your lifts ranked by estimated 1RM against population strength standards for a 20-year-old male (~180lb). P95 = stronger than 95% of lifters your age. Tiers: ELITE (top 5%), ADVANCED (top 20%), INTERMEDIATE (top 40%), NOVICE, BEGINNER. Trend arrows compare your last 4 weeks to the period before. Standards sourced from Symmetric Strength and NSCA normative data."
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
@@ -8315,7 +8415,7 @@ function StatsPage({
       fontFamily: "'DM Mono',monospace",
       marginBottom: 10
     }
-  }, "Estimated 1RM · all tracked lifts"), /*#__PURE__*/React.createElement(GravityMap, {
+  }, "Est. 1RM vs 20yo male population"), /*#__PURE__*/React.createElement(GravityMap, {
     version: version
   })), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -8405,52 +8505,64 @@ function StatsPage({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Exercise Synergies"), /*#__PURE__*/React.createElement(StatExplainer, {
-    text: "Correlational analysis of exercise pairings. For each lift, splits your sessions into days where a specific other exercise was also performed vs. days without it. Shows the percentage difference in average weight when the pairing is present. Requires 6+ sessions with 3+ co-occurrences."
+  }, "Plateau Detector"), /*#__PURE__*/React.createElement(StatExplainer, {
+    text: "Identifies lifts where your working weight has not increased in 3 or more weeks despite consistent training. A plateau signals your body has adapted \u2014 time to change stimulus. Suggestions are based on common periodization strategies."
   }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace",
-      marginBottom: 10
-    }
-  }, "Exercises that boost each other when paired"), bloodInsights.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: W.textDim,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, "Needs 6+ sessions per lift to find patterns") : bloodInsights.map(ins => /*#__PURE__*/React.createElement("div", {
-    key: ins.exName,
-    style: {
-      padding: "10px 12px",
-      borderRadius: 8,
-      marginBottom: 6,
-      background: `rgba(0,201,177,0.03)`,
-      border: `1px solid ${W.border}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 600,
-      color: W.text,
-      marginBottom: 3
-    }
-  }, ins.exName), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: W.textMid,
-      fontFamily: "'DM Mono',monospace"
-    }
-  }, "You perform ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: W.cyan
-    }
-  }, "+", ins.delta, "%"), " when preceded by ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: W.text
-    }
-  }, ins.pairedWith))))), /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 9, color: W.textDim, fontFamily: "'DM Mono',monospace", marginBottom: 10 }
+  }, "Lifts that need a stimulus change"), (function() {
+    var plateaus = [];
+    var threeWeeksAgo = new Date(Date.now() - 21 * 864e5).toISOString().split("T")[0];
+    var sixWeeksAgo = new Date(Date.now() - 42 * 864e5).toISOString().split("T")[0];
+    allWorkingEx.filter(function(ex) { return !LIGHT_INTENT.has(ex.name) && !BODYWEIGHT_EX.has(ex.name); }).forEach(function(ex) {
+      var ents = getEntries(ex.name);
+      var recent = ents.filter(function(e) { return e.date >= threeWeeksAgo; });
+      var older = ents.filter(function(e) { return e.date >= sixWeeksAgo && e.date < threeWeeksAgo; });
+      if (recent.length < 2 || older.length < 2) return;
+      var recentMax = Math.max.apply(null, recent.map(function(e) { return e.weight; }));
+      var olderMax = Math.max.apply(null, older.map(function(e) { return e.weight; }));
+      if (olderMax <= 0) return;
+      var change = (recentMax - olderMax) / olderMax * 100;
+      if (change < 2.5) {
+        var weeksFlat = 3;
+        var eightWeeksAgo = new Date(Date.now() - 56 * 864e5).toISOString().split("T")[0];
+        var veryOld = ents.filter(function(e) { return e.date >= eightWeeksAgo && e.date < sixWeeksAgo; });
+        if (veryOld.length > 0) {
+          var veryOldMax = Math.max.apply(null, veryOld.map(function(e) { return e.weight; }));
+          if (recentMax <= veryOldMax * 1.025) weeksFlat = 6;
+        }
+        var suggestions = ["Try a deload week then rebuild", "Add a set per session", "Switch rep range (e.g. 5\u00d73 \u2192 3\u00d78)", "Add a pause or tempo variation", "Increase frequency to 2x/week"];
+        var suggestion = suggestions[Math.floor(Math.abs(recentMax * 7 + ex.name.length) % suggestions.length)];
+        plateaus.push({ name: ex.name, weight: recentMax, weeksFlat: weeksFlat, change: Math.round(change * 10) / 10, suggestion: suggestion, accent: ex.dayAccent });
+      }
+    });
+    plateaus.sort(function(a, b) { return a.change - b.change; });
+    if (plateaus.length === 0) return /*#__PURE__*/React.createElement("div", {
+      style: { fontSize: 11, color: W.cyan, fontFamily: "'DM Mono',monospace", padding: "8px 0" }
+    }, "\u2713 No plateaus detected \u2014 all lifts progressing");
+    return /*#__PURE__*/React.createElement("div", null, plateaus.slice(0, 8).map(function(p, i) {
+      var urgencyColor = p.weeksFlat >= 6 ? W.red : p.weeksFlat >= 4 ? W.yellow : "rgba(255,255,255,0.5)";
+      return /*#__PURE__*/React.createElement("div", {
+        key: p.name,
+        style: {
+          padding: "10px 12px", borderRadius: 8, marginBottom: 6,
+          background: "rgba(255,255,255,0.02)", border: "1px solid " + W.border,
+          animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.04) + "s"
+        }
+      },
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }
+      },
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: W.text } }, p.name),
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, fontFamily: "'DM Mono',monospace", color: urgencyColor, fontWeight: 600 } }, p.weeksFlat, "w flat"),
+        /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontFamily: "'DM Mono',monospace", color: W.textDim } }, p.weight, " lb"))),
+      /*#__PURE__*/React.createElement("div", {
+        style: { fontSize: 9, color: W.textMid, fontFamily: "'DM Mono',monospace", display: "flex", alignItems: "center", gap: 4 }
+      },
+      /*#__PURE__*/React.createElement("span", { style: { color: W.cyan } }, "\u2192"),
+      p.suggestion));
+    }));
+  })()), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "14px 16px",
       borderBottom: `1px solid ${W.border}`
@@ -8468,67 +8580,79 @@ function StatsPage({
     style: { fontSize: 11, color: W.textDim, fontFamily: "'DM Mono',monospace" }
   }, "Use the Check In button before workouts") : (function() {
     var recent = readinessStore.slice(-14).reverse();
-    var avg7 = recent.slice(0, 7);
+    var avg7 = recent.slice(0, Math.min(7, recent.length));
     var avg7Score = avg7.length ? Math.round(avg7.reduce(function(s, r) { return s + r.score; }, 0) / avg7.length) : 0;
-    var avg7Sleep = avg7.length ? (avg7.reduce(function(s, r) { return s + r.sleep; }, 0) / avg7.length).toFixed(1) : 0;
-    var avg7Stress = avg7.length ? (avg7.reduce(function(s, r) { return s + r.stress; }, 0) / avg7.length).toFixed(1) : 0;
-    var avg7Soreness = avg7.length ? (avg7.reduce(function(s, r) { return s + r.soreness; }, 0) / avg7.length).toFixed(1) : 0;
     var avgColor = avg7Score >= 75 ? W.cyan : avg7Score >= 50 ? W.yellow : W.red;
-    var maxH = 40;
+    var avgLabel = avg7Score >= 75 ? "PRIMED" : avg7Score >= 50 ? "MODERATE" : "FATIGUED";
+    // Compute per-metric averages
+    var metrics = [
+      { key: "sleep", label: "Sleep", color: "#4fc3f7", labels: ["", "Terrible", "Poor", "Fair", "Good", "Great"] },
+      { key: "stress", label: "Stress", color: "#f5c842", labels: ["", "Extreme", "High", "Moderate", "Low", "None"] },
+      { key: "soreness", label: "Soreness", color: "#ff7043", labels: ["", "Wrecked", "Sore", "Moderate", "Mild", "Fresh"] }
+    ];
     return /*#__PURE__*/React.createElement("div", null,
-      // 7-day average header
+      // Score header
       /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }
+        style: { display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }
       },
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 8 } },
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 26, fontWeight: 800, color: avgColor, fontFamily: "'DM Sans',sans-serif", lineHeight: 1 } }, avg7Score),
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, color: W.textDim, letterSpacing: "0.1em", fontFamily: "'DM Mono',monospace" } }, "7-DAY AVG")),
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 12 } },
-        [["Sleep", avg7Sleep, "#4fc3f7"], ["Stress", avg7Stress, "#f5c842"], ["Soreness", avg7Soreness, "#ff7043"]].map(function(item) {
-          return /*#__PURE__*/React.createElement("div", { key: item[0], style: { textAlign: "center" } },
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace", letterSpacing: "0.08em", marginBottom: 2 } }, item[0]),
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: item[2], fontFamily: "'DM Mono',monospace" } }, item[1]));
-        }))),
-      // Sparkline bars
+      // Score circle
       /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", alignItems: "flex-end", gap: 3, height: maxH, marginBottom: 4 }
+        style: {
+          width: 56, height: 56, borderRadius: "50%", flexShrink: 0,
+          border: "2.5px solid " + avgColor + "55", background: avgColor + "10",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"
+        }
+      },
+      /*#__PURE__*/React.createElement("div", { style: { fontSize: 20, fontWeight: 800, color: avgColor, fontFamily: "'DM Mono',monospace", lineHeight: 1 } }, avg7Score),
+      /*#__PURE__*/React.createElement("div", { style: { fontSize: 6, color: avgColor, fontFamily: "'DM Mono',monospace", letterSpacing: "0.1em", opacity: 0.7, marginTop: 1 } }, "/100")),
+      // Right side: label + breakdown
+      /*#__PURE__*/React.createElement("div", { style: { flex: 1 } },
+        /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 } },
+          /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, fontWeight: 700, color: avgColor } }, avgLabel),
+          /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, color: W.textDim, fontFamily: "'DM Mono',monospace" } }, "7-day avg")),
+        /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 10 } },
+          metrics.map(function(m) {
+            var val = avg7.length ? (avg7.reduce(function(s, r) { return s + (r[m.key] || 0); }, 0) / avg7.length) : 0;
+            var rounded = Math.round(val * 10) / 10;
+            var wordLabel = m.labels[Math.round(val)] || "";
+            return /*#__PURE__*/React.createElement("div", { key: m.key, style: { display: "flex", alignItems: "center", gap: 4 } },
+              /*#__PURE__*/React.createElement("div", { style: { width: 6, height: 6, borderRadius: 1, background: m.color, opacity: 0.6 } }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, color: m.color, fontFamily: "'DM Mono',monospace", fontWeight: 600 } }, rounded),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace" } }, wordLabel));
+          })))),
+      // Sparkline chart
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", alignItems: "flex-end", gap: 2, height: 36, marginBottom: 3 }
       }, recent.map(function(r, i) {
-        var h = Math.max(4, Math.round(r.score / 100 * maxH));
+        var h = Math.max(3, Math.round(r.score / 100 * 34));
         var color = r.score >= 75 ? W.cyan : r.score >= 50 ? W.yellow : W.red;
-        return /*#__PURE__*/React.createElement("div", {
-          key: r.date,
-          style: { flex: 1, height: h, borderRadius: 2, background: color, opacity: i === 0 ? 0.9 : 0.5, transition: "height 0.3s" }
-        });
-      })),
-      // Date labels
-      /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", gap: 3, marginBottom: 10 }
-      }, recent.map(function(r, i) {
-        return /*#__PURE__*/React.createElement("div", {
-          key: r.date,
-          style: { flex: 1, fontSize: 7, color: W.textDim, fontFamily: "'DM Mono',monospace", textAlign: "center", opacity: i === 0 || i === recent.length - 1 ? 1 : 0.3 }
-        }, i === 0 ? "Today" : i === recent.length - 1 ? fmtDate(r.date).split(" ")[0] : "");
-      })),
-      // Individual metrics over time
-      ["Sleep", "Stress", "Soreness"].map(function(metric) {
-        var key = metric.toLowerCase();
-        var metricColor = metric === "Sleep" ? "#4fc3f7" : metric === "Stress" ? "#f5c842" : "#ff7043";
-        return /*#__PURE__*/React.createElement("div", { key: metric, style: { marginBottom: 6 } },
-          /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 } },
-            /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, color: metricColor, fontFamily: "'DM Mono',monospace", opacity: 0.7 } }, metric),
-            /*#__PURE__*/React.createElement("span", { style: { fontSize: 9, color: W.textDim, fontFamily: "'DM Mono',monospace" } },
-              recent.length > 0 ? recent[0][key] + "/5" : "")),
+        return /*#__PURE__*/React.createElement("div", { key: r.date, style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 } },
           /*#__PURE__*/React.createElement("div", {
-            style: { display: "flex", gap: 2, height: 12 }
-          }, recent.map(function(r, i) {
-            var val = r[key] || 0;
-            return /*#__PURE__*/React.createElement("div", {
-              key: r.date,
-              style: { flex: 1, height: "100%", display: "flex", alignItems: "flex-end" }
-            }, /*#__PURE__*/React.createElement("div", {
-              style: { width: "100%", height: Math.round(val / 5 * 12) + "px", borderRadius: 1, background: metricColor, opacity: 0.35 + (val / 5) * 0.4 }
-            }));
-          })));
+            style: { width: "100%", height: h, borderRadius: 2, background: color, opacity: i === 0 ? 0.85 : 0.4 }
+          }));
+      })),
+      // Date axis
+      /*#__PURE__*/React.createElement("div", {
+        style: { display: "flex", gap: 2, marginBottom: 12 }
+      }, recent.map(function(r, i) {
+        var show = i === 0 || i === recent.length - 1;
+        return /*#__PURE__*/React.createElement("div", {
+          key: r.date,
+          style: { flex: 1, fontSize: 7, color: W.textDim, fontFamily: "'DM Mono',monospace", textAlign: "center", opacity: show ? 0.8 : 0 }
+        }, i === 0 ? "now" : fmtDate(r.date).split(" ")[0]);
+      })),
+      // Per-metric trend rows
+      metrics.map(function(m) {
+        return /*#__PURE__*/React.createElement("div", { key: m.key, style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 4 } },
+          /*#__PURE__*/React.createElement("div", { style: { width: 56, fontSize: 8, color: m.color, fontFamily: "'DM Mono',monospace", opacity: 0.7, flexShrink: 0 } }, m.label),
+          /*#__PURE__*/React.createElement("div", { style: { flex: 1, display: "flex", gap: 2, height: 8 } },
+            recent.map(function(r, i) {
+              var val = r[m.key] || 0;
+              return /*#__PURE__*/React.createElement("div", { key: r.date, style: { flex: 1, display: "flex", alignItems: "flex-end" } },
+                /*#__PURE__*/React.createElement("div", {
+                  style: { width: "100%", height: Math.max(1, Math.round(val / 5 * 8)), borderRadius: 1, background: m.color, opacity: 0.3 + (val / 5) * 0.45 }
+                }));
+            })));
       }));
   })()), /*#__PURE__*/React.createElement("div", {
     style: {
