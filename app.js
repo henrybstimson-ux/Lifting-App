@@ -5495,206 +5495,63 @@ function BottomNav({
   setPage,
   visibleDayIds
 }) {
-  const {
-    monStr,
-    sunStr
-  } = thisWeekRange();
-  const days = DAYS.filter(d => visibleDayIds.includes(d.id));
-  const activeIdx = days.findIndex(d => d.id === page);
-  const isDay = activeIdx >= 0;
   const [homeTap, triggerHome] = useTap();
-  const [settingsTap, triggerSettings] = useTap();
+  const [workoutTap, triggerWorkout] = useTap();
   const [statsTap, triggerStats] = useTap();
-  const n = days.length;
+  const isWorkoutPage = page === "workout" || visibleDayIds.includes(page);
+  const tabs = [
+    { id: "home", label: "Home", tap: homeTap, trigger: triggerHome,
+      icon: function(active) { return /*#__PURE__*/React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none" },
+        /*#__PURE__*/React.createElement("path", { d: "M3 9.5L12 3l9 6.5V21H15v-5H9v5H3V9.5z",
+          fill: active ? W.cyan : "rgba(255,255,255,0.35)" })); } },
+    { id: "workout", label: "Workout", tap: workoutTap, trigger: triggerWorkout,
+      icon: function(active) { var c = active ? W.cyan : "rgba(255,255,255,0.35)";
+        return /*#__PURE__*/React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none" },
+          /*#__PURE__*/React.createElement("path", {
+            d: "M6.5 6a2 2 0 0 0-2 2v8a2 2 0 0 0 4 0V8a2 2 0 0 0-2-2zM17.5 6a2 2 0 0 0-2 2v8a2 2 0 0 0 4 0V8a2 2 0 0 0-2-2zM2 10v4M22 10v4M8.5 12h7",
+            stroke: c, strokeWidth: 2, strokeLinecap: "round" })); } },
+    { id: "stats", label: "Stats", tap: statsTap, trigger: triggerStats,
+      icon: function(active) { var c = active ? W.cyan : "rgba(255,255,255,0.35)";
+        return /*#__PURE__*/React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none" },
+          /*#__PURE__*/React.createElement("rect", { x: 2, y: 13, width: 5, height: 8, rx: 1.5, fill: c }),
+          /*#__PURE__*/React.createElement("rect", { x: 9.5, y: 7, width: 5, height: 14, rx: 1.5, fill: c }),
+          /*#__PURE__*/React.createElement("rect", { x: 17, y: 3, width: 5, height: 18, rx: 1.5, fill: c })); } }
+  ];
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      position: "fixed",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 100,
-      background: "rgba(9,7,6,0.97)",
-      backdropFilter: "blur(28px)",
+      position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
+      background: "rgba(9,7,6,0.97)", backdropFilter: "blur(28px)",
       WebkitBackdropFilter: "blur(28px)",
       borderTop: "1px solid rgba(255,255,255,0.12)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      maxWidth: 680,
-      margin: "0 auto",
-      display: "flex",
-      alignItems: "stretch",
-      height: NAV_CONTENT_H
+      maxWidth: 680, margin: "0 auto", display: "flex",
+      alignItems: "stretch", justifyContent: "space-around", height: 56
     }
-  }, /*#__PURE__*/React.createElement(NavIconBtn, {
-    tapClass: homeTap,
-    onClick: () => {
-      triggerHome();
-      setPage("home");
-    },
-    isActive: page === "home",
-    label: "Home"
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "16",
-    height: "16",
-    viewBox: "0 0 16 16",
-    fill: "none"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M2 6.5L8 2l6 4.5V14H10v-3.5H6V14H2V6.5z",
-    fill: page === "home" ? W.cyan : NAV_REST_COLOR
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      position: "relative",
-      minWidth: 0,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-evenly",
-      padding: "0 4px"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    style: {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      width: "100%",
-      height: `${NAV_CONTENT_H}px`,
-      overflow: "visible",
-      pointerEvents: "none"
-    }
-  }, /*#__PURE__*/React.createElement("defs", null, days.slice(0, -1).map((_, i) => {
-    const x1pct = (i + 0.5) / n * 100,
-      x2pct = (i + 1 + 0.5) / n * 100;
-    return /*#__PURE__*/React.createElement("linearGradient", {
-      key: i,
-      id: `seg-${i}`,
-      gradientUnits: "userSpaceOnUse",
-      x1: `${x1pct}%`,
-      y1: NAV_DOT_CY,
-      x2: `${x2pct}%`,
-      y2: NAV_DOT_CY
-    }, /*#__PURE__*/React.createElement("stop", {
-      offset: "0%",
-      stopColor: days[i].accent
-    }), /*#__PURE__*/React.createElement("stop", {
-      offset: "100%",
-      stopColor: days[i + 1].accent
-    }));
-  }), /*#__PURE__*/React.createElement("filter", {
-    id: "line-glow",
-    x: "-5%",
-    y: "-400%",
-    width: "110%",
-    height: "900%"
-  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
-    stdDeviation: "1.8",
-    result: "blur"
-  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
-    in: "blur"
-  }), /*#__PURE__*/React.createElement("feMergeNode", {
-    in: "SourceGraphic"
-  })))), days.slice(0, -1).map((_, i) => {
-    const x1pct = (i + 0.5) / n * 100,
-      x2pct = (i + 1 + 0.5) / n * 100;
-    const colored = isDay && i <= activeIdx;
-    const isLeading = isDay && i === activeIdx;
-    return /*#__PURE__*/React.createElement("g", {
-      key: i
-    }, /*#__PURE__*/React.createElement("line", {
-      x1: `${x1pct}%`,
-      y1: NAV_DOT_CY,
-      x2: `${x2pct}%`,
-      y2: NAV_DOT_CY,
-      stroke: "rgba(255,255,255,0.12)",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeDasharray: "3 3"
-    }), colored && /*#__PURE__*/React.createElement("line", {
-      x1: `${x1pct}%`,
-      y1: NAV_DOT_CY,
-      x2: `${x2pct}%`,
-      y2: NAV_DOT_CY,
-      stroke: `url(#seg-${i})`,
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      filter: isLeading ? "url(#line-glow)" : undefined
-    }));
-  })), days.map((d, i) => {
-    const isActive = page === d.id;
-    const isDone = sessionsStore.some(s => s.dayId === d.id && s.date >= monStr && s.date <= sunStr);
-    const hasLogged = d.blocks.flatMap(b => b.exercises || []).some(ex => getEntries(ex.name).some(e => e.date >= monStr && e.date <= sunStr && (e.dayId === d.id || !e.dayId)));
-    return /*#__PURE__*/React.createElement(NavDot, {
-      key: d.id,
-      day: d,
-      isActive: isActive,
-      isDone: isDone,
-      hasLogged: hasLogged,
-      onTap: () => setPage(d.id)
-    });
-  })), /*#__PURE__*/React.createElement(NavIconBtn, {
-    tapClass: statsTap,
-    onClick: () => {
-      triggerStats();
-      setPage("stats");
-    },
-    isActive: page === "stats",
-    label: "Stats"
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "16",
-    height: "16",
-    viewBox: "0 0 16 16",
-    fill: "none"
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "1",
-    y: "9",
-    width: "3",
-    height: "6",
-    rx: "1",
-    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "6",
-    y: "5",
-    width: "3",
-    height: "10",
-    rx: "1",
-    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "11",
-    y: "1",
-    width: "3",
-    height: "14",
-    rx: "1",
-    fill: page === "stats" ? W.cyan : NAV_REST_COLOR
-  }))), /*#__PURE__*/React.createElement(NavIconBtn, {
-    tapClass: settingsTap,
-    onClick: () => {
-      triggerSettings();
-      setPage("settings");
-    },
-    isActive: page === "settings",
-    label: "Timers"
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "16",
-    height: "16",
-    viewBox: "0 0 16 16",
-    fill: "none"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "8",
-    cy: "8",
-    r: "2.5",
-    stroke: page === "settings" ? W.cyan : NAV_REST_COLOR,
-    strokeWidth: "1.5",
-    fill: "none"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41",
-    stroke: page === "settings" ? W.cyan : NAV_REST_COLOR,
-    strokeWidth: "1.5",
-    strokeLinecap: "round"
-  })))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: "env(safe-area-inset-bottom)",
-      background: "rgba(9,7,6,0.97)"
-    }
+  }, tabs.map(function(t) {
+    var active = t.id === "workout" ? isWorkoutPage : page === t.id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.id,
+      className: t.tap,
+      onClick: function() { t.trigger(); setPage(t.id); },
+      style: {
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", gap: 4, border: "none",
+        background: "transparent", flex: 1, cursor: "pointer",
+        padding: "6px 0"
+      }
+    }, t.icon(active),
+    /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10, fontFamily: "'DM Mono',monospace",
+        letterSpacing: "0.08em", fontWeight: active ? 600 : 400,
+        color: active ? W.cyan : "rgba(255,255,255,0.35)",
+        transition: "color 0.2s"
+      }
+    }, t.label));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: { height: "env(safe-area-inset-bottom)", background: "rgba(9,7,6,0.97)" }
   }));
 }
 // ── FEATURE COMPONENTS ───────────────────────────────────────────────────────
@@ -7743,7 +7600,8 @@ function HomePage({
   onDeleteDate,
   onBWUpdate,
   onShowReadiness,
-  readinessScore
+  readinessScore,
+  visibleDayIds = []
 }) {
   const theme = getSeasonalTheme();
   const [showReadinessDetail, setShowReadinessDetail] = useState(false);
@@ -8109,7 +7967,8 @@ function HomePage({
         fontFamily: "'DM Mono',monospace"
       }
     }, diffDays, "d ago"));
-  })()))), oracle && /*#__PURE__*/React.createElement("div", {
+  })()))),
+  oracle && /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "0",
       padding: "14px 16px",
@@ -9974,6 +9833,110 @@ function Block({
   }, block.note))));
 }
 
+// ── WORKOUT PAGE (Hevy-style routine list) ───────────────────────────────────
+function WorkoutPage({ setPage, visibleDayIds, version }) {
+  const todayS = todayStr();
+  const { monStr, sunStr } = thisWeekRange();
+  const visibleDays = DAYS.filter(function(d) { return visibleDayIds.includes(d.id); });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 680, margin: "0 auto",
+      padding: "0 0 calc(env(safe-area-inset-bottom) + 90px)"
+    },
+    className: "ai"
+  },
+  /* Header */
+  /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "calc(env(safe-area-inset-top) + 20px) 16px 16px",
+      borderBottom: "1px solid " + W.border
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24, fontWeight: 800, color: W.text,
+      letterSpacing: "-0.02em", lineHeight: 1
+    }
+  }, "Workout")),
+  /* Routine Cards */
+  /*#__PURE__*/React.createElement("div", {
+    style: { padding: "16px 16px 0" }
+  }, visibleDays.map(function(day) {
+    var exNames = day.blocks.flatMap(function(b) { return (b.exercises || []).map(function(e) { return e.name; }); });
+    var preview = exNames.join(", ");
+    var loggedCount = day.blocks.flatMap(function(b) { return b.exercises || []; }).filter(function(ex) {
+      return getEntries(ex.name).some(function(e) { return e.date === todayS && (e.dayId === day.id || !e.dayId); });
+    }).length;
+    var totalCount = day.blocks.flatMap(function(b) { return b.exercises || []; }).length;
+    var isDone = loggedCount === totalCount && totalCount > 0;
+    var hasSession = sessionsStore.some(function(s) { return s.dayId === day.id && s.date >= monStr && s.date <= sunStr; });
+    return /*#__PURE__*/React.createElement("div", {
+      key: day.id,
+      style: {
+        background: W.surface,
+        border: "1px solid " + W.border,
+        borderRadius: 14,
+        marginBottom: 12,
+        overflow: "hidden"
+      }
+    },
+    /*#__PURE__*/React.createElement("div", {
+      style: { padding: "18px 18px 0" }
+    },
+    /* Title row */
+    /*#__PURE__*/React.createElement("div", {
+      style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 2 }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: { fontSize: 17, fontWeight: 700, color: W.text, letterSpacing: "-0.01em" }
+    }, day.title),
+    /*#__PURE__*/React.createElement("div", {
+      style: { display: "flex", alignItems: "center", gap: 6 }
+    },
+    hasSession && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 8, fontFamily: "'DM Mono',monospace",
+        padding: "2px 7px", borderRadius: 4,
+        background: W.cyanDim, color: W.cyan,
+        fontWeight: 700, letterSpacing: "0.1em"
+      }
+    }, "\u2713"),
+    /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 8, fontFamily: "'DM Mono',monospace",
+        padding: "2px 8px", borderRadius: 4,
+        background: day.accent + "15", color: day.accent,
+        letterSpacing: "0.12em", fontWeight: 600,
+        textTransform: "uppercase"
+      }
+    }, day.label))),
+    /* Focus subtitle */
+    /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11, color: W.textDim, fontFamily: "'DM Mono',monospace",
+        letterSpacing: "0.03em", marginBottom: 10
+      }
+    }, day.focus),
+    /* Exercise preview */
+    /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.55,
+        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+        overflow: "hidden", textOverflow: "ellipsis", marginBottom: 16
+      }
+    }, preview)),
+    /* Start Routine button */
+    /*#__PURE__*/React.createElement("button", {
+      onClick: function() { setPage(day.id); },
+      style: {
+        width: "100%", padding: "14px 0", border: "none",
+        borderTop: "1px solid " + W.border,
+        background: "transparent", cursor: "pointer",
+        fontSize: 14, fontWeight: 700, letterSpacing: "0.06em",
+        color: W.cyan
+      }
+    }, isDone ? "\u2713 Completed" : "Start Routine"));
+  })));
+}
+
 // ── ESTIMATED TIME ────────────────────────────────────────────────────────────
 function parseDurationToMin(str) {
   const m = str?.match(/^(\d+):(\d{2})$/);
@@ -10985,7 +10948,7 @@ function App() {
     return true;
   }).map(d => d.id);
   // Global page order for swipe navigation
-  const allPages = ["home", ...visibleDayIds, "stats", "settings"];
+  const allPages = ["home", "workout", ...visibleDayIds, "stats", "settings"];
   const globalSwipe = useSwipe(useCallback(() => {
     const i = allPages.indexOf(page);
     if (i < allPages.length - 1) setPage(allPages[i + 1]);
@@ -10996,7 +10959,7 @@ function App() {
   const currentDay = DAYS.find(d => d.id === page);
   const bodyweight = getLatestBW();
   useEffect(() => {
-    if (page !== "home" && page !== "settings" && page !== "stats" && !visibleDayIds.includes(page)) setPage("home");
+    if (page !== "home" && page !== "workout" && page !== "settings" && page !== "stats" && !visibleDayIds.includes(page)) setPage("home");
   }, [visibleDayIds]);
   if (!loaded) return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -11065,6 +11028,7 @@ function App() {
     version: version,
     bwVersion: bwVersion,
     setPage: setPage,
+    visibleDayIds: visibleDayIds,
     onDeleteDate: (d, dId = null) => setDeleteDate({
       date: d,
       dayId: dId
@@ -11072,6 +11036,10 @@ function App() {
     onBWUpdate: () => setBwVersion(v => v + 1),
     onShowReadiness: () => setShowReadiness(true),
     readinessScore: readinessScore
+  }) : page === "workout" ? /*#__PURE__*/React.createElement(WorkoutPage, {
+    setPage: setPage,
+    visibleDayIds: visibleDayIds,
+    version: version
   }) : page === "stats" ? /*#__PURE__*/React.createElement(StatsPage, {
     version: version
   }) : page === "settings" ? /*#__PURE__*/React.createElement(RestSettingsPage, {
