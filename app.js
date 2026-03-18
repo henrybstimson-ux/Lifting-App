@@ -8172,30 +8172,30 @@ function StatsPage({
       return /*#__PURE__*/React.createElement("div", {
         key: r.label,
         style: {
-          padding: "8px 10px", borderRadius: 8, marginBottom: 5,
+          padding: "12px 14px", borderRadius: 10, marginBottom: 8,
           background: statusBg, border: "1px solid " + (r.isWeak ? "rgba(255,71,87,0.15)" : r.isStrong ? "rgba(0,201,177,0.12)" : W.border),
           animation: "fadeIn 0.2s ease both", animationDelay: (i * 0.03) + "s"
         }
       },
       /*#__PURE__*/React.createElement("div", {
-        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }
       },
-      /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 600, color: W.text } }, r.label),
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+      /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: W.text } }, r.label),
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
         /*#__PURE__*/React.createElement("span", {
-          style: { fontSize: 7, fontFamily: "'DM Mono',monospace", padding: "1px 5px", borderRadius: 3, background: statusBg, color: color, letterSpacing: "0.08em", fontWeight: 600 }
+          style: { fontSize: 8, fontFamily: "'DM Mono',monospace", padding: "3px 8px", borderRadius: 4, background: color + "18", color: color, letterSpacing: "0.1em", fontWeight: 700 }
         }, statusLabel),
         /*#__PURE__*/React.createElement("span", {
-          style: { fontSize: 10, fontFamily: "'DM Mono',monospace", color: color, fontWeight: 700 }
+          style: { fontSize: 14, fontFamily: "'DM Mono',monospace", color: color, fontWeight: 800 }
         }, r.actual.toFixed(2)))),
       /*#__PURE__*/React.createElement("div", {
         style: { display: "flex", alignItems: "center", justifyContent: "space-between" }
       },
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace" }
-      }, r.a, " ", r.aVal, " / ", r.b, " ", r.bVal),
+        style: { fontSize: 10, color: W.textDim, fontFamily: "'DM Mono',monospace" }
+      }, r.a, " ", r.aVal, "lb  /  ", r.b, " ", r.bVal, "lb"),
       /*#__PURE__*/React.createElement("span", {
-        style: { fontSize: 8, color: W.textDim, fontFamily: "'DM Mono',monospace" }
+        style: { fontSize: 10, color: W.textDim, fontFamily: "'DM Mono',monospace" }
       }, "target ", r.expected.toFixed(2))));
     }));
   })())), /*#__PURE__*/React.createElement("div", {
